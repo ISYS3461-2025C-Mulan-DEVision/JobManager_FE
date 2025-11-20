@@ -4,5 +4,6 @@ interface ImportMetaEnv {
 }
 
 interface ImportMeta {
+  glob: Function;
   readonly env: ImportMetaEnv;
 }

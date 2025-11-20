@@ -1,36 +1,34 @@
-interface ImportAllResult {
-  name: string;
-  key: string;
-  data: any;
-}
-
-type ImportFunction = {
-  keys: () => string[];
-  (key: string): any;
-};
-
-const importAll = (
-  r: ImportFunction,
-  hasDefault: boolean
-): ImportAllResult[] => {
-  return r.keys().map((e) => {
-    const path = e.split("/");
+const loadModules = (modules: Record<string, any>, hasDefault = false) =>
+  Object.entries(modules).map(([path, mod]) => {
+    const parts = path.split("/");
     return {
-      name: path.slice(-1)[0].split(".")[0].toUpperCase(),
-      key: path.reverse()[1],
-      data: hasDefault ? r(e).default : r(e),
+      name: parts.at(-1)!.replace(".js", "").toUpperCase(),
+      key: parts.at(-2)!,
+      data: hasDefault ? mod.default : mod,
     };
   });
-};
 
-const rawActions = importAll(require.context("./", true, /actions.js$/i), true);
-const rawTypes = importAll(require.context("./", true, /types.js$/i), false);
-const rawReducers = importAll(
-  require.context("./", true, /reducer.js$/i),
+const rawActions = loadModules(
+  import.meta.glob("./**/actions.ts", { eager: true }),
   true
 );
-const rawSagas = importAll(require.context("./", true, /saga.js$/i), false);
 
+const rawTypes = loadModules(
+  import.meta.glob("./**/types.ts", { eager: true }),
+  false
+);
+
+const rawReducers = loadModules(
+  import.meta.glob("./**/reducer.ts", { eager: true }),
+  true
+);
+
+const rawSagas = loadModules(
+  import.meta.glob("./**/saga.ts", { eager: true }),
+  false
+);
+
+// Final exports
 export const actions = rawActions.reduce((p, e) => ({ ...p, ...e.data }), {});
 export const types = rawTypes.reduce((p, e) => ({ ...p, ...e.data }), {});
 export const reducers = rawReducers.reduce(
