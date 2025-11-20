@@ -13,7 +13,6 @@ const configureStore = (initialState = {}): Store => {
 
   const isDev = import.meta.env.VITE_NODE_ENV === "development";
 
-  console.log("isDev", isDev);
   if (isDev) {
     const loggerMiddleware = createLogger({
       collapsed: () => true,
