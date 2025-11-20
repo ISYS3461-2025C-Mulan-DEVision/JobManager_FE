@@ -1,12 +1,21 @@
-import './App.css'
+import { Routes, Route, Link } from "react-router-dom";
+import Home from "./pages/Home";
+import LoginPage from "./pages/LoginPage";
 
 function App() {
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-red-500 flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-white">Hello World</h1>
+    <div>
+      <nav className="p-4 bg-gray-800 text-white flex gap-4">
+        <Link to="/">Home</Link>
+        <Link to="/login">Login</Link>
+      </nav>
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Routes>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
