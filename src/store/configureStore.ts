@@ -11,8 +11,9 @@ const configureStore = (initialState = {}): Store => {
 
   const middlewares = [sagaMiddleware];
 
-  const isDev = !!import.meta.env.NODE_ENV;
+  const isDev = import.meta.env.VITE_NODE_ENV === "development";
 
+  console.log("isDev", isDev);
   if (isDev) {
     const loggerMiddleware = createLogger({
       collapsed: () => true,
