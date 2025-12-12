@@ -3,10 +3,10 @@ import * as types from "./type";
 import actions from "./actions";
 
 function* handleToggleLoading(action: any) {
-  yield delay(300);
-  yield put(actions.setLoading(action.payload));
+    yield delay(300);
+    yield put(actions.setLoading(action.payload));
 }
 
 export function* watchToggleLoading() {
-  yield takeEvery(types.TOGGLE_LOADING_ASYNC, handleToggleLoading);
+    yield takeEvery(types.TOGGLE_LOADING_ASYNC, handleToggleLoading);
 }

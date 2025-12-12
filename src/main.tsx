@@ -8,15 +8,15 @@ import store from "./store/index.js";
 
 const container = document.getElementById("root")!;
 if (!container) {
-  throw new Error("Root container not found");
+    throw new Error("Root container not found");
 } else {
-  createRoot(container).render(
-    <StrictMode>
-      <Provider store={store}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </Provider>
-    </StrictMode>
-  );
+    createRoot(container).render(
+        <StrictMode>
+            <Provider store={store}>
+                <BrowserRouter>
+                    <App />
+                </BrowserRouter>
+            </Provider>
+        </StrictMode>,
+    );
 }
