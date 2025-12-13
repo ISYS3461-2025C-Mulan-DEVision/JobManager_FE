@@ -1,9 +1,15 @@
 import { useState } from "react";
-import AuthService, { LoginPayload } from "@/components/feature/Authentication/api/AuthService";
+import { useNavigate } from "react-router-dom";
+import AuthService, {
+    LoginPayload,
+} from "@/components/feature/Authentication/api/AuthService";
+import { storeAuthSession } from "@/services/authStorage";
+import { ROUTES } from "@/utils";
 
 export const useCompanyLogin = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     const clearError = () => setError(null);
 
@@ -12,12 +18,26 @@ export const useCompanyLogin = () => {
         setError(null);
 
         try {
-            await AuthService.loginCompany(formData);
-            // Handle success (e.g., redirect, store token)
-            console.log("Login successful");
+            const response = await AuthService.loginCompany(formData);
+
+            if (!response.success || !response.data) {
+                throw new Error(
+                    response.message ||
+                        "Failed to login. Please check your credentials."
+                );
+            }
+
+            storeAuthSession(response.data);
+            navigate(ROUTES.HOME);
+            return response.data;
         } catch (err) {
-            setError("Failed to login. Please check your credentials.");
+            const message =
+                err instanceof Error
+                    ? err.message
+                    : "Failed to login. Please check your credentials.";
+            setError(message);
             console.error(err);
+            return null;
         } finally {
             setIsLoading(false);
         }
