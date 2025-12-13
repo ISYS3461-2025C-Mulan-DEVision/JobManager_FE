@@ -1,8 +1,23 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button, Card } from "@/components/ui";
 import LandingLayout from "@/layout/LandingLayout";
 
+// Dev utility to simulate login
+const simulateLogin = () => {
+    localStorage.setItem("access_token", "mock-access-token-12345");
+    localStorage.setItem("refresh_token", "mock-refresh-token-67890");
+    localStorage.setItem("company_id", "mock-company-uuid-12345");
+    localStorage.setItem("user_email", "demo@company.com");
+};
+
 export default function Landing() {
+    const navigate = useNavigate();
+
+    const handleDevLogin = () => {
+        simulateLogin();
+        navigate("/profile");
+    };
+
     return (
         <LandingLayout>
             {/* Hero Section */}
@@ -56,6 +71,15 @@ export default function Landing() {
                                         Log in
                                     </Button>
                                 </Link>
+                                {/* DEV ONLY: Simulate Login */}
+                                <Button
+                                    variant="outline"
+                                    size="lg"
+                                    onClick={handleDevLogin}
+                                    className="border-dashed border-orange-400 text-orange-600 hover:bg-orange-50"
+                                >
+                                    🔧 Dev Login
+                                </Button>
                             </div>
 
                             {/* Feature Pills */}

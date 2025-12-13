@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import AppHeader from "@/components/common/AppHeader";
+import AuthenticatedHeader from "@/components/common/AuthenticatedHeader";
 
 interface AppLayoutProps {
     children: ReactNode;
@@ -8,7 +8,7 @@ interface AppLayoutProps {
 const AppLayout = ({ children }: AppLayoutProps) => {
     return (
         <div className="min-h-screen bg-background flex flex-col">
-            <AppHeader />
+            <AuthenticatedHeader />
             <main className="flex-1">
                 {children}
             </main>
