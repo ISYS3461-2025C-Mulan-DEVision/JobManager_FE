@@ -1,0 +1,38 @@
+{
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.defaultFormatter": "vscode.typescript-language-features",
+    "[javascript]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[typescript]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[javascriptreact]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[typescriptreact]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[json]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[jsonc]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": true,
+    "typescript.format.insertSpaceBeforeFunctionParenthesis": false,
+    "javascript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": true,
+    "javascript.format.insertSpaceBeforeFunctionParenthesis": false
+}
