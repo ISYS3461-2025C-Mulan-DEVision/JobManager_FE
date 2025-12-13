@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from "react";
-import { Alert, Spinner } from "@/components/ui";
+import React, { useState, useCallback } from "react";
+import { Alert, Spinner, FileUpload } from "@/components/ui";
 import { useCompanyMedia } from "../hooks/useCompanyMedia";
 import type { CompanyMedia, MediaReorderItem } from "../types";
 
@@ -103,74 +103,6 @@ const MediaItem: React.FC<MediaItemProps> = ({
     );
 };
 
-// Upload dropzone
-interface UploadDropzoneProps {
-    onUpload: (file: File) => void;
-    isUploading: boolean;
-}
-
-const UploadDropzone: React.FC<UploadDropzoneProps> = ({ onUpload, isUploading }) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const [isDragging, setIsDragging] = useState(false);
-
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = () => {
-        setIsDragging(false);
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-        const file = e.dataTransfer.files[0];
-        if (file) {
-            onUpload(file);
-        }
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            onUpload(file);
-        }
-    };
-
-    return (
-        <div
-            onClick={() => inputRef.current?.click()}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors ${isDragging
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
-                }`}
-        >
-            {isUploading ? (
-                <Spinner size="md" />
-            ) : (
-                <>
-                    <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <span className="text-sm text-gray-500">Add Media</span>
-                    <span className="text-xs text-gray-400 mt-1">Drag & drop or click</span>
-                </>
-            )}
-            <input
-                ref={inputRef}
-                type="file"
-                accept="image/*,video/*"
-                onChange={handleChange}
-                className="hidden"
-            />
-        </div>
-    );
-};
-
 export const CompanyMediaGallery: React.FC = () => {
     const {
         mediaItems,
@@ -268,7 +200,12 @@ export const CompanyMediaGallery: React.FC = () => {
                         onDrop={handleDrop}
                     />
                 ))}
-                <UploadDropzone onUpload={handleUpload} isUploading={isUploading} />
+                <FileUpload
+                    onUpload={handleUpload}
+                    isUploading={isUploading}
+                    accept="image/*,video/*"
+                    label="Add Media"
+                />
             </div>
 
             {mediaItems.length === 0 && !isUploading && (
