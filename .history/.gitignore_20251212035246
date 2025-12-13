@@ -1,6 +1,0 @@
-node_modules/
-personal/
-dist/
-.vite/
-.env
-.DS_Store
