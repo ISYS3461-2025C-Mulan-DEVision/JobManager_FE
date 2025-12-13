@@ -79,7 +79,6 @@ export const forgotPasswordCompany = async (payload: ForgotPasswordPayload) => {
 const AuthService = {
     loginCompany,
     signupCompany,
-    forgotPasswordCompany,
 };
 
 export default AuthService;

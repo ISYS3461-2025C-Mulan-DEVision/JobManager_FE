@@ -1,4 +1,4 @@
-import { Routes } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import AppHeader from "./components/common/AppHeader";
 import { authRoutes, mainRoutes } from "./routes";
 

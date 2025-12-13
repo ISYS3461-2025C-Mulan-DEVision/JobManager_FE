@@ -1,4 +1,3 @@
-import React from "react";
 import { CompanySignup } from "../components/feature/Authentication/CompanySignup";
 import AuthLayout from "../layout/AuthLayout";
 

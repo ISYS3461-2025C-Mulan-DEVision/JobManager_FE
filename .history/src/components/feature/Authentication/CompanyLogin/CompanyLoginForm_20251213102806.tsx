@@ -24,9 +24,8 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
     error,
     onDismissError,
 }) => {
-    const [showPassword, setShowPassword] = React.useState(false);
-    const [capsLockOn, setCapsLockOn] = React.useState(false);
     const [rememberMe, setRememberMe] = React.useState(true);
+    const [showResetHint, setShowResetHint] = React.useState(false);
 
     const apiBase = import.meta.env.VITE_API_URL ?? "";
 
@@ -98,12 +97,15 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                         Remember me
                     </label>
 
-                    <Link
-                        to="/forgot-password"
+                    <button
+                        type="button"
                         className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                        onClick={() => {
+                            setShowResetHint(true);
+                        }}
                     >
                         Forgot password?
-                    </Link>
+                    </button>
                 </div>
 
                 <Button

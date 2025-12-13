@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { Button, Card } from "../components/ui";
+import LandingLayout from "../layout/LandingLayout";
 
-export default function Home() {
+export default function Landing() {
     return (
-        <div className="bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/20">
+        <LandingLayout>
             {/* Hero Section */}
             <section className="relative overflow-hidden px-6 pt-16 pb-20">
                 {/* Animated Background Elements */}
@@ -270,6 +271,6 @@ export default function Home() {
                     </Card>
                 </div>
             </section>
-        </div>
+        </LandingLayout>
     );
 }

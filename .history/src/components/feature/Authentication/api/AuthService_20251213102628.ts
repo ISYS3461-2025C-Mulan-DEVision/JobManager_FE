@@ -59,27 +59,9 @@ export const signupCompany = async (payload: SignupPayload) => {
     });
 };
 
-export const forgotPasswordCompany = async (payload: ForgotPasswordPayload) => {
-    // Replace with actual API endpoint
-    // return HttpClient.post('/auth/company/forgot-password', payload);
-
-    // Mock implementation for now
-    console.log("Sending reset email to:", payload.email);
-    return new Promise((resolve) => {
-        setTimeout(
-            () =>
-                resolve({
-                    message: "Password reset email sent successfully.",
-                }),
-            1000,
-        );
-    });
-};
-
 const AuthService = {
     loginCompany,
     signupCompany,
-    forgotPasswordCompany,
 };
 
 export default AuthService;
