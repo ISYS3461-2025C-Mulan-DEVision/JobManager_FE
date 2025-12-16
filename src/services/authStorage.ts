@@ -27,6 +27,8 @@ export const storeAuthSession = (tokens: AuthTokens): void => {
     };
 
     localStorage.setItem(USER_KEY, JSON.stringify(userPayload));
+
+    window.dispatchEvent(new Event("auth-change"));
 };
 
 export const clearAuthSession = (): void => {
@@ -35,6 +37,8 @@ export const clearAuthSession = (): void => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+
+    window.dispatchEvent(new Event("auth-change"));
 };
 
 export const getAccessToken = (): string | null => {
