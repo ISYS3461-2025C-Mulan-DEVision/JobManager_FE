@@ -39,7 +39,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
         onDismissError,
         onDismissSuccess,
     } = props;
-    const apiBase = import.meta.env.VITE_API_URL ?? "";
+    const apiBase = import.meta.env.VITE_API_URL ?? "http://localhost:8081/api";
     const [currentStep, setCurrentStep] = React.useState(0);
     const [stepErrors, setStepErrors] = React.useState<
         Partial<Record<keyof SignupPayload, string>>
@@ -267,7 +267,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
         }
 
         window.sessionStorage.setItem("pending-google-sso", "1");
-        window.location.href = `${apiBase}/auth/google`;
+        window.location.href = `${apiBase}/auth/oauth2/google`;
     }, [apiBase]);
 
     const handleSsoFieldChange = React.useCallback(
