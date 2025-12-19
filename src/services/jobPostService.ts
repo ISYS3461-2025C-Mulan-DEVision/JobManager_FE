@@ -19,7 +19,7 @@ export const fetchJobPosts = async (
     filters?: JobPostFilters
 ): Promise<PaginatedResponse<JobPost>> => {
     const companyId = getCompanyId();
-    
+
     if (!companyId) {
         throw new Error("Company ID not found. Please log in again.");
     }
@@ -33,7 +33,7 @@ export const fetchJobPosts = async (
 
     // Backend returns Page<JobPostDto> in the data field
     const pageData = response.data.data;
-    
+
     // Transform backend data to include computed fields
     const transformedData = pageData.content.map(transformJobPost);
 
