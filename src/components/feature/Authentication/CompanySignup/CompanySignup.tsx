@@ -8,6 +8,7 @@ import { validateSignupForm } from "./validation";
 export const CompanySignup: React.FC = () => {
     const { signup, isLoading, error, success, clearError, clearSuccess } =
         useCompanySignup();
+
     const initialValues: SignupPayload = {
         email: "",
         password: "",
