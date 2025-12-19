@@ -30,7 +30,7 @@ export const useCompanyLogin = () => {
 
             console.log("Login successful, storing auth session");
             storeAuthSession(response.data);
-            
+
             console.log("Navigating to dashboard");
             navigate(ROUTES.DASHBOARD, { replace: true });
             return response.data;
