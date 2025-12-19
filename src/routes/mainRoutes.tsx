@@ -1,8 +1,9 @@
 import { Route } from "react-router-dom";
 import Landing from "@/pages/Landing";
-import { ProfilePage } from "@/pages/profile";
+import Dashboard from "@/pages/Dashboard";
+import { ROUTES } from "@/utils";
 
 export const mainRoutes = [
-    <Route key="home" path="/" element={<Landing />} />,
-    <Route key="profile" path="/profile" element={<ProfilePage />} />,
+    <Route key="home" path={ROUTES.HOME} element={<Landing />} />,
+    <Route key="dashboard" path={ROUTES.DASHBOARD} element={<Dashboard />} />,
 ];

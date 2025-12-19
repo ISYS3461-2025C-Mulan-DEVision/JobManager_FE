@@ -18,6 +18,7 @@ export const useCompanyLogin = () => {
         setError(null);
 
         try {
+            console.log("Attempting login for:", formData.email);
             const response = await AuthService.loginCompany(formData);
 
             if (!response.success || !response.data) {
@@ -27,8 +28,11 @@ export const useCompanyLogin = () => {
                 );
             }
 
+            console.log("Login successful, storing auth session");
             storeAuthSession(response.data);
-            navigate(ROUTES.HOME);
+
+            console.log("Navigating to dashboard");
+            navigate(ROUTES.DASHBOARD, { replace: true });
             return response.data;
         } catch (err) {
             const message =
@@ -36,7 +40,7 @@ export const useCompanyLogin = () => {
                     ? err.message
                     : "Failed to login. Please check your credentials.";
             setError(message);
-            console.error(err);
+            console.error("Login error:", err);
             return null;
         } finally {
             setIsLoading(false);
