@@ -17,6 +17,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
     const pathname = location.pathname;
     const onLogin = pathname === "/login";
     const onRegister = pathname === "/register";
+    const logoTarget = user ? "/dashboard" : "/";
 
     // Listen for auth changes
     useEffect(() => {
@@ -57,7 +58,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
             <div className="h-20 border-b border-gray-200 bg-white">
                 <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
                     <div className="flex items-center gap-8">
-                        <Link to="/" className="flex items-center gap-3">
+                        <Link to={logoTarget} className="flex items-center gap-3">
                             <img
                                 src="/logo/logo.png"
                                 alt="DEVision"
@@ -82,7 +83,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                     Dashboard
                                 </Link>
                                 <Link
-                                    to="/jobs"
+                                    to="/job-posts"
                                     className="text-sm font-medium text-gray-700 hover:text-gray-900"
                                 >
                                     Job Posts

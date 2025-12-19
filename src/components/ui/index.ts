@@ -5,3 +5,4 @@ export * from "./Card";
 export * from "./Spinner";
 export * from "./Alert";
 export * from "./GoogleLogo";
+export * from "./Badge";
