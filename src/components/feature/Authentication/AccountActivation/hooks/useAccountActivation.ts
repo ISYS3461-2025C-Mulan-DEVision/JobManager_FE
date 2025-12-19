@@ -26,16 +26,12 @@ export const useAccountActivation = () => {
             }
 
             try {
-                console.log('Attempting to activate account...');
-
                 const response = await axios.post(
-                    `${process.env.VITE_API_URL || "http://localhost:8081"}/api/auth/activate`,
+                    `${import.meta.env.VITE_API_URL || "http://localhost:8081"}/api/auth/activate`,
                     {
                         token: token,
                     }
                 );
-
-                console.log('2. Attempting to activate account...');
 
                 if (response.data.success) {
                     setState({
