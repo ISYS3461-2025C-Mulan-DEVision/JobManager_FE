@@ -21,9 +21,14 @@ export interface RefreshTokenPayload {
     refreshToken: string;
 }
 
+export interface CompleteSsoRegistrationPayload {
+    token: string;
+    country: string;
+}
+
 type NullableStringResponse = ApiResponse<string | null>;
 
-const AUTH_BASE_PATH = "/auth";
+const AUTH_BASE_PATH = "/auth/oauth2";
 
 const COUNTRY_ENTRIES = [
     { code: "VIETNAM", iso: "VN", name: "Vietnam" },
@@ -166,6 +171,43 @@ const resendActivationEmail = async (
     }
 };
 
+
+const completeSsoRegistration = async (
+    payload: CompleteSsoRegistrationPayload
+): Promise<ApiResponse<AuthTokens>> => {
+    try {
+        console.log("Calling /auth/complete with payload:", {
+            token: payload.token.substring(0, 20) + "...",
+            country: payload.country
+        });
+
+        const response = await httpClient.post<ApiResponse<AuthTokens>>(
+            `${AUTH_BASE_PATH}/complete`,
+            {
+                token: payload.token,
+                country: payload.country,
+            }
+        );
+
+        console.log("SSO completion response:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("SSO completion failed:", error);
+        
+        if (axios.isAxiosError(error)) {
+            console.error("Error details:", {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                config: error.config
+            });
+        }
+
+        normalizeAxiosError(error);
+        throw error;
+    }
+}
+
 const refreshAuthToken = async (
     payload: RefreshTokenPayload
 ): Promise<ApiResponse<AuthTokens>> => {
@@ -222,15 +264,29 @@ const forgotPasswordCompany = async (
     };
 };
 
+const getCountries = async (): Promise<ApiResponse<Array<{ code: string; displayName: string }>>> => {
+    try {
+        const response = await httpClient.get<ApiResponse<Array<{ code: string; displayName: string }>>>(
+            `${AUTH_BASE_PATH}/countries`
+        );
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
+};
+
 const AuthService = {
     loginCompany,
     signupCompany,
     activateAccount,
     resendActivationEmail,
+    completeSsoRegistration,
     forgotPasswordCompany,
     refreshAuthToken,
     logoutCompany,
     fetchHealth,
+    getCountries,
 };
 
 export default AuthService;
