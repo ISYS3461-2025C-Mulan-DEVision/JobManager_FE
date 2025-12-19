@@ -317,17 +317,17 @@ export const CompanyInfoForm: React.FC = () => {
                 isSaving={isSaving}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
+                    {/* <Input
                         label="Headquarters"
                         value={formData.headquarters}
                         onChange={(e) => handleChange("headquarters", e.target.value)}
                         disabled={!editingSections.location}
                         fullWidth
-                    />
+                    /> */}
                     <Input
-                        label="Country"
-                        value={formData.country}
-                        onChange={(e) => handleChange("country", e.target.value)}
+                        label="Street Address"
+                        value={formData.streetAddress}
+                        onChange={(e) => handleChange("streetAddress", e.target.value)}
                         disabled={!editingSections.location}
                         fullWidth
                     />
@@ -339,9 +339,9 @@ export const CompanyInfoForm: React.FC = () => {
                         fullWidth
                     />
                     <Input
-                        label="Street Address"
-                        value={formData.streetAddress}
-                        onChange={(e) => handleChange("streetAddress", e.target.value)}
+                        label="Country"
+                        value={formData.country}
+                        onChange={(e) => handleChange("country", e.target.value)}
                         disabled={!editingSections.location}
                         fullWidth
                     />
@@ -387,14 +387,14 @@ export const CompanyInfoForm: React.FC = () => {
                 isSaving={isSaving}
             >
                 <div className="space-y-4">
-                    <Textarea
+                    {/* <Textarea
                         label="Company Description"
                         value={formData.description}
                         onChange={(e) => handleChange("description", e.target.value)}
                         rows={4}
                         placeholder="Describe your company..."
                         disabled={!editingSections.about}
-                    />
+                    /> */}
                     <Textarea
                         label="About Us"
                         value={formData.aboutUs}

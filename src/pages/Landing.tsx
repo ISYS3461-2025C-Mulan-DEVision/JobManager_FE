@@ -4,10 +4,10 @@ import LandingLayout from "@/layout/LandingLayout";
 
 // Dev utility to simulate login
 const simulateLogin = () => {
-    localStorage.setItem("access_token", "mock-access-token-12345");
-    localStorage.setItem("refresh_token", "mock-refresh-token-67890");
-    localStorage.setItem("company_id", "mock-company-uuid-12345");
-    localStorage.setItem("user_email", "demo@company.com");
+    localStorage.setItem("access_token", "same-token-for-dev-purposes-only");
+    localStorage.setItem("refresh_token", "same-refresh-token-for-dev-purposes-only");
+    localStorage.setItem("company_id", "company_id_for_dev");
+    localStorage.setItem("user_email", "company@example.com");
 };
 
 export default function Landing() {
