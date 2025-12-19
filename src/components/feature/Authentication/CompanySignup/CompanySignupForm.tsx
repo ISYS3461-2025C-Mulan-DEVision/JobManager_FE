@@ -394,8 +394,10 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                     window.sessionStorage.removeItem("sso-token");
                     setShowSsoCompletion(false);
 
-                    // Navigate to dashboard
-                    navigate("/dashboard");
+                    // Navigate to dashboard with a small delay to ensure state is updated
+                    setTimeout(() => {
+                        navigate("/dashboard", { replace: true });
+                    }, 100);
                 } else {
                     setSsoErrors({
                         general: response.message || "Registration failed. Please try again."
