@@ -28,7 +28,7 @@ export const useCompanyLogin = () => {
             }
 
             storeAuthSession(response.data);
-            navigate(ROUTES.HOME);
+            navigate(ROUTES.DASHBOARD);
             return response.data;
         } catch (err) {
             const message =

@@ -4,6 +4,7 @@ import { HeadlessModal } from "@/components/headless";
 import { Input, Button, Alert, GoogleLogo } from "@/components/ui";
 import { SignupPayload } from "./types.ts";
 import { validateSignupFields } from "./validation.ts";
+import httpClient from "@/services/httpClient";
 
 interface CompanySignupFormProps {
     values: SignupPayload;
@@ -56,6 +57,36 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
         email: values.email,
         country: values.country,
     });
+
+    // Country list state
+    const [countryList, setCountryList] = React.useState<
+        Array<{ code: string; displayName: string }>
+    >([]);
+    const [countryLoading, setCountryLoading] = React.useState(true);
+    const [countryError, setCountryError] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+        let isMounted = true;
+        setCountryLoading(true);
+        setCountryError(null);
+        httpClient
+            .get("/auth/countries")
+            .then((res) => {
+                if (isMounted) {
+                    setCountryList(res.data.data || []);
+                    setCountryLoading(false);
+                }
+            })
+            .catch((err) => {
+                if (isMounted) {
+                    setCountryError("Failed to load country list");
+                    setCountryLoading(false);
+                }
+            });
+        return () => {
+            isMounted = false;
+        };
+    }, [apiBase]);
 
     const isGoogleSignup = values.signupMethod === "google";
 
@@ -240,7 +271,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
     }, [apiBase]);
 
     const handleSsoFieldChange = React.useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
+        (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
             const { name, value } = event.target;
             setSsoFields((prev) => ({ ...prev, [name]: value }));
 
@@ -390,20 +421,49 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                 </>
             )}
 
-            <Input
-                label="Country *"
-                id="country"
-                name="country"
-                type="text"
-                autoComplete="country-name"
-                required
-                placeholder="Where is your company based?"
-                value={values.country}
-                onChange={handleFieldChange}
-                onBlur={() => handleBlur("country")}
-                error={getFieldError("country")}
-                fullWidth
-            />
+            <div>
+                <label
+                    htmlFor="country"
+                    className="block text-sm font-medium text-gray-700"
+                >
+                    Country *
+                </label>
+                {countryLoading ? (
+                    <div className="mt-2 text-sm text-gray-500">
+                        Loading countries...
+                    </div>
+                ) : countryError ? (
+                    <div className="mt-2 text-sm text-red-600">
+                        {countryError}
+                    </div>
+                ) : (
+                    <select
+                        id="country"
+                        name="country"
+                        className={`mt-2 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            getFieldError("country")
+                                ? "border-red-500 focus:ring-red-500"
+                                : "border-gray-300"
+                        }`}
+                        value={values.country}
+                        onChange={handleFieldChange}
+                        onBlur={() => handleBlur("country")}
+                        required
+                    >
+                        <option value="">Select a country</option>
+                        {countryList.map((c) => (
+                            <option key={c.code} value={c.code}>
+                                {c.displayName}
+                            </option>
+                        ))}
+                    </select>
+                )}
+                {getFieldError("country") && (
+                    <span className="text-sm text-red-600">
+                        {getFieldError("country")}
+                    </span>
+                )}
+            </div>
 
             <Button
                 type="button"
@@ -411,7 +471,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                 size="md"
                 fullWidth
                 onClick={handleNext}
-                disabled={isLoading}
+                disabled={isLoading || countryLoading}
             >
                 Continue to company profile
             </Button>
@@ -712,16 +772,48 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                         fullWidth
                     />
 
-                    <Input
-                        label="Country *"
-                        id="sso-country"
-                        name="country"
-                        type="text"
-                        value={ssoFields.country}
-                        onChange={handleSsoFieldChange}
-                        error={ssoErrors.country}
-                        fullWidth
-                    />
+                    <div>
+                        <label
+                            htmlFor="sso-country"
+                            className="block text-sm font-medium text-gray-700"
+                        >
+                            Country *
+                        </label>
+                        {countryLoading ? (
+                            <div className="mt-2 text-sm text-gray-500">
+                                Loading countries...
+                            </div>
+                        ) : countryError ? (
+                            <div className="mt-2 text-sm text-red-600">
+                                {countryError}
+                            </div>
+                        ) : (
+                            <select
+                                id="sso-country"
+                                name="country"
+                                className={`mt-2 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                    ssoErrors.country
+                                        ? "border-red-500 focus:ring-red-500"
+                                        : "border-gray-300"
+                                }`}
+                                value={ssoFields.country}
+                                onChange={handleSsoFieldChange}
+                                required
+                            >
+                                <option value="">Select a country</option>
+                                {countryList.map((c) => (
+                                    <option key={c.code} value={c.code}>
+                                        {c.displayName}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                        {ssoErrors.country && (
+                            <span className="text-sm text-red-600">
+                                {ssoErrors.country}
+                            </span>
+                        )}
+                    </div>
 
                     <Button type="submit" variant="primary" fullWidth>
                         Continue
