@@ -1,5 +1,7 @@
-// import { HttpClient } from "../../../../services/httpClient";
-
+import axios, { AxiosError } from "axios";
+import httpClient from "@/services/httpClient";
+import type { ApiResponse } from "@/types";
+import type { AuthTokens } from "@/types";
 import type { SignupPayload } from "../CompanySignup/types.ts";
 
 export interface LoginPayload {
@@ -11,75 +13,224 @@ export interface ForgotPasswordPayload {
     email: string;
 }
 
-export const loginCompany = async (payload: LoginPayload) => {
-    // Replace with actual API endpoint
-    // return HttpClient.post('/auth/company/login', payload);
+export interface ActivationPayload {
+    token: string;
+}
 
-    // Mock implementation for now
-    console.log("Logging in company with:", payload);
-    return new Promise((resolve) => {
-        setTimeout(
-            () =>
-                resolve({
-                    token: "mock-token",
-                    user: { name: "Company Admin" },
-                }),
-            1000,
-        );
-    });
+export interface RefreshTokenPayload {
+    refreshToken: string;
+}
+
+type NullableStringResponse = ApiResponse<string | null>;
+
+const AUTH_BASE_PATH = "/auth";
+
+const COUNTRY_ENTRIES = [
+    { code: "VIETNAM", iso: "VN", name: "Vietnam" },
+    { code: "SINGAPORE", iso: "SG", name: "Singapore" },
+    { code: "MALAYSIA", iso: "MY", name: "Malaysia" },
+    { code: "THAILAND", iso: "TH", name: "Thailand" },
+    { code: "PHILIPPINES", iso: "PH", name: "Philippines" },
+    { code: "INDONESIA", iso: "ID", name: "Indonesia" },
+    { code: "JAPAN", iso: "JP", name: "Japan" },
+    { code: "SOUTH_KOREA", iso: "KR", name: "South Korea" },
+    { code: "CHINA", iso: "CN", name: "China" },
+    { code: "AUSTRALIA", iso: "AU", name: "Australia" },
+    { code: "NEW_ZEALAND", iso: "NZ", name: "New Zealand" },
+    { code: "UNITED_STATES", iso: "US", name: "United States" },
+    { code: "CANADA", iso: "CA", name: "Canada" },
+    { code: "UNITED_KINGDOM", iso: "GB", name: "United Kingdom" },
+    { code: "GERMANY", iso: "DE", name: "Germany" },
+    { code: "FRANCE", iso: "FR", name: "France" },
+    { code: "NETHERLANDS", iso: "NL", name: "Netherlands" },
+    { code: "INDIA", iso: "IN", name: "India" },
+    { code: "OTHER", iso: "XX", name: "Other" },
+];
+
+const COUNTRY_LOOKUP = COUNTRY_ENTRIES.reduce<Record<string, string>>(
+    (acc, entry) => {
+        acc[entry.code] = entry.code;
+        acc[entry.iso] = entry.code;
+        acc[entry.name.toUpperCase()] = entry.code;
+        return acc;
+    },
+    {}
+);
+
+const resolveCountryCode = (country: string): string => {
+    if (!country) {
+        return "OTHER";
+    }
+
+    const trimmed = country.trim();
+    const upper = trimmed.toUpperCase();
+    const candidates = [
+        upper,
+        upper.replace(/\s+/g, "_"),
+        upper.replace(/[^A-Z]/g, ""),
+    ];
+
+    for (const candidate of candidates) {
+        if (COUNTRY_LOOKUP[candidate]) {
+            return COUNTRY_LOOKUP[candidate];
+        }
+    }
+
+    return upper.replace(/\s+/g, "_");
 };
 
-export const signupCompany = async (payload: SignupPayload) => {
-    // Replace with actual API endpoint
-    // const formData = new FormData();
-    // Object.entries(payload).forEach(([key, value]) => {
-    //     if (key === "companyLogo" && value instanceof File) {
-    //         formData.append(key, value);
-    //     } else if (typeof value === "string") {
-    //         formData.append(key, value);
-    //     }
-    // });
-    // return HttpClient.post('/auth/company/signup', formData);
+const normalizeAxiosError = (error: unknown): never => {
+    if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<{ message?: string }>;
+        const fallback = "Unable to complete the request. Please try again.";
+        const apiMessage = axiosError.response?.data?.message;
+        const message = apiMessage || axiosError.message || fallback;
+        throw new Error(message);
+    }
 
-    // Mock implementation for now
-    const { companyLogo, ...rest } = payload;
-    console.log("Signing up company with:", {
-        ...rest,
-        companyLogo: companyLogo ? companyLogo.name : null,
-    });
-    return new Promise((resolve) => {
-        setTimeout(
-            () =>
-                resolve({
-                    token: "mock-token",
-                    user: { name: payload.companyName },
-                }),
-            1000,
-        );
-    });
+    if (error instanceof Error) {
+        throw error;
+    }
+
+    throw new Error(
+        "Unexpected error occurred while communicating with the server."
+    );
 };
 
-export const forgotPasswordCompany = async (payload: ForgotPasswordPayload) => {
-    // Replace with actual API endpoint
-    // return HttpClient.post('/auth/company/forgot-password', payload);
-
-    // Mock implementation for now
-    console.log("Sending reset email to:", payload.email);
-    return new Promise((resolve) => {
-        setTimeout(
-            () =>
-                resolve({
-                    message: "Password reset email sent successfully.",
-                }),
-            1000,
+const loginCompany = async (
+    payload: LoginPayload
+): Promise<ApiResponse<AuthTokens>> => {
+    try {
+        const response = await httpClient.post<ApiResponse<AuthTokens>>(
+            `${AUTH_BASE_PATH}/login`,
+            payload
         );
-    });
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
+};
+
+const signupCompany = async (
+    payload: SignupPayload
+): Promise<NullableStringResponse> => {
+    try {
+        const requestBody = {
+            email: payload.email.trim(),
+            password: payload.password,
+            country: resolveCountryCode(payload.country),
+        };
+
+        const response = await httpClient.post<NullableStringResponse>(
+            `${AUTH_BASE_PATH}/register`,
+            requestBody
+        );
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
+};
+
+const activateAccount = async (
+    payload: ActivationPayload
+): Promise<NullableStringResponse> => {
+    try {
+        const response = await httpClient.post<NullableStringResponse>(
+            `${AUTH_BASE_PATH}/activate`,
+            payload
+        );
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
+};
+
+const resendActivationEmail = async (
+    email: string
+): Promise<NullableStringResponse> => {
+    try {
+        const response = await httpClient.post<NullableStringResponse>(
+            `${AUTH_BASE_PATH}/resend-activation`,
+            null,
+            {
+                params: { email },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
+};
+
+const refreshAuthToken = async (
+    payload: RefreshTokenPayload
+): Promise<ApiResponse<AuthTokens>> => {
+    try {
+        const response = await httpClient.post<ApiResponse<AuthTokens>>(
+            `${AUTH_BASE_PATH}/refresh`,
+            payload
+        );
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
+};
+
+const logoutCompany = async (): Promise<NullableStringResponse> => {
+    try {
+        const response = await httpClient.post<NullableStringResponse>(
+            `${AUTH_BASE_PATH}/logout`
+        );
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
+};
+
+const fetchHealth = async (): Promise<string> => {
+    try {
+        const response = await httpClient.get<string>(
+            `${AUTH_BASE_PATH}/health`
+        );
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
+};
+
+const forgotPasswordCompany = async (
+    payload: ForgotPasswordPayload
+): Promise<NullableStringResponse> => {
+    console.warn(
+        "Password reset endpoint is not yet implemented in the backend. Payload logged for reference.",
+        payload
+    );
+
+    return {
+        success: true,
+        message:
+            "Password reset instructions are not available yet. Please contact support for assistance.",
+        data: null,
+        timestamp: new Date().toISOString(),
+    };
 };
 
 const AuthService = {
     loginCompany,
     signupCompany,
+    activateAccount,
+    resendActivationEmail,
     forgotPasswordCompany,
+    refreshAuthToken,
+    logoutCompany,
+    fetchHealth,
 };
 
 export default AuthService;

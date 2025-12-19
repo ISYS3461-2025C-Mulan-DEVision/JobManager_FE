@@ -6,7 +6,8 @@ import { SignupPayload } from "./types";
 import { validateSignupForm } from "./validation";
 
 export const CompanySignup: React.FC = () => {
-    const { signup, isLoading, error } = useCompanySignup();
+    const { signup, isLoading, error, success, clearError, clearSuccess } =
+        useCompanySignup();
     const initialValues: SignupPayload = {
         email: "",
         password: "",
@@ -31,6 +32,9 @@ export const CompanySignup: React.FC = () => {
                     {...formProps}
                     isLoading={isLoading}
                     error={error}
+                    success={success}
+                    onDismissError={clearError}
+                    onDismissSuccess={clearSuccess}
                 />
             )}
         </HeadlessForm>

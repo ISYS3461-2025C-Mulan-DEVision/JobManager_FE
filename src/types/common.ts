@@ -1,15 +1,17 @@
 // Common types used across the application
 
 export interface ApiResponse<T> {
+    success: boolean;
+    message: string;
     data: T;
-    message?: string;
-    status: number;
+    timestamp: string;
 }
 
 export interface ApiError {
     message: string;
-    status: number;
+    status?: number;
     errors?: Record<string, string[]>;
+    timestamp?: string;
 }
 
 export interface PaginatedResponse<T> {

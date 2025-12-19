@@ -12,13 +12,16 @@ interface CompanySignupFormProps {
     handleChange: (
         e: React.ChangeEvent<
             HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-        >,
+        >
     ) => void;
     handleBlur: (field: keyof SignupPayload) => void;
     setFieldValue: (field: keyof SignupPayload, value: any) => void;
     isLoading: boolean;
     isValid: boolean;
     error: string | null;
+    success: string | null;
+    onDismissError?: () => void;
+    onDismissSuccess?: () => void;
 }
 
 export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
@@ -31,6 +34,9 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
         setFieldValue,
         isLoading,
         error,
+        success,
+        onDismissError,
+        onDismissSuccess,
     } = props;
     const apiBase = import.meta.env.VITE_API_URL ?? "";
     const [currentStep, setCurrentStep] = React.useState(0);
@@ -42,7 +48,9 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
     const [capsLockOn, setCapsLockOn] = React.useState(false);
     const [logoPreview, setLogoPreview] = React.useState<string | null>(null);
     const [showSsoCompletion, setShowSsoCompletion] = React.useState(false);
-    const [ssoErrors, setSsoErrors] = React.useState<Record<string, string>>({});
+    const [ssoErrors, setSsoErrors] = React.useState<Record<string, string>>(
+        {}
+    );
     const [ssoFields, setSsoFields] = React.useState({
         companyName: values.companyName,
         email: values.email,
@@ -61,9 +69,12 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                     : "Set up your login credentials and region.",
                 fields: (isGoogleSignup
                     ? ["email", "country"]
-                    : ["email", "password", "confirmPassword", "country"]) as (
-                        keyof SignupPayload
-                    )[],
+                    : [
+                          "email",
+                          "password",
+                          "confirmPassword",
+                          "country",
+                      ]) as (keyof SignupPayload)[],
             },
             {
                 id: "company",
@@ -78,7 +89,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                 ] as (keyof SignupPayload)[],
             },
         ],
-        [isGoogleSignup],
+        [isGoogleSignup]
     );
 
     const activeStep = steps[currentStep];
@@ -141,19 +152,19 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
 
     const displayedErrors = React.useMemo(
         () => ({ ...errors, ...stepErrors }),
-        [errors, stepErrors],
+        [errors, stepErrors]
     );
 
     const shouldShowError = React.useCallback(
         (field: keyof SignupPayload) =>
             Boolean(stepErrors[field] || touched[field]),
-        [stepErrors, touched],
+        [stepErrors, touched]
     );
 
     const getFieldError = React.useCallback(
         (field: keyof SignupPayload) =>
             shouldShowError(field) ? displayedErrors[field] : undefined,
-        [displayedErrors, shouldShowError],
+        [displayedErrors, shouldShowError]
     );
 
     const clearStepError = React.useCallback(
@@ -168,24 +179,27 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                 return next;
             });
         },
-        [stepErrors],
+        [stepErrors]
     );
 
     const handleFieldChange = React.useCallback(
         (
             event: React.ChangeEvent<
                 HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-            >,
+            >
         ) => {
             const field = event.target.name as keyof SignupPayload;
             clearStepError(field);
             handleChange(event);
         },
-        [clearStepError, handleChange],
+        [clearStepError, handleChange]
     );
 
     const handleNext = React.useCallback(() => {
-        const validationResult = validateSignupFields(values, activeStep.fields);
+        const validationResult = validateSignupFields(
+            values,
+            activeStep.fields
+        );
 
         if (Object.keys(validationResult).length > 0) {
             setStepErrors(validationResult);
@@ -208,7 +222,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
             setFieldValue("companyLogo", file);
             clearStepError("companyLogo");
         },
-        [clearStepError, setFieldValue],
+        [clearStepError, setFieldValue]
     );
 
     const handleRemoveLogo = React.useCallback(() => {
@@ -240,7 +254,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                 return next;
             });
         },
-        [ssoErrors],
+        [ssoErrors]
     );
 
     const handleSsoSubmit = React.useCallback(
@@ -284,7 +298,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
             setStepErrors({});
             setCurrentStep(0);
         },
-        [ssoFields, setFieldValue],
+        [ssoFields, setFieldValue]
     );
 
     const accountStep = (
@@ -321,7 +335,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                         onKeyUp={(event) =>
                             setCapsLockOn(
                                 (event as any).getModifierState?.("CapsLock") ??
-                                false,
+                                    false
                             )
                         }
                         error={getFieldError("password")}
@@ -332,7 +346,9 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                                 onClick={() => setShowPassword((prev) => !prev)}
                                 className="rounded-md px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"
                                 aria-label={
-                                    showPassword ? "Hide password" : "Show password"
+                                    showPassword
+                                        ? "Hide password"
+                                        : "Show password"
                                 }
                             >
                                 {showPassword ? "Hide" : "Show"}
@@ -440,11 +456,12 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                     )}
                 </div>
 
-                {shouldShowError("companyLogo") && getFieldError("companyLogo") && (
-                    <span className="text-sm text-red-600">
-                        {getFieldError("companyLogo")}
-                    </span>
-                )}
+                {shouldShowError("companyLogo") &&
+                    getFieldError("companyLogo") && (
+                        <span className="text-sm text-red-600">
+                            {getFieldError("companyLogo")}
+                        </span>
+                    )}
 
                 <p className="text-center text-xs text-gray-500">
                     Upload a square logo (PNG or JPG, up to 2MB recommended).
@@ -482,7 +499,10 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
             />
 
             <div className="flex flex-col gap-1">
-                <label htmlFor="address" className="text-sm font-medium text-gray-700">
+                <label
+                    htmlFor="address"
+                    className="text-sm font-medium text-gray-700"
+                >
                     Detailed address *
                 </label>
                 <textarea
@@ -490,10 +510,11 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                     name="address"
                     rows={3}
                     placeholder="Street, city, and postal code"
-                    className={`rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${getFieldError("address")
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-gray-300"
-                        }`}
+                    className={`rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        getFieldError("address")
+                            ? "border-red-500 focus:ring-red-500"
+                            : "border-gray-300"
+                    }`}
                     value={values.address}
                     onChange={handleFieldChange}
                     onBlur={() => handleBlur("address")}
@@ -544,8 +565,24 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
             </div>
 
             {error && (
-                <Alert type="error" className="mt-6" title="Registration failed">
+                <Alert
+                    type="error"
+                    className="mt-6"
+                    title="Registration failed"
+                    onClose={onDismissError}
+                >
                     {error}
+                </Alert>
+            )}
+
+            {success && (
+                <Alert
+                    type="success"
+                    className="mt-6"
+                    title="Registration successful"
+                    onClose={onDismissSuccess}
+                >
+                    {success}
                 </Alert>
             )}
 
@@ -555,14 +592,18 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                         const isActive = index === currentStep;
                         const isCompleted = index < currentStep;
                         return (
-                            <div key={step.id} className="flex flex-col items-center text-center">
+                            <div
+                                key={step.id}
+                                className="flex flex-col items-center text-center"
+                            >
                                 <span
-                                    className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold ${isActive
-                                        ? "bg-heading text-white"
-                                        : isCompleted
-                                            ? "border-blue-200 bg-blue-100 text-blue-600"
-                                            : "border-gray-300 bg-white text-gray-500"
-                                        }`}
+                                    className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold ${
+                                        isActive
+                                            ? "bg-heading text-white"
+                                            : isCompleted
+                                              ? "border-blue-200 bg-blue-100 text-blue-600"
+                                              : "border-gray-300 bg-white text-gray-500"
+                                    }`}
                                 >
                                     {index + 1}
                                 </span>
@@ -590,7 +631,10 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                 {currentStep === 0 && (
                     <>
                         <div className="relative py-2">
-                            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                            <div
+                                className="absolute inset-0 flex items-center"
+                                aria-hidden="true"
+                            >
                                 <div className="w-full border-t border-gray-200" />
                             </div>
                             <div className="relative flex justify-center">
@@ -640,7 +684,8 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                             Complete Google sign-up
                         </h3>
                         <p className="mt-1 text-sm text-gray-600">
-                            We just need a few more details to finish your profile.
+                            We just need a few more details to finish your
+                            profile.
                         </p>
                     </div>
 
