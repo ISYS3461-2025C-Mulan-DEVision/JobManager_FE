@@ -90,7 +90,7 @@ export const useSsoLogin = (): UseSsoLoginReturn => {
 
                 setHasProcessed(true);
                 setIsProcessingSso(false);
-                
+
                 // Clear URL params but stay on login page
                 const newParams = new URLSearchParams();
                 setSearchParams(newParams, { replace: true });

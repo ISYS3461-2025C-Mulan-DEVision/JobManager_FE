@@ -1,13 +1,13 @@
 import React from "react";
-import {Link} from "react-router-dom";
-import {HeadlessModal} from "@/components/headless";
-import {Input, Button, Alert, GoogleLogo} from "@/components/ui";
-import {SignupPayload} from "./types.ts";
-import {validateSignupFields} from "./validation.ts";
+import { Link } from "react-router-dom";
+import { HeadlessModal } from "@/components/headless";
+import { Input, Button, Alert, GoogleLogo } from "@/components/ui";
+import { SignupPayload } from "./types.ts";
+import { validateSignupFields } from "./validation.ts";
 import httpClient from "@/services/httpClient";
 import AuthService from "../api/AuthService";
 import { storeAuthSession } from "../../../../services/authStorage";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 interface CompanySignupFormProps {
     values: SignupPayload;
@@ -55,7 +55,9 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
     const [capsLockOn, setCapsLockOn] = React.useState(false);
     const [logoPreview, setLogoPreview] = React.useState<string | null>(null);
     const [showSsoCompletion, setShowSsoCompletion] = React.useState(false);
-    const [ssoErrors, setSsoErrors] = React.useState<Record<string, string>>({});
+    const [ssoErrors, setSsoErrors] = React.useState<Record<string, string>>(
+        {}
+    );
     const [ssoLoading, setSsoLoading] = React.useState(false);
     const [ssoFields, setSsoFields] = React.useState({
         companyName: values.companyName,
@@ -113,7 +115,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
             name,
             successParam,
             errorParam,
-            fullURL: window.location.href
+            fullURL: window.location.href,
         });
 
         // Handle error from backend
@@ -171,11 +173,11 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                 fields: (isGoogleSignup
                     ? ["email", "country"]
                     : [
-                        "email",
-                        "password",
-                        "confirmPassword",
-                        "country",
-                    ]) as (keyof SignupPayload)[],
+                          "email",
+                          "password",
+                          "confirmPassword",
+                          "country",
+                      ]) as (keyof SignupPayload)[],
             },
             {
                 id: "company",
@@ -312,10 +314,11 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
 
     const handleGoogleSignup = () => {
         // Save that we're doing SSO registration, not login
-        sessionStorage.setItem('sso_flow', 'registration');
+        sessionStorage.setItem("sso_flow", "registration");
 
         // Redirect to backend OAuth2 endpoint - let Spring Security handle it
-        window.location.href = 'http://localhost:8081/oauth2/authorization/google';
+        window.location.href =
+            "http://localhost:8081/oauth2/authorization/google";
     };
 
     const handleSsoFieldChange = React.useCallback(
@@ -357,7 +360,9 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
             const token = window.sessionStorage.getItem("sso-token");
 
             if (!token) {
-                setSsoErrors({ general: "Invalid SSO session. Please try again." });
+                setSsoErrors({
+                    general: "Invalid SSO session. Please try again.",
+                });
                 return;
             }
 
@@ -365,10 +370,9 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
             setSsoErrors({});
 
             try {
-
                 console.log("Calling completeSsoRegistration with:", {
                     token: token.substring(0, 20) + "...",
-                    country: trimmedCountry
+                    country: trimmedCountry,
                 });
 
                 const response = await AuthService.completeSsoRegistration({
@@ -378,6 +382,9 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
 
                 console.log("SSO completion response:", response);
                 if (response.success && response.data) {
+                    console.log(
+                        "SSO registration successful, storing auth session"
+                    );
                     // Store auth session
                     storeAuthSession({
                         accessToken: response.data.accessToken,
@@ -394,13 +401,14 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                     window.sessionStorage.removeItem("sso-token");
                     setShowSsoCompletion(false);
 
-                    // Navigate to dashboard with a small delay to ensure state is updated
-                    setTimeout(() => {
-                        navigate("/dashboard", { replace: true });
-                    }, 100);
+                    console.log("Navigating to dashboard");
+                    // Navigate to dashboard
+                    navigate("/dashboard", { replace: true });
                 } else {
                     setSsoErrors({
-                        general: response.message || "Registration failed. Please try again."
+                        general:
+                            response.message ||
+                            "Registration failed. Please try again.",
                     });
                 }
             } catch (err: any) {
@@ -413,7 +421,9 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                 } else if (err.message) {
                     setSsoErrors({ general: err.message });
                 } else {
-                    setSsoErrors({ general: "Network error. Please try again." });
+                    setSsoErrors({
+                        general: "Network error. Please try again.",
+                    });
                 }
             } finally {
                 setSsoLoading(false);
@@ -456,7 +466,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                         onKeyUp={(event) =>
                             setCapsLockOn(
                                 (event as any).getModifierState?.("CapsLock") ??
-                                false
+                                    false
                             )
                         }
                         error={getFieldError("password")}
@@ -754,8 +764,8 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                                                 isActive
                                                     ? "bg-heading text-white"
                                                     : isCompleted
-                                                        ? "border-blue-200 bg-blue-100 text-blue-600"
-                                                        : "border-gray-300 bg-white text-gray-500"
+                                                      ? "border-blue-200 bg-blue-100 text-blue-600"
+                                                      : "border-gray-300 bg-white text-gray-500"
                                             }`}
                                         >
                                             {index + 1}
@@ -821,7 +831,8 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                         </p>
 
                         <p className="text-center text-xs text-gray-500">
-                            By continuing you agree to your company's hiring policies.
+                            By continuing you agree to your company's hiring
+                            policies.
                         </p>
                     </div>
                 </>
@@ -914,7 +925,9 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                         isLoading={ssoLoading}
                         disabled={ssoLoading || countryLoading}
                     >
-                        {ssoLoading ? "Completing registration..." : "Complete registration"}
+                        {ssoLoading
+                            ? "Completing registration..."
+                            : "Complete registration"}
                     </Button>
                 </form>
             </HeadlessModal>
