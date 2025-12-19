@@ -1,7 +1,8 @@
-import {useState, useEffect} from "react";
-import {useNavigate, useSearchParams} from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import {ActivationState} from "../types";
+import { ActivationState } from "../types";
+import process from "process";
 
 export const useAccountActivation = () => {
     const [searchParams] = useSearchParams();
@@ -26,9 +27,12 @@ export const useAccountActivation = () => {
             }
 
             try {
-                const response = await axios.post("http://localhost:8081/api/auth/activate", {
-                    token: token,
-                });
+                const response = await axios.post(
+                    `${process.env.VITE_API_URL || "http://localhost:8081"}/api/auth/activate`,
+                    {
+                        token: token,
+                    }
+                );
 
                 if (response.data.success) {
                     setState({
@@ -48,7 +52,9 @@ export const useAccountActivation = () => {
             } catch (error: any) {
                 setState({
                     status: "error",
-                    message: error.response?.data?.message || "Error occurred while activating account. Please try again.",
+                    message:
+                        error.response?.data?.message ||
+                        "Error occurred while activating account. Please try again.",
                 });
             }
         };
