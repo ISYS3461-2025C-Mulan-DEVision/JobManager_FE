@@ -28,7 +28,8 @@ export interface CompleteSsoRegistrationPayload {
 
 type NullableStringResponse = ApiResponse<string | null>;
 
-const AUTH_BASE_PATH = "/auth/oauth2";
+const AUTH_BASE_PATH_SSO = "/auth/oauth2";
+const AUTH_BASE_PATH = "/auth";
 
 const COUNTRY_ENTRIES = [
     { code: "VIETNAM", iso: "VN", name: "Vietnam" },
@@ -182,7 +183,7 @@ const completeSsoRegistration = async (
         });
 
         const response = await httpClient.post<ApiResponse<AuthTokens>>(
-            `${AUTH_BASE_PATH}/complete`,
+            `${AUTH_BASE_PATH_SSO}/complete`,
             {
                 token: payload.token,
                 country: payload.country,
