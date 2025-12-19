@@ -1,0 +1,66 @@
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
+import { ActivationState } from "../types";
+import process from "process";
+
+export const useAccountActivation = () => {
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+
+    const [state, setState] = useState<ActivationState>({
+        status: "loading",
+        message: "",
+    });
+
+    useEffect(() => {
+        const activateAccount = async () => {
+            const token = searchParams.get("token");
+
+            if (!token) {
+                setState({
+                    status: "error",
+                    message: "Invalid activation link",
+                });
+
+                return;
+            }
+
+            try {
+                const response = await axios.post(
+                    `${process.env.VITE_API_URL || "http://localhost:8081"}/api/auth/activate`,
+                    {
+                        token: token,
+                    }
+                );
+
+                if (response.data.success) {
+                    setState({
+                        status: "success",
+                        message: response.data.message,
+                    });
+
+                    setTimeout(() => {
+                        navigate("/login");
+                    }, 3000);
+                } else {
+                    setState({
+                        status: "error",
+                        message: response.data.message,
+                    });
+                }
+            } catch (error: any) {
+                setState({
+                    status: "error",
+                    message:
+                        error.response?.data?.message ||
+                        "Error occurred while activating account. Please try again.",
+                });
+            }
+        };
+
+        activateAccount();
+    }, [searchParams, navigate]);
+
+    return state;
+};
