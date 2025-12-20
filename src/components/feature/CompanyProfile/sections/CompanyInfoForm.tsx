@@ -173,21 +173,20 @@ export const CompanyInfoForm: React.FC = () => {
         error,
         successMessage,
         handleChange,
-        handleSubmit,
+        handleSubmitCompany,
+        handleSubmitProfile,
         handleLogoUpload,
         handleBannerUpload,
     } = useCompanyInfoForm();
 
     // Track which sections are being edited
     const [editingSections, setEditingSections] = useState<{
-        basicInfo: boolean;
-        location: boolean;
-        socialLinks: boolean;
+        companyInfo: boolean;
+        profileInfo: boolean;
         about: boolean;
     }>({
-        basicInfo: false,
-        location: false,
-        socialLinks: false,
+        companyInfo: false,
+        profileInfo: false,
         about: false,
     });
 
@@ -207,9 +206,19 @@ export const CompanyInfoForm: React.FC = () => {
         setEditingSections((prev) => ({ ...prev, [section]: false }));
     };
 
-    const saveSection = async (section: keyof typeof editingSections) => {
-        await handleSubmit();
-        setEditingSections((prev) => ({ ...prev, [section]: false }));
+    const saveCompanySection = async () => {
+        await handleSubmitCompany();
+        setEditingSections((prev) => ({ ...prev, companyInfo: false }));
+    };
+
+    const saveProfileSection = async () => {
+        await handleSubmitProfile();
+        setEditingSections((prev) => ({ ...prev, profileInfo: false }));
+    };
+
+    const saveAboutSection = async () => {
+        await handleSubmitProfile();
+        setEditingSections((prev) => ({ ...prev, about: false }));
     };
 
     if (isLoading) {
@@ -249,43 +258,80 @@ export const CompanyInfoForm: React.FC = () => {
                 onLogoUpload={handleLogoUpload}
             />
 
-            {/* Basic Information */}
+            {/* Company Information - Uses Company endpoint */}
             <EditableSection
-                title="Basic Information"
-                isEditing={editingSections.basicInfo}
-                onEdit={() => startEditing("basicInfo")}
-                onSave={() => saveSection("basicInfo")}
-                onCancel={() => cancelEditing("basicInfo")}
+                title="Company Information"
+                isEditing={editingSections.companyInfo}
+                onEdit={() => startEditing("companyInfo")}
+                onSave={() => saveCompanySection()}
+                onCancel={() => cancelEditing("companyInfo")}
                 isSaving={isSaving}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                         label="Company Name"
-                        value={formData.companyName}
-                        onChange={(e) => handleChange("companyName", e.target.value)}
-                        disabled={!editingSections.basicInfo}
+                        value={formData.name}
+                        onChange={(e) => handleChange("name", e.target.value)}
+                        disabled={!editingSections.companyInfo}
                         fullWidth
                     />
                     <Input
                         label="Phone Number"
                         value={formData.phone}
                         onChange={(e) => handleChange("phone", e.target.value)}
-                        disabled={!editingSections.basicInfo}
+                        placeholder="+84123456789"
+                        disabled={!editingSections.companyInfo}
                         fullWidth
                     />
                     <Input
-                        label="Website"
-                        value={formData.website}
-                        onChange={(e) => handleChange("website", e.target.value)}
-                        placeholder="https://example.com"
-                        disabled={!editingSections.basicInfo}
+                        label="Street Address"
+                        value={formData.streetAddress}
+                        onChange={(e) => handleChange("streetAddress", e.target.value)}
+                        disabled={!editingSections.companyInfo}
                         fullWidth
                     />
+                    <Input
+                        label="City"
+                        value={formData.city}
+                        onChange={(e) => handleChange("city", e.target.value)}
+                        disabled={!editingSections.companyInfo}
+                        fullWidth
+                    />
+                    <Input
+                        label="Country Code"
+                        value={formData.countryCode}
+                        onChange={(e) => handleChange("countryCode", e.target.value)}
+                        placeholder="e.g., VN, US"
+                        disabled={!editingSections.companyInfo}
+                        fullWidth
+                    />
+                </div>
+            </EditableSection>
+
+            {/* Profile Information - Uses Profile endpoint */}
+            <EditableSection
+                title="Profile Details"
+                isEditing={editingSections.profileInfo}
+                onEdit={() => startEditing("profileInfo")}
+                onSave={() => saveProfileSection()}
+                onCancel={() => cancelEditing("profileInfo")}
+                isSaving={isSaving}
+            >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                         label="Industry"
                         value={formData.industry}
                         onChange={(e) => handleChange("industry", e.target.value)}
-                        disabled={!editingSections.basicInfo}
+                        placeholder="e.g., Technology"
+                        disabled={!editingSections.profileInfo}
+                        fullWidth
+                    />
+                    <Input
+                        label="Company Size"
+                        value={formData.companySize}
+                        onChange={(e) => handleChange("companySize", e.target.value)}
+                        placeholder="e.g., 51-200"
+                        disabled={!editingSections.profileInfo}
                         fullWidth
                     />
                     <Input
@@ -293,108 +339,39 @@ export const CompanyInfoForm: React.FC = () => {
                         type="number"
                         value={formData.foundedYear}
                         onChange={(e) => handleChange("foundedYear", e.target.value)}
-                        disabled={!editingSections.basicInfo}
+                        placeholder="e.g., 2020"
+                        disabled={!editingSections.profileInfo}
                         fullWidth
                     />
                     <Input
-                        label="Employee Count"
-                        value={formData.employeeCount}
-                        onChange={(e) => handleChange("employeeCount", e.target.value)}
-                        placeholder="e.g., 50-100"
-                        disabled={!editingSections.basicInfo}
+                        label="Website URL"
+                        value={formData.websiteUrl}
+                        onChange={(e) => handleChange("websiteUrl", e.target.value)}
+                        placeholder="https://example.com"
+                        disabled={!editingSections.profileInfo}
                         fullWidth
                     />
-                </div>
-            </EditableSection>
-
-            {/* Location */}
-            <EditableSection
-                title="Location"
-                isEditing={editingSections.location}
-                onEdit={() => startEditing("location")}
-                onSave={() => saveSection("location")}
-                onCancel={() => cancelEditing("location")}
-                isSaving={isSaving}
-            >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* <Input
-                        label="Headquarters"
-                        value={formData.headquarters}
-                        onChange={(e) => handleChange("headquarters", e.target.value)}
-                        disabled={!editingSections.location}
-                        fullWidth
-                    /> */}
-                    <Input
-                        label="Street Address"
-                        value={formData.streetAddress}
-                        onChange={(e) => handleChange("streetAddress", e.target.value)}
-                        disabled={!editingSections.location}
-                        fullWidth
-                    />
-                    <Input
-                        label="City"
-                        value={formData.city}
-                        onChange={(e) => handleChange("city", e.target.value)}
-                        disabled={!editingSections.location}
-                        fullWidth
-                    />
-                    <Input
-                        label="Country"
-                        value={formData.country}
-                        onChange={(e) => handleChange("country", e.target.value)}
-                        disabled={!editingSections.location}
-                        fullWidth
-                    />
-                </div>
-            </EditableSection>
-
-            {/* Social Links */}
-            <EditableSection
-                title="Social Links"
-                isEditing={editingSections.socialLinks}
-                onEdit={() => startEditing("socialLinks")}
-                onSave={() => saveSection("socialLinks")}
-                onCancel={() => cancelEditing("socialLinks")}
-                isSaving={isSaving}
-            >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                         label="LinkedIn URL"
                         value={formData.linkedinUrl}
                         onChange={(e) => handleChange("linkedinUrl", e.target.value)}
                         placeholder="https://linkedin.com/company/..."
-                        disabled={!editingSections.socialLinks}
-                        fullWidth
-                    />
-                    <Input
-                        label="Facebook URL"
-                        value={formData.facebookUrl}
-                        onChange={(e) => handleChange("facebookUrl", e.target.value)}
-                        placeholder="https://facebook.com/..."
-                        disabled={!editingSections.socialLinks}
+                        disabled={!editingSections.profileInfo}
                         fullWidth
                     />
                 </div>
             </EditableSection>
 
-            {/* About */}
+            {/* About - Uses Profile endpoint */}
             <EditableSection
                 title="About"
                 isEditing={editingSections.about}
                 onEdit={() => startEditing("about")}
-                onSave={() => saveSection("about")}
+                onSave={() => saveAboutSection()}
                 onCancel={() => cancelEditing("about")}
                 isSaving={isSaving}
             >
                 <div className="space-y-4">
-                    {/* <Textarea
-                        label="Company Description"
-                        value={formData.description}
-                        onChange={(e) => handleChange("description", e.target.value)}
-                        rows={4}
-                        placeholder="Describe your company..."
-                        disabled={!editingSections.about}
-                    /> */}
                     <Textarea
                         label="About Us"
                         value={formData.aboutUs}

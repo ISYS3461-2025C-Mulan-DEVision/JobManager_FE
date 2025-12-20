@@ -1,44 +1,57 @@
 // Company Profile Types
 
-export interface CompanyProfile {
+// Company data from GET /companies/{companyId}
+export interface Company {
     id: string;
-    companyName: string;
-    email: string;
+    name: string;
     phone?: string;
-    city?: string;
     streetAddress?: string;
-    country?: string;
-    logoUrl?: string;
-    bannerUrl?: string;
-    description?: string;
-    website?: string;
-    industry?: string;
-    foundedYear?: number;
-    employeeCount?: string;
-    headquarters?: string;
-    linkedinUrl?: string;
-    facebookUrl?: string;
-    aboutUs?: string;
-    whoWeSeek?: string;
+    city?: string;
+    countryCode?: string;
 }
 
-export interface CompanyProfileFormData {
-    companyName: string;
+// Profile data from GET /companies/{companyId}/profile
+export interface CompanyProfile {
+    companyId: string;
+    aboutUs?: string;
+    whoWeSeek?: string;
+    logoUrl?: string;
+    bannerUrl?: string;
+    websiteUrl?: string;
+    linkedinUrl?: string;
+    industry?: string;
+    companySize?: string;
+    foundedYear?: number;
+}
+
+// Combined data for the UI
+export interface CompanyFullData {
+    company: Company;
+    profile: CompanyProfile;
+}
+
+// Form data for Company endpoint (PUT /companies/{companyId})
+export interface CompanyFormData {
+    name: string;
     phone: string;
-    city: string;
     streetAddress: string;
-    country: string;
-    description: string;
-    website: string;
-    industry: string;
-    foundedYear: string;
-    employeeCount: string;
-    headquarters: string;
-    linkedinUrl: string;
-    facebookUrl: string;
+    city: string;
+    countryCode: string;
+}
+
+// Form data for Profile endpoint (PUT /companies/{companyId}/profile)
+export interface ProfileFormData {
     aboutUs: string;
     whoWeSeek: string;
+    websiteUrl: string;
+    linkedinUrl: string;
+    industry: string;
+    companySize: string;
+    foundedYear: string;
 }
+
+// Combined form data for the UI
+export interface CompanyProfileFormData extends CompanyFormData, ProfileFormData {}
 
 export interface CompanyMedia {
     id: string;

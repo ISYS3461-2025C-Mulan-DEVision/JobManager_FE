@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import type { CompanyProfile, CompanyProfileFormData } from "../types";
+import type { Company, CompanyProfile, CompanyProfileFormData, CompanyFormData, ProfileFormData } from "../types";
 import {
+    getCompany,
     getCompanyProfile,
+    updateCompany,
     updateCompanyProfile,
     uploadLogo,
     uploadBanner,
@@ -9,96 +11,131 @@ import {
 
 interface UseCompanyInfoFormReturn {
     formData: CompanyProfileFormData;
+    company: Company | null;
     profile: CompanyProfile | null;
     isLoading: boolean;
     isSaving: boolean;
     error: string | null;
     successMessage: string | null;
     handleChange: (field: keyof CompanyProfileFormData, value: string) => void;
-    handleSubmit: () => Promise<void>;
+    handleSubmitCompany: () => Promise<void>;
+    handleSubmitProfile: () => Promise<void>;
     handleLogoUpload: (file: File) => Promise<void>;
     handleBannerUpload: (file: File) => Promise<void>;
-    refreshProfile: () => Promise<void>;
+    refreshData: () => Promise<void>;
 }
 
 const initialFormData: CompanyProfileFormData = {
-    companyName: "",
+    // Company fields
+    name: "",
     phone: "",
-    city: "",
     streetAddress: "",
-    country: "",
-    description: "",
-    website: "",
-    industry: "",
-    foundedYear: "",
-    employeeCount: "",
-    headquarters: "",
-    linkedinUrl: "",
-    facebookUrl: "",
+    city: "",
+    countryCode: "",
+    // Profile fields
     aboutUs: "",
     whoWeSeek: "",
+    websiteUrl: "",
+    linkedinUrl: "",
+    industry: "",
+    companySize: "",
+    foundedYear: "",
 };
 
 export function useCompanyInfoForm(): UseCompanyInfoFormReturn {
     const [formData, setFormData] = useState<CompanyProfileFormData>(initialFormData);
+    const [company, setCompany] = useState<Company | null>(null);
     const [profile, setProfile] = useState<CompanyProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-    const fetchProfile = useCallback(async () => {
+    const fetchData = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const data = await getCompanyProfile();
-            setProfile(data);
+            const [companyData, profileData] = await Promise.all([
+                getCompany(),
+                getCompanyProfile(),
+            ]);
+            setCompany(companyData);
+            setProfile(profileData);
             setFormData({
-                companyName: data.companyName || "",
-                phone: data.phone || "",
-                city: data.city || "",
-                streetAddress: data.streetAddress || "",
-                country: data.country || "",
-                description: data.description || "",
-                website: data.website || "",
-                industry: data.industry || "",
-                foundedYear: data.foundedYear?.toString() || "",
-                employeeCount: data.employeeCount || "",
-                headquarters: data.headquarters || "",
-                linkedinUrl: data.linkedinUrl || "",
-                facebookUrl: data.facebookUrl || "",
-                aboutUs: data.aboutUs || "",
-                whoWeSeek: data.whoWeSeek || "",
+                // Company fields
+                name: companyData.name || "",
+                phone: companyData.phone || "",
+                streetAddress: companyData.streetAddress || "",
+                city: companyData.city || "",
+                countryCode: companyData.countryCode || "",
+                // Profile fields
+                aboutUs: profileData.aboutUs || "",
+                whoWeSeek: profileData.whoWeSeek || "",
+                websiteUrl: profileData.websiteUrl || "",
+                linkedinUrl: profileData.linkedinUrl || "",
+                industry: profileData.industry || "",
+                companySize: profileData.companySize || "",
+                foundedYear: profileData.foundedYear?.toString() || "",
             });
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load profile");
+            setError(err instanceof Error ? err.message : "Failed to load data");
         } finally {
             setIsLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchProfile();
-    }, [fetchProfile]);
+        fetchData();
+    }, [fetchData]);
 
     const handleChange = useCallback((field: keyof CompanyProfileFormData, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
         setSuccessMessage(null);
     }, []);
 
-    const handleSubmit = useCallback(async () => {
+    // Submit company data (name, phone, streetAddress, city, countryCode)
+    const handleSubmitCompany = useCallback(async () => {
         setIsSaving(true);
         setError(null);
         setSuccessMessage(null);
         try {
-            const updatedProfile = await updateCompanyProfile({
-                ...formData,
-                foundedYear: formData.foundedYear || undefined,
-            });
+            const companyPayload: Partial<CompanyFormData> = {
+                name: formData.name,
+                phone: formData.phone,
+                streetAddress: formData.streetAddress,
+                city: formData.city,
+                countryCode: formData.countryCode,
+            };
+            const updatedCompany = await updateCompany(companyPayload);
+            setCompany(updatedCompany);
+            setSuccessMessage("Company information updated successfully!");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to save company information");
+        } finally {
+            setIsSaving(false);
+        }
+    }, [formData]);
+
+    // Submit profile data (aboutUs, whoWeSeek, websiteUrl, linkedinUrl, industry, companySize, foundedYear)
+    const handleSubmitProfile = useCallback(async () => {
+        setIsSaving(true);
+        setError(null);
+        setSuccessMessage(null);
+        try {
+            const profilePayload: Partial<ProfileFormData> = {
+                aboutUs: formData.aboutUs,
+                whoWeSeek: formData.whoWeSeek,
+                websiteUrl: formData.websiteUrl,
+                linkedinUrl: formData.linkedinUrl,
+                industry: formData.industry,
+                companySize: formData.companySize,
+                foundedYear: formData.foundedYear,
+            };
+            const updatedProfile = await updateCompanyProfile(profilePayload);
             setProfile(updatedProfile);
             setSuccessMessage("Profile updated successfully!");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to save changes");
+            setError(err instanceof Error ? err.message : "Failed to save profile");
         } finally {
             setIsSaving(false);
         }
@@ -128,15 +165,17 @@ export function useCompanyInfoForm(): UseCompanyInfoFormReturn {
 
     return {
         formData,
+        company,
         profile,
         isLoading,
         isSaving,
         error,
         successMessage,
         handleChange,
-        handleSubmit,
+        handleSubmitCompany,
+        handleSubmitProfile,
         handleLogoUpload,
         handleBannerUpload,
-        refreshProfile: fetchProfile,
+        refreshData: fetchData,
     };
 }

@@ -1,17 +1,19 @@
-// Company Profile API Service
 import type {
+    Company,
     CompanyProfile,
-    CompanyProfileFormData,
+    CompanyFormData,
+    ProfileFormData,
     CompanyMedia,
     MediaUploadPayload,
     MediaReorderItem,
 } from "../types";
+import { getAccessToken, getStoredUser } from "@/services/authStorage";
 
 const COMPANY_BASE_URL = import.meta.env.VITE_COMPANY_API_URL || "http://localhost:8082/api/companies";
 
 // Helper function to get auth headers
 const getAuthHeaders = (): HeadersInit => {
-    const token = localStorage.getItem("access_token");
+    const token = getAccessToken();
     return {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -19,7 +21,7 @@ const getAuthHeaders = (): HeadersInit => {
 };
 
 const getAuthHeadersFormData = (): HeadersInit => {
-    const token = localStorage.getItem("access_token");
+    const token = getAccessToken();
     return {
         Authorization: `Bearer ${token}`,
     };
@@ -27,10 +29,45 @@ const getAuthHeadersFormData = (): HeadersInit => {
 
 // Get company ID from storage
 const getCompanyId = (): string => {
-    return localStorage.getItem("company_id") || "";
+    const user = getStoredUser();
+    return user?.companyId || "";
 };
 
-// Profile APIs
+// Company APIs (GET/PUT /companies/{companyId})
+export const getCompany = async (): Promise<Company> => {
+    const companyId = getCompanyId();
+    const response = await fetch(`${COMPANY_BASE_URL}/${companyId}`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch company");
+    }
+
+    const data = await response.json();
+    return data.data || data;
+};
+
+export const updateCompany = async (
+    companyData: Partial<CompanyFormData>
+): Promise<Company> => {
+    const companyId = getCompanyId();
+    const response = await fetch(`${COMPANY_BASE_URL}/${companyId}`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(companyData),
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to update company");
+    }
+
+    const data = await response.json();
+    return data.data || data;
+};
+
+// Profile APIs (GET/PUT /companies/{companyId}/profile)
 export const getCompanyProfile = async (): Promise<CompanyProfile> => {
     const companyId = getCompanyId();
     const response = await fetch(`${COMPANY_BASE_URL}/${companyId}/profile`, {
@@ -47,13 +84,18 @@ export const getCompanyProfile = async (): Promise<CompanyProfile> => {
 };
 
 export const updateCompanyProfile = async (
-    profileData: Partial<CompanyProfileFormData>
+    profileData: Partial<ProfileFormData>
 ): Promise<CompanyProfile> => {
     const companyId = getCompanyId();
+    // Convert foundedYear to number if present
+    const payload = {
+        ...profileData,
+        foundedYear: profileData.foundedYear ? parseInt(profileData.foundedYear, 10) : undefined,
+    };
     const response = await fetch(`${COMPANY_BASE_URL}/${companyId}/profile`, {
         method: "PUT",
         headers: getAuthHeaders(),
-        body: JSON.stringify(profileData),
+        body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -200,6 +242,8 @@ export const deleteMedia = async (mediaId: string): Promise<void> => {
 };
 
 const CompanyProfileService = {
+    getCompany,
+    updateCompany,
     getCompanyProfile,
     updateCompanyProfile,
     uploadLogo,
