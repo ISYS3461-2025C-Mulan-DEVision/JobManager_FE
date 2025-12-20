@@ -53,21 +53,22 @@ export interface ProfileFormData {
 // Combined form data for the UI
 export interface CompanyProfileFormData extends CompanyFormData, ProfileFormData {}
 
+export type MediaType = "LOGO" | "BANNER" | "IMAGE" | "VIDEO";
+
 export interface CompanyMedia {
     id: string;
     companyId: string;
-    mediaType: "IMAGE" | "VIDEO" | "DOCUMENT" | "GALLERY";
+    type: MediaType; // Backend returns 'type' field
     url: string;
     title?: string;
     description?: string;
     displayOrder: number;
     createdAt: string;
-    updatedAt: string;
 }
 
 export interface MediaUploadPayload {
     file: File;
-    mediaType: "IMAGE" | "VIDEO" | "DOCUMENT" | "GALLERY";
+    mediaType: MediaType; // Used in frontend, mapped to 'type' in API call
     title?: string;
     description?: string;
 }

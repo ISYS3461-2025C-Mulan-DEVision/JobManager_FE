@@ -68,6 +68,216 @@ export const validators = {
     },
 };
 
+// ============================================================================
+// Company-specific validators (consistent with backend validation)
+// ============================================================================
+
+// Valid international dial codes
+const VALID_DIAL_CODES = [
+    "1", "7", "20", "27", "30", "31", "32", "33", "34", "36", "39", "40", "41",
+    "43", "44", "45", "46", "47", "48", "49", "54", "55", "56", "57", "58", "60",
+    "61", "62", "63", "64", "65", "66", "81", "82", "84", "86", "90", "91", "92",
+    "93", "94", "95", "98", "234", "254", "375", "380", "852", "853", "886",
+    "966", "971", "972", "973", "974",
+];
+
+// Valid company size ranges
+const VALID_COMPANY_SIZES = [
+    "1-10",
+    "11-50",
+    "51-200",
+    "201-500",
+    "501-1000",
+    "1001-5000",
+    "5001-10000",
+    "10001+",
+];
+
+export const companyValidators = {
+    /**
+     * Company name: max 255 characters
+     */
+    name: (value: string): string | undefined => {
+        if (!value) return undefined;
+        if (value.length > 255) {
+            return "Company name must be less than 255 characters";
+        }
+        return undefined;
+    },
+
+    /**
+     * Phone number: Must start with + followed by valid dial code and 4-12 more digits
+     * Format: +[dial_code][4-12 digits] (7-15 total digits after +)
+     */
+    phone: (value: string): string | undefined => {
+        if (!value) return undefined;
+
+        // Must match pattern: + followed by 7-15 digits
+        if (!/^\+\d{7,15}$/.test(value)) {
+            return "Phone number must start with + followed by 7-15 digits";
+        }
+
+        const digitsAfterPlus = value.slice(1);
+
+        // Check for valid dial code
+        const hasValidDialCode = VALID_DIAL_CODES.some((code) =>
+            digitsAfterPlus.startsWith(code)
+        );
+
+        if (!hasValidDialCode) {
+            return "Phone number must start with a valid international dial code";
+        }
+
+        // Find the dial code and check digits after it
+        const matchedDialCode = VALID_DIAL_CODES.find((code) =>
+            digitsAfterPlus.startsWith(code)
+        );
+
+        if (matchedDialCode) {
+            const digitsAfterCode = digitsAfterPlus.slice(matchedDialCode.length);
+            if (digitsAfterCode.length < 4) {
+                return "Phone number must have at least 4 digits after country code";
+            }
+            if (digitsAfterCode.length > 12) {
+                return "Phone number digits after country code must be less than 13 characters";
+            }
+        }
+
+        return undefined;
+    },
+
+    /**
+     * Street address: max 255 characters
+     */
+    streetAddress: (value: string): string | undefined => {
+        if (!value) return undefined;
+        if (value.length > 255) {
+            return "Street address must be less than 255 characters";
+        }
+        return undefined;
+    },
+
+    /**
+     * City: max 128 characters
+     */
+    city: (value: string): string | undefined => {
+        if (!value) return undefined;
+        if (value.length > 128) {
+            return "City must be less than 128 characters";
+        }
+        return undefined;
+    },
+
+    /**
+     * Country code: 2-3 uppercase letters (ISO 3166-1)
+     */
+    countryCode: (value: string): string | undefined => {
+        if (!value) return undefined;
+        if (value.length < 2 || value.length > 3) {
+            return "Country code must be 2-3 characters (ISO 3166-1 alpha-2 or alpha-3)";
+        }
+        if (!/^[A-Z]{2,3}$/.test(value)) {
+            return "Country code must be uppercase letters (e.g., VN, USA)";
+        }
+        return undefined;
+    },
+
+    /**
+     * About us: max 10000 characters
+     */
+    aboutUs: (value: string): string | undefined => {
+        if (!value) return undefined;
+        if (value.length > 10000) {
+            return "About us must be less than 10000 characters";
+        }
+        return undefined;
+    },
+
+    /**
+     * Who we seek: max 5000 characters
+     */
+    whoWeSeek: (value: string): string | undefined => {
+        if (!value) return undefined;
+        if (value.length > 5000) {
+            return "Who we seek must be less than 5000 characters";
+        }
+        return undefined;
+    },
+
+    /**
+     * Website URL: max 512 characters, valid URL format
+     */
+    websiteUrl: (value: string): string | undefined => {
+        if (!value) return undefined;
+        if (value.length > 512) {
+            return "Website URL must be less than 512 characters";
+        }
+        // Match backend pattern: ^(https?://)?([\\w.-]+)(:[0-9]+)?(/.*)?$|^$
+        if (!/^(https?:\/\/)?[\w.-]+(:[0-9]+)?(\/.*)?$/.test(value)) {
+            return "Website URL must be a valid URL format";
+        }
+        return undefined;
+    },
+
+    /**
+     * LinkedIn URL: max 512 characters, valid LinkedIn URL format
+     */
+    linkedinUrl: (value: string): string | undefined => {
+        if (!value) return undefined;
+        if (value.length > 512) {
+            return "LinkedIn URL must be less than 512 characters";
+        }
+        // Match backend pattern: ^(https?://)?(www\\.)?linkedin\\.com/(company|in)/[\\w\\-]+/?$
+        if (!/^(https?:\/\/)?(www\.)?linkedin\.com\/(company|in)\/[\w-]+\/?$/.test(value)) {
+            return "LinkedIn URL must be a valid LinkedIn profile or company URL";
+        }
+        return undefined;
+    },
+
+    /**
+     * Industry: max 128 characters
+     */
+    industry: (value: string): string | undefined => {
+        if (!value) return undefined;
+        if (value.length > 128) {
+            return "Industry must be less than 128 characters";
+        }
+        return undefined;
+    },
+
+    /**
+     * Company size: must be a valid range
+     */
+    companySize: (value: string): string | undefined => {
+        if (!value) return undefined;
+        if (!VALID_COMPANY_SIZES.includes(value)) {
+            return "Company size must be a valid range (e.g., 1-10, 11-50, 51-200, 201-500, 501-1000, 1001-5000, 5001-10000, 10001+)";
+        }
+        return undefined;
+    },
+
+    /**
+     * Founded year: between 1800 and 2100
+     */
+    foundedYear: (value: string): string | undefined => {
+        if (!value) return undefined;
+        const year = parseInt(value, 10);
+        if (isNaN(year)) {
+            return "Founded year must be a valid number";
+        }
+        if (year < 1800) {
+            return "Founded year must be at least 1800";
+        }
+        if (year > 2100) {
+            return "Founded year must be at most 2100";
+        }
+        return undefined;
+    },
+};
+
+// Export valid company sizes for dropdown/select usage
+export const COMPANY_SIZE_OPTIONS = VALID_COMPANY_SIZES;
+
 // Compose multiple validators
 export const composeValidators = (
     ...validators: Array<(value: any) => string | undefined>

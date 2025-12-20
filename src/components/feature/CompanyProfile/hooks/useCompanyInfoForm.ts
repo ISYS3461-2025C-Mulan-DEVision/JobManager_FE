@@ -145,7 +145,7 @@ export function useCompanyInfoForm(): UseCompanyInfoFormReturn {
         setError(null);
         try {
             const result = await uploadLogo(file);
-            setProfile((prev) => prev ? { ...prev, logoUrl: result.logoUrl } : prev);
+            setProfile((prev) => prev ? { ...prev, logoUrl: result.url } : prev);
             setSuccessMessage("Logo uploaded successfully!");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to upload logo");
@@ -156,7 +156,7 @@ export function useCompanyInfoForm(): UseCompanyInfoFormReturn {
         setError(null);
         try {
             const result = await uploadBanner(file);
-            setProfile((prev) => prev ? { ...prev, bannerUrl: result.bannerUrl } : prev);
+            setProfile((prev) => prev ? { ...prev, bannerUrl: result.url } : prev);
             setSuccessMessage("Banner uploaded successfully!");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to upload banner");

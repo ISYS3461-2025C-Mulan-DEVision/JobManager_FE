@@ -107,7 +107,7 @@ export const updateCompanyProfile = async (
 };
 
 // Media APIs
-export const uploadLogo = async (file: File): Promise<{ logoUrl: string }> => {
+export const uploadLogo = async (file: File): Promise<{ url: string }> => {
     const companyId = getCompanyId();
     const formData = new FormData();
     formData.append("file", file);
@@ -126,7 +126,7 @@ export const uploadLogo = async (file: File): Promise<{ logoUrl: string }> => {
     return data.data || data;
 };
 
-export const uploadBanner = async (file: File): Promise<{ bannerUrl: string }> => {
+export const uploadBanner = async (file: File): Promise<{ url: string }> => {
     const companyId = getCompanyId();
     const formData = new FormData();
     formData.append("file", file);
@@ -149,7 +149,7 @@ export const uploadMedia = async (payload: MediaUploadPayload): Promise<CompanyM
     const companyId = getCompanyId();
     const formData = new FormData();
     formData.append("file", payload.file);
-    formData.append("mediaType", payload.mediaType);
+    formData.append("type", payload.mediaType); // Backend expects 'type' field
     if (payload.title) formData.append("title", payload.title);
     if (payload.description) formData.append("description", payload.description);
 
@@ -179,7 +179,12 @@ export const getAllMedia = async (): Promise<CompanyMedia[]> => {
     }
 
     const data = await response.json();
-    return data.data || data || [];
+    // Handle paginated response: { data: { content: [...], page, size, totalElements, ... } }
+    if (data.data?.content) {
+        return data.data.content;
+    }
+    // Fallback for direct array response
+    return Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
 };
 
 export const getMediaById = async (mediaId: string): Promise<CompanyMedia> => {
@@ -218,10 +223,16 @@ export const updateMedia = async (
 
 export const reorderMedia = async (reorderItems: MediaReorderItem[]): Promise<void> => {
     const companyId = getCompanyId();
+    // Backend expects array of UUIDs in desired order, not objects with mediaId/displayOrder
+    // Sort by displayOrder and extract just the IDs
+    const orderedIds = reorderItems
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+        .map(item => item.mediaId);
+    
     const response = await fetch(`${COMPANY_BASE_URL}/${companyId}/media/reorder`, {
         method: "PUT",
         headers: getAuthHeaders(),
-        body: JSON.stringify(reorderItems),
+        body: JSON.stringify(orderedIds),
     });
 
     if (!response.ok) {
