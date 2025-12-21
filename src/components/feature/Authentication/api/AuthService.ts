@@ -13,6 +13,11 @@ export interface ForgotPasswordPayload {
     email: string;
 }
 
+export interface ResetPasswordPayload {
+    token: string;
+    newPassword: string;
+}
+
 export interface ActivationPayload {
     token: string;
 }
@@ -172,14 +177,13 @@ const resendActivationEmail = async (
     }
 };
 
-
 const completeSsoRegistration = async (
     payload: CompleteSsoRegistrationPayload
 ): Promise<ApiResponse<AuthTokens>> => {
     try {
         console.log("Calling /auth/complete with payload:", {
             token: payload.token.substring(0, 20) + "...",
-            country: payload.country
+            country: payload.country,
         });
 
         const response = await httpClient.post<ApiResponse<AuthTokens>>(
@@ -194,20 +198,20 @@ const completeSsoRegistration = async (
         return response.data;
     } catch (error) {
         console.error("SSO completion failed:", error);
-        
+
         if (axios.isAxiosError(error)) {
             console.error("Error details:", {
                 message: error.message,
                 response: error.response?.data,
                 status: error.response?.status,
-                config: error.config
+                config: error.config,
             });
         }
 
         normalizeAxiosError(error);
         throw error;
     }
-}
+};
 
 const refreshAuthToken = async (
     payload: RefreshTokenPayload
@@ -251,25 +255,40 @@ const fetchHealth = async (): Promise<string> => {
 const forgotPasswordCompany = async (
     payload: ForgotPasswordPayload
 ): Promise<NullableStringResponse> => {
-    console.warn(
-        "Password reset endpoint is not yet implemented in the backend. Payload logged for reference.",
-        payload
-    );
-
-    return {
-        success: true,
-        message:
-            "Password reset instructions are not available yet. Please contact support for assistance.",
-        data: null,
-        timestamp: new Date().toISOString(),
-    };
+    try {
+        const response = await httpClient.post<NullableStringResponse>(
+            `${AUTH_BASE_PATH}/forgot-password`,
+            payload
+        );
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
 };
 
-const getCountries = async (): Promise<ApiResponse<Array<{ code: string; displayName: string }>>> => {
+const resetPasswordCompany = async (
+    payload: ResetPasswordPayload
+): Promise<NullableStringResponse> => {
     try {
-        const response = await httpClient.get<ApiResponse<Array<{ code: string; displayName: string }>>>(
-            `${AUTH_BASE_PATH}/countries`
+        const response = await httpClient.post<NullableStringResponse>(
+            `${AUTH_BASE_PATH}/reset-password`,
+            payload
         );
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
+};
+
+const getCountries = async (): Promise<
+    ApiResponse<Array<{ code: string; displayName: string }>>
+> => {
+    try {
+        const response = await httpClient.get<
+            ApiResponse<Array<{ code: string; displayName: string }>>
+        >(`${AUTH_BASE_PATH}/countries`);
         return response.data;
     } catch (error) {
         normalizeAxiosError(error);
@@ -284,6 +303,7 @@ const AuthService = {
     resendActivationEmail,
     completeSsoRegistration,
     forgotPasswordCompany,
+    resetPasswordCompany,
     refreshAuthToken,
     logoutCompany,
     fetchHealth,
