@@ -22,9 +22,24 @@ httpClient.interceptors.request.use((config) => {
 httpClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error?.response?.status === 401) {
+        // Handle redirect responses (302) - should not happen with maxRedirects: 0
+        if (error?.response?.status === 302) {
+            console.error("Unexpected redirect detected:", error.response);
+            clearAuthSession();
+            return Promise.reject(
+                new Error("Authentication required. Please login again.")
+            );
+        }
+
+        // Handle auth errors
+        if (
+            error?.response?.status === 401 ||
+            error?.response?.status === 403
+        ) {
+            console.error("Authentication error:", error.response?.status);
             clearAuthSession();
         }
+
         return Promise.reject(error);
     }
 );

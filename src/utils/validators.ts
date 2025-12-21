@@ -19,7 +19,7 @@ export const validators = {
 
     required: (
         value: any,
-        fieldName: string = "This field",
+        fieldName: string = "This field"
     ): string | undefined => {
         if (!value || (typeof value === "string" && !value.trim())) {
             return `${fieldName} is required`;
@@ -30,7 +30,7 @@ export const validators = {
     minLength: (
         value: string,
         min: number,
-        fieldName: string = "Value",
+        fieldName: string = "Value"
     ): string | undefined => {
         if (value && value.length < min) {
             return `${fieldName} must be at least ${min} characters`;
@@ -41,7 +41,7 @@ export const validators = {
     maxLength: (
         value: string,
         max: number,
-        fieldName: string = "Value",
+        fieldName: string = "Value"
     ): string | undefined => {
         if (value && value.length > max) {
             return `${fieldName} must not exceed ${max} characters`;
@@ -72,14 +72,72 @@ export const validators = {
 // Company-specific validators (consistent with backend validation)
 // ============================================================================
 
-// Valid international dial codes
-const VALID_DIAL_CODES = [
-    "1", "7", "20", "27", "30", "31", "32", "33", "34", "36", "39", "40", "41",
-    "43", "44", "45", "46", "47", "48", "49", "54", "55", "56", "57", "58", "60",
-    "61", "62", "63", "64", "65", "66", "81", "82", "84", "86", "90", "91", "92",
-    "93", "94", "95", "98", "234", "254", "375", "380", "852", "853", "886",
-    "966", "971", "972", "973", "974",
+// Country codes with names
+export interface CountryCode {
+    code: string;
+    name: string;
+    flag?: string;
+}
+
+export const COUNTRY_CODES: CountryCode[] = [
+    { code: "1", name: "USA/Canada" },
+    { code: "7", name: "Russia" },
+    { code: "20", name: "Egypt" },
+    { code: "27", name: "South Africa" },
+    { code: "30", name: "Greece" },
+    { code: "31", name: "Netherlands" },
+    { code: "32", name: "Belgium" },
+    { code: "33", name: "France" },
+    { code: "34", name: "Spain" },
+    { code: "36", name: "Hungary" },
+    { code: "39", name: "Italy" },
+    { code: "40", name: "Romania" },
+    { code: "41", name: "Switzerland" },
+    { code: "43", name: "Austria" },
+    { code: "44", name: "UK" },
+    { code: "45", name: "Denmark" },
+    { code: "46", name: "Sweden" },
+    { code: "47", name: "Norway" },
+    { code: "48", name: "Poland" },
+    { code: "49", name: "Germany" },
+    { code: "54", name: "Argentina" },
+    { code: "55", name: "Brazil" },
+    { code: "56", name: "Chile" },
+    { code: "57", name: "Colombia" },
+    { code: "58", name: "Venezuela" },
+    { code: "60", name: "Malaysia" },
+    { code: "61", name: "Australia" },
+    { code: "62", name: "Indonesia" },
+    { code: "63", name: "Philippines" },
+    { code: "65", name: "Singapore" },
+    { code: "66", name: "Thailand" },
+    { code: "81", name: "Japan" },
+    { code: "82", name: "South Korea" },
+    { code: "84", name: "Vietnam" },
+    { code: "86", name: "China" },
+    { code: "90", name: "Turkey" },
+    { code: "91", name: "India" },
+    { code: "92", name: "Pakistan" },
+    { code: "93", name: "Afghanistan" },
+    { code: "94", name: "Sri Lanka" },
+    { code: "95", name: "Myanmar" },
+    { code: "98", name: "Iran" },
+    { code: "234", name: "Nigeria" },
+    { code: "254", name: "Kenya" },
+    { code: "375", name: "Belarus" },
+    { code: "380", name: "Ukraine" },
+    { code: "852", name: "Hong Kong" },
+    { code: "853", name: "Macau" },
+    { code: "886", name: "Taiwan" },
+    { code: "966", name: "Saudi Arabia" },
+    { code: "971", name: "UAE" },
+    { code: "972", name: "Israel" },
+    { code: "973", name: "Bahrain" },
+    { code: "974", name: "Qatar" },
 ];
+
+// Valid international dial codes (for backward compatibility)
+const VALID_DIAL_CODES = COUNTRY_CODES.map((c) => c.code);
 
 // Valid company size ranges
 const VALID_COMPANY_SIZES = [
@@ -134,7 +192,9 @@ export const companyValidators = {
         );
 
         if (matchedDialCode) {
-            const digitsAfterCode = digitsAfterPlus.slice(matchedDialCode.length);
+            const digitsAfterCode = digitsAfterPlus.slice(
+                matchedDialCode.length
+            );
             if (digitsAfterCode.length < 4) {
                 return "Phone number must have at least 4 digits after country code";
             }
@@ -228,7 +288,11 @@ export const companyValidators = {
             return "LinkedIn URL must be less than 512 characters";
         }
         // Match backend pattern: ^(https?://)?(www\\.)?linkedin\\.com/(company|in)/[\\w\\-]+/?$
-        if (!/^(https?:\/\/)?(www\.)?linkedin\.com\/(company|in)\/[\w-]+\/?$/.test(value)) {
+        if (
+            !/^(https?:\/\/)?(www\.)?linkedin\.com\/(company|in)\/[\w-]+\/?$/.test(
+                value
+            )
+        ) {
             return "LinkedIn URL must be a valid LinkedIn profile or company URL";
         }
         return undefined;

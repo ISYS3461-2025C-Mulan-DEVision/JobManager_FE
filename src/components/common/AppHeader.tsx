@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../ui";
 import { getStoredUser, clearAuthSession } from "../../services/authStorage";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { getCompanyProfile } from "@/components/feature/CompanyProfile/api";
 
 type AppHeaderProps = {
     className?: string;
@@ -12,7 +13,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
     const navigate = useNavigate();
     const [user, setUser] = useState(getStoredUser());
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
 
     const pathname = location.pathname;
     const onLogin = pathname === "/login";
@@ -30,21 +31,24 @@ export default function AppHeader({ className }: AppHeaderProps) {
         };
     }, []);
 
-    // Close dropdown when clicking outside
+    // Fetch company logo when user is available
     useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target as Node)
-            ) {
-                setIsDropdownOpen(false);
+        const fetchCompanyLogo = async () => {
+            if (user?.companyId) {
+                try {
+                    const profile = await getCompanyProfile();
+                    setCompanyLogoUrl(profile.logoUrl || null);
+                } catch (error) {
+                    console.error("Failed to fetch company profile:", error);
+                    setCompanyLogoUrl(null);
+                }
+            } else {
+                setCompanyLogoUrl(null);
             }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, []);
+
+        fetchCompanyLogo();
+    }, [user]);
 
     const handleLogout = () => {
         clearAuthSession();
@@ -57,7 +61,10 @@ export default function AppHeader({ className }: AppHeaderProps) {
             <div className="h-20 border-b border-gray-200 bg-white">
                 <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
                     <div className="flex items-center gap-8">
-                        <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-3">
+                        <Link
+                            to={user ? "/dashboard" : "/"}
+                            className="flex items-center gap-3"
+                        >
                             <img
                                 src="/logo/logo.png"
                                 alt="DEVision"
@@ -100,51 +107,66 @@ export default function AppHeader({ className }: AppHeaderProps) {
                     <div className="flex items-center gap-4">
                         {user ? (
                             <>
-                                <div className="relative" ref={dropdownRef}>
-                                    <button
-                                        onClick={() =>
-                                            setIsDropdownOpen(!isDropdownOpen)
-                                        }
-                                        className="flex items-center gap-2 focus:outline-none cursor-pointer"
-                                    >
-                                        <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
-                                            {user.email.charAt(0).toUpperCase()}
-                                        </div>
-                                    </button>
+                                <div
+                                    className="relative"
+                                    onMouseEnter={() => setIsDropdownOpen(true)}
+                                    onMouseLeave={() =>
+                                        setIsDropdownOpen(false)
+                                    }
+                                >
+                                    <div className="flex items-center gap-2 cursor-pointer">
+                                        {companyLogoUrl ? (
+                                            <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200">
+                                                <img
+                                                    src={companyLogoUrl}
+                                                    alt="Company logo"
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
+                                                {user.email
+                                                    .charAt(0)
+                                                    .toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
 
                                     {isDropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100">
-                                            <div className="px-4 py-3 border-b border-gray-100">
-                                                <p className="text-sm font-medium text-gray-900 truncate">
-                                                    {user.email}
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    Subscription:{" "}
-                                                    <span className="font-semibold text-blue-600">
-                                                        Free
-                                                    </span>
-                                                </p>
-                                            </div>
+                                        <div className="absolute right-0 mt-0 pt-2 w-64 z-50">
+                                            <div className="bg-white rounded-md shadow-lg py-1 border border-gray-100">
+                                                <div className="px-4 py-3 border-b border-gray-100">
+                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                        {user.email}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        Subscription:{" "}
+                                                        <span className="font-semibold text-blue-600">
+                                                            Free
+                                                        </span>
+                                                    </p>
+                                                </div>
 
-                                            <Link
-                                                to="/profile"
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                            >
-                                                Profile Settings
-                                            </Link>
-                                            <Link
-                                                to="/notifications"
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                            >
-                                                Notifications
-                                            </Link>
-                                            <div className="border-t border-gray-100 my-1"></div>
-                                            <button
-                                                onClick={handleLogout}
-                                                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
-                                            >
-                                                Log out
-                                            </button>
+                                                <Link
+                                                    to="/profile"
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                >
+                                                    Profile Settings
+                                                </Link>
+                                                <Link
+                                                    to="/notifications"
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                >
+                                                    Notifications
+                                                </Link>
+                                                <div className="border-t border-gray-100 my-1"></div>
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                                                >
+                                                    Log out
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

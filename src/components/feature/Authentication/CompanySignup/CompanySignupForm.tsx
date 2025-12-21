@@ -43,7 +43,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
         onDismissSuccess,
     } = props;
 
-    const apiBase = import.meta.env.VITE_API_URL ?? "http://localhost:8081/api";
+    const apiBase = `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api/`;
     const navigate = useNavigate();
 
     // const [currentStep, setCurrentStep] = React.useState(0); // Removed step logic

@@ -1,5 +1,5 @@
 import React from "react";
-import { Input, Button, Alert } from "@/components/ui";
+import { Input, Button, Alert, PhoneInput } from "@/components/ui";
 import { CompleteProfilePayload } from "./types";
 
 interface CompleteProfileFormProps {
@@ -166,20 +166,16 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = (
                         fullWidth
                     />
 
-                    <Input
+                    <PhoneInput
                         label="Phone number *"
-                        id="phoneNumber"
-                        name="phoneNumber"
-                        type="tel"
-                        autoComplete="tel"
-                        required
-                        placeholder="e.g. +1 555 123 4567"
                         value={values.phoneNumber}
-                        onChange={handleChange}
-                        onBlur={() => handleBlur("phoneNumber")}
+                        onChange={(value) =>
+                            setFieldValue("phoneNumber", value)
+                        }
                         error={
                             touched.phoneNumber ? errors.phoneNumber : undefined
                         }
+                        helperText="Enter your company phone number with country code"
                         fullWidth
                     />
 

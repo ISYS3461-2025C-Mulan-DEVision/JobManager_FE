@@ -61,12 +61,20 @@ export const useCompanyLogin = () => {
                         navigate("/complete-profile", { replace: true });
                         return response.data;
                     }
+
+                    // Profile is complete, navigate to dashboard
+                    console.log("Profile is complete, navigating to dashboard");
+                    navigate(ROUTES.DASHBOARD, { replace: true });
+                    return response.data;
                 } else {
                     console.warn(
-                        "Company response not successful or data missing"
+                        "Company response not successful or data missing, redirecting to profile completion"
                     );
+                    // If we can't get company data, assume profile is incomplete
+                    navigate("/complete-profile", { replace: true });
+                    return response.data;
                 }
-            } catch (profileError) {
+            } catch (profileError: any) {
                 console.error("Failed to fetch company profile:", profileError);
                 // If we can't check, maybe let them go to dashboard or stay?
                 // For now, proceed to dashboard, but maybe log it.
