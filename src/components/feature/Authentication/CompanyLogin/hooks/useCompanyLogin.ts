@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AuthService, {
     LoginPayload,
 } from "@/components/feature/Authentication/api/AuthService";
+import CompanyService from "@/services/companyService";
 import { storeAuthSession } from "@/services/authStorage";
 import { ROUTES } from "@/utils";
 
@@ -30,6 +31,46 @@ export const useCompanyLogin = () => {
 
             console.log("Login successful, storing auth session");
             storeAuthSession(response.data);
+
+            // Check if profile is complete
+            try {
+                console.log(
+                    "Fetching company profile for ID:",
+                    response.data.companyId
+                );
+                const companyResponse = await CompanyService.getCompany(
+                    response.data.companyId
+                );
+                console.log("Company profile response:", companyResponse);
+
+                if (companyResponse.success && companyResponse.data) {
+                    const company = companyResponse.data;
+                    console.log("Company data:", company);
+
+                    // Check if essential fields are missing
+                    const isProfileIncomplete =
+                        !company.name ||
+                        !company.phone ||
+                        !company.streetAddress;
+                    console.log("Is profile incomplete?", isProfileIncomplete);
+
+                    if (isProfileIncomplete) {
+                        console.log(
+                            "Profile incomplete, navigating to complete-profile"
+                        );
+                        navigate("/complete-profile", { replace: true });
+                        return response.data;
+                    }
+                } else {
+                    console.warn(
+                        "Company response not successful or data missing"
+                    );
+                }
+            } catch (profileError) {
+                console.error("Failed to fetch company profile:", profileError);
+                // If we can't check, maybe let them go to dashboard or stay?
+                // For now, proceed to dashboard, but maybe log it.
+            }
 
             console.log("Navigating to dashboard");
             navigate(ROUTES.DASHBOARD, { replace: true });

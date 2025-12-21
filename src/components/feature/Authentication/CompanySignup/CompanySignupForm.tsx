@@ -46,7 +46,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
     const apiBase = import.meta.env.VITE_API_URL ?? "http://localhost:8081/api";
     const navigate = useNavigate();
 
-    const [currentStep, setCurrentStep] = React.useState(0);
+    // const [currentStep, setCurrentStep] = React.useState(0); // Removed step logic
     const [stepErrors, setStepErrors] = React.useState<
         Partial<Record<keyof SignupPayload, string>>
     >({});
@@ -162,46 +162,14 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
 
     const isGoogleSignup = values.signupMethod === "google";
 
-    const steps = React.useMemo(
-        () => [
-            {
-                id: "account",
-                title: "Account basics",
-                description: isGoogleSignup
-                    ? "Confirm how we can reach you."
-                    : "Set up your login credentials and region.",
-                fields: (isGoogleSignup
-                    ? ["email", "country"]
-                    : [
-                          "email",
-                          "password",
-                          "confirmPassword",
-                          "country",
-                      ]) as (keyof SignupPayload)[],
-            },
-            {
-                id: "company",
-                title: "Company profile",
-                description:
-                    "Let applicants learn more about your company before they apply.",
-                fields: [
-                    "companyName",
-                    "phoneNumber",
-                    "address",
-                    "companyLogo",
-                ] as (keyof SignupPayload)[],
-            },
-        ],
-        [isGoogleSignup]
-    );
+    // Steps removed
+    // const activeStep = steps[currentStep];
 
-    const activeStep = steps[currentStep];
-
-    React.useEffect(() => {
-        if (currentStep >= steps.length) {
-            setCurrentStep(steps.length - 1);
-        }
-    }, [currentStep, steps.length]);
+    // React.useEffect(() => {
+    //     if (currentStep >= steps.length) {
+    //         setCurrentStep(steps.length - 1);
+    //     }
+    // }, [currentStep, steps.length]);
 
     React.useEffect(() => {
         if (!values.companyLogo) {
@@ -268,40 +236,9 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
         [clearStepError, handleChange]
     );
 
-    const handleNext = React.useCallback(() => {
-        const validationResult = validateSignupFields(
-            values,
-            activeStep.fields
-        );
+    // handleNext and handlePrevious removed
 
-        if (Object.keys(validationResult).length > 0) {
-            setStepErrors(validationResult);
-            activeStep.fields.forEach((field) => handleBlur(field));
-            return;
-        }
-
-        setStepErrors({});
-        setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
-    }, [activeStep.fields, handleBlur, steps.length, values]);
-
-    const handlePrevious = React.useCallback(() => {
-        setStepErrors({});
-        setCurrentStep((step) => Math.max(step - 1, 0));
-    }, []);
-
-    const handleLogoChange = React.useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            const file = event.target.files?.[0] ?? null;
-            setFieldValue("companyLogo", file);
-            clearStepError("companyLogo");
-        },
-        [clearStepError, setFieldValue]
-    );
-
-    const handleRemoveLogo = React.useCallback(() => {
-        setFieldValue("companyLogo", null);
-        clearStepError("companyLogo");
-    }, [clearStepError, setFieldValue]);
+    // Logo handlers removed
 
     // const handleGoogleSignup = React.useCallback(() => {
     //     if (typeof window === "undefined") {
@@ -432,7 +369,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
         [ssoFields, navigate]
     );
 
-    const accountStep = (
+    const signupFormContent = (
         <div className="space-y-5">
             <Input
                 label="Company email *"
@@ -566,149 +503,19 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
             </div>
 
             <Button
-                type="button"
+                type="submit"
                 variant="primary"
                 size="md"
                 fullWidth
-                onClick={handleNext}
+                isLoading={isLoading}
                 disabled={isLoading || countryLoading}
             >
-                Continue to company profile
+                Create account
             </Button>
         </div>
     );
 
-    const companyStep = (
-        <div className="space-y-6">
-            <div className="flex flex-col items-center gap-3">
-                {logoPreview ? (
-                    <img
-                        src={logoPreview}
-                        alt="Company logo preview"
-                        className="h-16 w-16 rounded-full object-cover shadow"
-                    />
-                ) : (
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-gray-300 text-xs text-gray-500">
-                        Logo
-                    </div>
-                )}
-
-                <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-                    <label className="flex-1 text-sm font-medium text-gray-700">
-                        Company logo *
-                        <input
-                            type="file"
-                            accept="image/*"
-                            className="mt-2 w-full cursor-pointer rounded-lg border border-dashed border-gray-300 bg-gray-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            onChange={handleLogoChange}
-                        />
-                    </label>
-
-                    {values.companyLogo && (
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={handleRemoveLogo}
-                            className="self-end text-sm text-gray-600 hover:text-gray-800"
-                        >
-                            Remove
-                        </Button>
-                    )}
-                </div>
-
-                {shouldShowError("companyLogo") &&
-                    getFieldError("companyLogo") && (
-                        <span className="text-sm text-red-600">
-                            {getFieldError("companyLogo")}
-                        </span>
-                    )}
-
-                <p className="text-center text-xs text-gray-500">
-                    Upload a square logo (PNG or JPG, up to 2MB recommended).
-                </p>
-            </div>
-
-            <Input
-                label="Company name *"
-                id="companyName"
-                name="companyName"
-                type="text"
-                autoComplete="organization"
-                required
-                placeholder="What should applicants see?"
-                value={values.companyName}
-                onChange={handleFieldChange}
-                onBlur={() => handleBlur("companyName")}
-                error={getFieldError("companyName")}
-                fullWidth
-            />
-
-            <Input
-                label="Phone number *"
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                autoComplete="tel"
-                required
-                placeholder="e.g. +1 555 123 4567"
-                value={values.phoneNumber}
-                onChange={handleFieldChange}
-                onBlur={() => handleBlur("phoneNumber")}
-                error={getFieldError("phoneNumber")}
-                fullWidth
-            />
-
-            <div className="flex flex-col gap-1">
-                <label
-                    htmlFor="address"
-                    className="text-sm font-medium text-gray-700"
-                >
-                    Detailed address *
-                </label>
-                <textarea
-                    id="address"
-                    name="address"
-                    rows={3}
-                    placeholder="Street, city, and postal code"
-                    className={`rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        getFieldError("address")
-                            ? "border-red-500 focus:ring-red-500"
-                            : "border-gray-300"
-                    }`}
-                    value={values.address}
-                    onChange={handleFieldChange}
-                    onBlur={() => handleBlur("address")}
-                />
-                {getFieldError("address") && (
-                    <span className="text-sm text-red-600">
-                        {getFieldError("address")}
-                    </span>
-                )}
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={handlePrevious}
-                    disabled={isLoading}
-                    className="w-full sm:w-1/2"
-                >
-                    Back
-                </Button>
-                <Button
-                    type="submit"
-                    variant="primary"
-                    size="md"
-                    isLoading={isLoading}
-                    disabled={isLoading}
-                    className="w-full sm:w-1/2"
-                >
-                    Create account
-                </Button>
-            </div>
-        </div>
-    );
+    // companyStep removed
 
     return (
         <div className="w-full">
@@ -750,75 +557,48 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                     )}
 
                     <div className="mt-8 space-y-6">
-                        <div className="flex flex-col items-center gap-4 md:flex-row md:justify-center">
-                            {steps.map((step, index) => {
-                                const isActive = index === currentStep;
-                                const isCompleted = index < currentStep;
-                                return (
-                                    <div
-                                        key={step.id}
-                                        className="flex flex-col items-center text-center"
-                                    >
-                                        <span
-                                            className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold ${
-                                                isActive
-                                                    ? "bg-heading text-white"
-                                                    : isCompleted
-                                                      ? "border-blue-200 bg-blue-100 text-blue-600"
-                                                      : "border-gray-300 bg-white text-gray-500"
-                                            }`}
-                                        >
-                                            {index + 1}
-                                        </span>
-                                        <span className="mt-2 text-sm font-medium text-gray-700">
-                                            {step.title}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                        {/* Step indicators removed */}
 
                         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                             <div className="mb-6 text-center">
                                 <h3 className="text-lg font-semibold text-heading">
-                                    {activeStep.title}
+                                    Account basics
                                 </h3>
                                 <p className="mt-1 text-sm text-gray-600">
-                                    {activeStep.description}
+                                    {isGoogleSignup
+                                        ? "Confirm how we can reach you."
+                                        : "Set up your login credentials and region."}
                                 </p>
                             </div>
 
-                            {currentStep === 0 ? accountStep : companyStep}
+                            {signupFormContent}
                         </div>
 
-                        {currentStep === 0 && (
-                            <>
-                                <div className="relative py-2">
-                                    <div
-                                        className="absolute inset-0 flex items-center"
-                                        aria-hidden="true"
-                                    >
-                                        <div className="w-full border-t border-gray-200" />
-                                    </div>
-                                    <div className="relative flex justify-center">
-                                        <span className="bg-white px-2 text-xs font-medium text-gray-500">
-                                            OR
-                                        </span>
-                                    </div>
-                                </div>
+                        {/* Removed conditional rendering based on currentStep */}
+                        <div className="relative py-2">
+                            <div
+                                className="absolute inset-0 flex items-center"
+                                aria-hidden="true"
+                            >
+                                <div className="w-full border-t border-gray-200" />
+                            </div>
+                            <div className="relative flex justify-center">
+                                <span className="bg-white px-2 text-xs font-medium text-gray-500">
+                                    OR
+                                </span>
+                            </div>
+                        </div>
 
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    onClick={handleGoogleSignup}
-                                    className="flex w-full items-center justify-center"
-                                    disabled={isLoading}
-                                >
-                                    <GoogleLogo className="mr-2" />
-                                    Continue with Google
-                                </Button>
-                            </>
-                        )}
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={handleGoogleSignup}
+                            className="flex w-full items-center justify-center"
+                            disabled={isLoading}
+                        >
+                            <GoogleLogo className="mr-2" />
+                            Continue with Google
+                        </Button>
 
                         <p className="pt-2 text-center text-sm text-gray-600">
                             Already have an account?{" "}
