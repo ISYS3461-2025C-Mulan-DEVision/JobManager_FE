@@ -57,7 +57,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
             <div className="h-20 border-b border-gray-200 bg-white">
                 <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
                     <div className="flex items-center gap-8">
-                        <Link to="/" className="flex items-center gap-3">
+                        <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-3">
                             <img
                                 src="/logo/logo.png"
                                 alt="DEVision"
