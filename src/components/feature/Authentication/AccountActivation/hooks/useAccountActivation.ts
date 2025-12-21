@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { ActivationState } from "../types";
+import { ActivationState } from "../types.ts";
 
 export const useAccountActivation = () => {
     const [searchParams] = useSearchParams();
