@@ -105,7 +105,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                         onClick={() =>
                                             setIsDropdownOpen(!isDropdownOpen)
                                         }
-                                        className="flex items-center gap-2 focus:outline-none"
+                                        className="flex items-center gap-2 focus:outline-none cursor-pointer"
                                     >
                                         <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
                                             {user.email.charAt(0).toUpperCase()}
@@ -127,7 +127,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                             </div>
 
                                             <Link
-                                                to="/settings"
+                                                to="/profile"
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                             >
                                                 Profile Settings

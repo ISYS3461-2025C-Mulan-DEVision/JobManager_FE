@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { ActivationState } from "../types";
-import process from "process";
+import { ActivationState } from "../types.ts";
 
 export const useAccountActivation = () => {
     const [searchParams] = useSearchParams();
@@ -28,7 +27,7 @@ export const useAccountActivation = () => {
 
             try {
                 const response = await axios.post(
-                    `${process.env.VITE_API_URL || "http://localhost:8081"}/api/auth/activate`,
+                    `${import.meta.env.VITE_API_URL || "http://localhost:8081"}/api/auth/activate`,
                     {
                         token: token,
                     }
