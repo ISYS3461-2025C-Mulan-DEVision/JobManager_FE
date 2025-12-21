@@ -15,10 +15,23 @@ export const useCompanyForgotPassword = () => {
         setSuccess(null);
 
         try {
-            await AuthService.forgotPasswordCompany(formData);
-            setSuccess("Password reset email sent successfully. Please check your inbox.");
-        } catch (err) {
-            setError("Failed to send reset email. Please try again.");
+            const response = await AuthService.forgotPasswordCompany(formData);
+
+            if (response.success) {
+                setSuccess(
+                    response.message ||
+                        "Password reset email sent successfully. Please check your inbox."
+                );
+            } else {
+                setError(
+                    response.message ||
+                        "Failed to send reset email. Please try again."
+                );
+            }
+        } catch (err: any) {
+            setError(
+                err.message || "Failed to send reset email. Please try again."
+            );
             console.error(err);
         } finally {
             setIsLoading(false);

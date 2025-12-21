@@ -2,6 +2,7 @@ import { Route } from "react-router-dom";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegistrationPage from "@/pages/auth/RegistrationPage";
 import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import ActivateAccountPage from "@/pages/auth/ActivateAccountPage";
 import CompleteProfilePage from "@/pages/auth/CompleteProfilePage";
 import { PublicRoute } from "@/components/common/PublicRoute";
@@ -31,6 +32,15 @@ export const authRoutes = [
         element={
             <PublicRoute>
                 <ForgotPasswordPage />
+            </PublicRoute>
+        }
+    />,
+    <Route
+        key="reset-password"
+        path="/reset-password"
+        element={
+            <PublicRoute>
+                <ResetPasswordPage />
             </PublicRoute>
         }
     />,
