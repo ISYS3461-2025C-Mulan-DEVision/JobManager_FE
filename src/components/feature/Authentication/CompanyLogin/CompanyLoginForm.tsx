@@ -28,17 +28,26 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
     const [capsLockOn, setCapsLockOn] = React.useState(false);
     const [rememberMe, setRememberMe] = React.useState(true);
 
-    const apiBase = import.meta.env.VITE_API_URL ?? "http://localhost:8081/api";
+    const apiBase = `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api/`;
 
     return (
         <div className="w-full">
             <div className="text-center">
-                <h2 className="text-2xl tracking-tight text-gray-600">Welcome back!</h2>
-                <p className="mt-2 text-3xl text-heading font-bold">COMPANY SIGN IN</p>
+                <h2 className="text-2xl tracking-tight text-gray-600">
+                    Welcome back!
+                </h2>
+                <p className="mt-2 text-3xl text-heading font-bold">
+                    COMPANY SIGN IN
+                </p>
             </div>
 
             {error && (
-                <Alert type="error" className="mt-6" onClose={onDismissError} title="Sign-in failed">
+                <Alert
+                    type="error"
+                    className="mt-6"
+                    onClose={onDismissError}
+                    title="Sign-in failed"
+                >
                     {error}
                 </Alert>
             )}
@@ -56,7 +65,11 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                     onChange={handleChange}
                     onBlur={() => handleBlur("email")}
                     error={touched.email ? errors.email : undefined}
-                    helperText={!touched.email ? "Use your company email address." : undefined}
+                    helperText={
+                        !touched.email
+                            ? "Use your company email address."
+                            : undefined
+                    }
                     fullWidth
                 />
 
@@ -71,7 +84,11 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                     value={values.password}
                     onChange={handleChange}
                     onBlur={() => handleBlur("password")}
-                    onKeyUp={(e) => setCapsLockOn((e as any).getModifierState?.("CapsLock") ?? false)}
+                    onKeyUp={(e) =>
+                        setCapsLockOn(
+                            (e as any).getModifierState?.("CapsLock") ?? false
+                        )
+                    }
                     error={touched.password ? errors.password : undefined}
                     helperText={capsLockOn ? "Caps Lock is on." : undefined}
                     endAdornment={
@@ -79,7 +96,9 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                             type="button"
                             onClick={() => setShowPassword((s) => !s)}
                             className="rounded-md px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"
-                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-label={
+                                showPassword ? "Hide password" : "Show password"
+                            }
                         >
                             {showPassword ? "Hide" : "Show"}
                         </button>
@@ -118,11 +137,16 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                 </Button>
 
                 <div className="relative py-2">
-                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div
+                        className="absolute inset-0 flex items-center"
+                        aria-hidden="true"
+                    >
                         <div className="w-full border-t border-gray-200" />
                     </div>
                     <div className="relative flex justify-center">
-                        <span className="bg-white px-2 text-xs font-medium text-gray-500">OR</span>
+                        <span className="bg-white px-2 text-xs font-medium text-gray-500">
+                            OR
+                        </span>
                     </div>
                 </div>
 
@@ -141,7 +165,10 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
 
                 <p className="pt-1 text-center text-sm text-gray-600">
                     Don’t have an account?{" "}
-                    <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+                    <Link
+                        to="/register"
+                        className="font-medium text-blue-600 hover:text-blue-500"
+                    >
                         Create one
                     </Link>
                 </p>

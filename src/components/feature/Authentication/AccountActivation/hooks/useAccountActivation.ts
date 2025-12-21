@@ -27,7 +27,7 @@ export const useAccountActivation = () => {
 
             try {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_API_URL || "http://localhost:8081"}/api/auth/activate`,
+                    `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api/auth/activate`,
                     {
                         token: token,
                     }

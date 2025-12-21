@@ -3,6 +3,7 @@ import LoginPage from "@/pages/auth/LoginPage";
 import RegistrationPage from "@/pages/auth/RegistrationPage";
 import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
 import ActivateAccountPage from "@/pages/auth/ActivateAccountPage";
+import CompleteProfilePage from "@/pages/auth/CompleteProfilePage";
 
 export const authRoutes = [
     <Route key="login" path="/login" element={<LoginPage />} />,
@@ -16,5 +17,10 @@ export const authRoutes = [
         key="activate-account"
         path="/activate"
         element={<ActivateAccountPage />}
+    />,
+    <Route
+        key="complete-profile"
+        path="/complete-profile"
+        element={<CompleteProfilePage />}
     />,
 ];
