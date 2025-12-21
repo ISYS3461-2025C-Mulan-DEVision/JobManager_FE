@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState, useCallback } from "react";
 import { FileText, ImageIcon } from "lucide-react";
 import clsx from "clsx";
 
@@ -21,6 +21,10 @@ export interface MediaPreviewProps {
   objectFit?: "cover" | "contain" | "fill";
   /** Show video controls (only for video type) */
   showControls?: boolean;
+  /** Enable fade-in animation on load */
+  fadeIn?: boolean;
+  /** Show skeleton placeholder while loading */
+  showSkeleton?: boolean;
 }
 
 const aspectRatioStyles = {
@@ -39,7 +43,21 @@ export const MediaPreview = memo<MediaPreviewProps>(
     className,
     objectFit = "cover",
     showControls = false,
+    fadeIn = false,
+    showSkeleton = false,
   }) => {
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [hasError, setHasError] = useState(false);
+
+    const handleLoad = useCallback(() => {
+      setIsLoaded(true);
+    }, []);
+
+    const handleError = useCallback(() => {
+      setHasError(true);
+      setIsLoaded(true);
+    }, []);
+
     const objectFitClass =
       objectFit === "cover"
         ? "object-cover"
@@ -48,20 +66,36 @@ export const MediaPreview = memo<MediaPreviewProps>(
           : "object-fill";
 
     const containerClass = clsx(
-      "bg-gray-100 rounded-lg overflow-hidden",
+      "bg-gray-100 rounded-lg overflow-hidden relative",
       aspectRatioStyles[aspectRatio],
       className
+    );
+
+    const mediaClass = clsx(
+      "w-full h-full",
+      objectFitClass,
+      fadeIn && "transition-opacity duration-300",
+      fadeIn && !isLoaded && "opacity-0",
+      fadeIn && isLoaded && "opacity-100"
+    );
+
+    // Skeleton placeholder
+    const skeleton = showSkeleton && !isLoaded && !hasError && (
+      <div className="absolute inset-0 bg-gray-200 animate-pulse" />
     );
 
     if (type === "image") {
       return (
         <div className={containerClass}>
+          {skeleton}
           <img
             src={url}
             alt={alt}
-            className={clsx("w-full h-full", objectFitClass)}
-            loading={lazy ? "lazy" : undefined}
+            className={mediaClass}
+            loading={lazy ? "lazy" : "eager"}
             draggable={false}
+            onLoad={handleLoad}
+            onError={handleError}
           />
         </div>
       );
@@ -70,12 +104,15 @@ export const MediaPreview = memo<MediaPreviewProps>(
     if (type === "video") {
       return (
         <div className={containerClass}>
+          {skeleton}
           <video
             src={url}
-            className={clsx("w-full h-full", objectFitClass)}
+            className={mediaClass}
             controls={showControls}
             preload="metadata"
             draggable={false}
+            onLoadedData={handleLoad}
+            onError={handleError}
           />
         </div>
       );

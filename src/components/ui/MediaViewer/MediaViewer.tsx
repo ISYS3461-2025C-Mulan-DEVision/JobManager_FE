@@ -95,6 +95,9 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
           aspectRatio="auto"
           objectFit="contain"
           showControls={isVideo}
+          lazy={false}
+          fadeIn={true}
+          showSkeleton={true}
           className="max-h-[80vh] max-w-full"
         />
       </div>

@@ -65,6 +65,9 @@ const MediaItem = memo<MediaItemProps>(
           alt={media.title || "Media"}
           aspectRatio="auto"
           className="w-full h-full"
+          lazy={true}
+          fadeIn={true}
+          showSkeleton={true}
         />
 
         {/* Delete button */}

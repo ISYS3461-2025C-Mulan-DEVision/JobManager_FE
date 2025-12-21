@@ -1,4 +1,10 @@
-import React, { useState, useRef, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  useEffect,
+} from "react";
 import {
   Button,
   Input,
@@ -45,6 +51,29 @@ const BannerWithLogo: React.FC<BannerWithLogoProps> = ({
 }) => {
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const [bannerLoaded, setBannerLoaded] = useState(false);
+  const [logoLoaded, setLogoLoaded] = useState(false);
+
+  // Preload critical images for faster perceived loading
+  useEffect(() => {
+    if (logoUrl) {
+      const img = new Image();
+      img.src = logoUrl;
+    }
+    if (bannerUrl) {
+      const img = new Image();
+      img.src = bannerUrl;
+    }
+  }, [logoUrl, bannerUrl]);
+
+  // Reset loaded state when URLs change
+  useEffect(() => {
+    setBannerLoaded(false);
+  }, [bannerUrl]);
+
+  useEffect(() => {
+    setLogoLoaded(false);
+  }, [logoUrl]);
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -60,11 +89,23 @@ const BannerWithLogo: React.FC<BannerWithLogoProps> = ({
     <div className="relative mb-20">
       {/* Banner */}
       <div className="relative h-56 w-full rounded-2xl overflow-hidden bg-gradient-to-r from-slate-100 to-slate-200">
+        {bannerUrl && !bannerLoaded && (
+          <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+        )}
         {bannerUrl ? (
           <img
             src={bannerUrl}
             alt="Company Banner"
-            className="w-full h-full object-cover"
+            loading="eager"
+            onLoad={() => setBannerLoaded(true)}
+            ref={(img) => {
+              if (img?.complete) {
+                setBannerLoaded(true);
+              }
+            }}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              bannerLoaded ? "opacity-100" : "opacity-0"
+            }`}
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900" />
@@ -91,11 +132,23 @@ const BannerWithLogo: React.FC<BannerWithLogoProps> = ({
         {/* Logo */}
         <div className="relative">
           <div className="w-32 h-32 rounded-2xl border-4 border-white bg-white shadow-lg overflow-hidden">
+            {logoUrl && !logoLoaded && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl" />
+            )}
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt="Company Logo"
-                className="w-full h-full object-cover"
+                loading="eager"
+                onLoad={() => setLogoLoaded(true)}
+                ref={(img) => {
+                  if (img?.complete) {
+                    setLogoLoaded(true);
+                  }
+                }}
+                className={`w-full h-full object-cover transition-opacity duration-300 ${
+                  logoLoaded ? "opacity-100" : "opacity-0"
+                }`}
               />
             ) : (
               <div className="w-full h-full bg-slate-100 flex items-center justify-center">
