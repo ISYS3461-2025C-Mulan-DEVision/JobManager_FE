@@ -37,7 +37,9 @@ export const PASSWORD_REQUIREMENTS = {
 /**
  * Check which password requirements are met
  */
-export const checkPasswordRequirements = (password: string): PasswordRequirement[] => {
+export const checkPasswordRequirements = (
+    password: string
+): PasswordRequirement[] => {
     return Object.values(PASSWORD_REQUIREMENTS).map((req) => ({
         label: req.label,
         test: req.test,
@@ -50,7 +52,9 @@ export const checkPasswordRequirements = (password: string): PasswordRequirement
  */
 export const isPasswordValid = (password: string): boolean => {
     if (!password) return false;
-    return Object.values(PASSWORD_REQUIREMENTS).every((req) => req.test(password));
+    return Object.values(PASSWORD_REQUIREMENTS).every((req) =>
+        req.test(password)
+    );
 };
 
 /**

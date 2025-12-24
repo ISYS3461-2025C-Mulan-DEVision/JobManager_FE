@@ -405,16 +405,21 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                             onBlur={() => handleBlur("password")}
                             onKeyUp={(event) =>
                                 setCapsLockOn(
-                                    (event as any).getModifierState?.("CapsLock") ??
-                                        false
+                                    (event as any).getModifierState?.(
+                                        "CapsLock"
+                                    ) ?? false
                                 )
                             }
                             error={getFieldError("password")}
-                            helperText={capsLockOn ? "Caps Lock is on." : undefined}
+                            helperText={
+                                capsLockOn ? "Caps Lock is on." : undefined
+                            }
                             endAdornment={
                                 <button
                                     type="button"
-                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    onClick={() =>
+                                        setShowPassword((prev) => !prev)
+                                    }
                                     className="rounded-md px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"
                                     aria-label={
                                         showPassword
@@ -519,10 +524,11 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                 fullWidth
                 isLoading={isLoading}
                 disabled={
-                    isLoading || 
-                    countryLoading || 
+                    isLoading ||
+                    countryLoading ||
                     (!isGoogleSignup && !isPasswordValid(values.password)) ||
-                    (!isGoogleSignup && values.password !== values.confirmPassword)
+                    (!isGoogleSignup &&
+                        values.password !== values.confirmPassword)
                 }
             >
                 Create account
