@@ -5,6 +5,7 @@ import {
     SALARY_TYPES,
     SYNC_STATUS,
 } from "@/utils/constants";
+import { UUID } from "crypto";
 
 export type JobStatus = (typeof JOB_STATUS)[keyof typeof JOB_STATUS];
 export type EmploymentType =

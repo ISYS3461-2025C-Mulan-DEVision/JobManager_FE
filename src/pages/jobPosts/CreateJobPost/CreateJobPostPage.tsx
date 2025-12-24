@@ -1,0 +1,448 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button, Spinner } from "@/components/ui";
+import {
+    JobPostFormData,
+    JobPostFormErrors,
+    FormStep,
+    FORM_STEPS,
+    SaveStatus,
+} from "./types";
+import {
+    validateBasics,
+    validateCompensation,
+    validateDescription,
+    validateVisibility,
+    validateAllSteps,
+} from "./validation";
+import { Step1Basics } from "./steps/Step1Basics";
+import { Step2Compensation } from "./steps/Step2Compensation";
+import { Step3Description } from "./steps/Step3Description";
+import { Step4Visibility } from "./steps/Step4Visibility";
+import { JobPostPreviewModal } from "./components/JobPostPreviewModal";
+import { ROUTES } from "@/utils/constants";
+import clsx from "clsx";
+
+const CreateJobPostPage: React.FC = () => {
+    const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
+    const isEditMode = Boolean(id);
+
+    // Form state
+    const [currentStep, setCurrentStep] = useState<FormStep>(FormStep.BASICS);
+    const [formData, setFormData] = useState<JobPostFormData>({
+        title: "",
+        employmentTypes: [],
+        isFresher: false,
+        salaryType: "" as any,
+        salaryMin: "",
+        salaryMax: "",
+        salaryNote: "",
+        locationCity: "",
+        countryId: "",
+        description: "",
+        technicalSkills: [],
+        isPrivate: false,
+        expiryAt: "",
+        isPublished: false,
+    });
+    const [errors, setErrors] = useState<JobPostFormErrors>({});
+    const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+    const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+    const [showPreview, setShowPreview] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Auto-save draft every 30 seconds
+    useEffect(() => {
+        const autoSaveInterval = setInterval(() => {
+            if (saveStatus !== "saving") {
+                handleAutoSave();
+            }
+        }, 30000); // 30 seconds
+
+        return () => clearInterval(autoSaveInterval);
+    }, [formData, saveStatus]);
+
+    // Load existing job post if editing
+    useEffect(() => {
+        if (isEditMode && id) {
+            loadJobPost(id);
+        }
+    }, [id, isEditMode]);
+
+    const loadJobPost = async (jobId: string) => {
+        // TODO: Fetch job post from API
+        console.log("Loading job post:", jobId);
+    };
+
+    const handleAutoSave = useCallback(async () => {
+        // Only auto-save if form has content
+        if (!formData.title && formData.technicalSkills.length === 0) {
+            return;
+        }
+
+        setSaveStatus("saving");
+
+        try {
+            // TODO: Call API to save draft
+            await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API call
+
+            setSaveStatus("saved");
+            setLastSavedAt(new Date());
+
+            // Reset to idle after 2 seconds
+            setTimeout(() => {
+                setSaveStatus("idle");
+            }, 2000);
+        } catch (error) {
+            console.error("Auto-save failed:", error);
+            setSaveStatus("error");
+        }
+    }, [formData]);
+
+    const handleFieldChange = (field: keyof JobPostFormData, value: any) => {
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+
+        // Clear error for this field
+        if (errors[field as keyof JobPostFormErrors]) {
+            setErrors((prev) => ({
+                ...prev,
+                [field]: undefined,
+            }));
+        }
+    };
+
+    const validateCurrentStep = (): boolean => {
+        let stepErrors: JobPostFormErrors = {};
+
+        switch (currentStep) {
+            case FormStep.BASICS:
+                stepErrors = validateBasics(formData);
+                break;
+            case FormStep.COMPENSATION:
+                stepErrors = validateCompensation(formData);
+                break;
+            case FormStep.DESCRIPTION:
+                stepErrors = validateDescription(formData);
+                break;
+            case FormStep.VISIBILITY:
+                stepErrors = validateVisibility(formData);
+                break;
+        }
+
+        setErrors(stepErrors);
+        return Object.keys(stepErrors).length === 0;
+    };
+
+    const handleNext = () => {
+        if (validateCurrentStep()) {
+            setCurrentStep((prev) => Math.min(prev + 1, FORM_STEPS.length - 1));
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    };
+
+    const handlePrevious = () => {
+        setCurrentStep((prev) => Math.max(prev - 1, 0));
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const handleStepClick = (step: FormStep) => {
+        // Allow navigating to previous steps or current step freely
+        if (step <= currentStep) {
+            setCurrentStep(step);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+            // Validate current step before moving forward
+            if (validateCurrentStep()) {
+                setCurrentStep(step);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        }
+    };
+
+    const handleSaveDraft = async () => {
+        setIsSubmitting(true);
+        setSaveStatus("saving");
+
+        try {
+            // TODO: Call API to save as draft
+            await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+
+            setSaveStatus("saved");
+            setLastSavedAt(new Date());
+
+            // Show success message
+            alert("Draft saved successfully!");
+
+            // Navigate back to job posts
+            setTimeout(() => {
+                navigate(ROUTES.JOB_POSTS);
+            }, 500);
+        } catch (error) {
+            console.error("Failed to save draft:", error);
+            setSaveStatus("error");
+            alert("Failed to save draft. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handlePublish = async () => {
+        // Validate all steps
+        const allErrors = validateAllSteps(formData);
+        setErrors(allErrors);
+
+        if (Object.keys(allErrors).length > 0) {
+            alert("Please fix all errors before publishing");
+            return;
+        }
+
+        setIsSubmitting(true);
+        setSaveStatus("saving");
+
+        try {
+            // TODO: Call API to create/update and publish job post
+            await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call
+
+            setSaveStatus("saved");
+
+            // Show success message
+            alert("Job post published successfully! 🎉");
+
+            // Navigate back to job posts
+            navigate(ROUTES.JOB_POSTS);
+        } catch (error) {
+            console.error("Failed to publish:", error);
+            setSaveStatus("error");
+            alert("Failed to publish job post. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const renderStep = () => {
+        switch (currentStep) {
+            case FormStep.BASICS:
+                return (
+                    <Step1Basics
+                        formData={formData}
+                        errors={errors}
+                        onChange={handleFieldChange}
+                    />
+                );
+            case FormStep.COMPENSATION:
+                return (
+                    <Step2Compensation
+                        formData={formData}
+                        errors={errors}
+                        onChange={handleFieldChange}
+                    />
+                );
+            case FormStep.DESCRIPTION:
+                return (
+                    <Step3Description
+                        formData={formData}
+                        errors={errors}
+                        onChange={handleFieldChange}
+                    />
+                );
+            case FormStep.VISIBILITY:
+                return (
+                    <Step4Visibility
+                        formData={formData}
+                        errors={errors}
+                        onChange={handleFieldChange}
+                        onSaveDraft={handleSaveDraft}
+                        onPublish={handlePublish}
+                        isSaving={isSubmitting}
+                        showPreview={() => setShowPreview(true)}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
+    const getSaveStatusIndicator = () => {
+        switch (saveStatus) {
+            case "saving":
+                return (
+                    <span className="text-sm text-gray-500 flex items-center gap-2">
+                        <Spinner className="w-4 h-4" />
+                        Saving...
+                    </span>
+                );
+            case "saved":
+                return (
+                    <span className="text-sm text-green-600 flex items-center gap-2">
+                        ✓ Saved
+                        {lastSavedAt && (
+                            <span className="text-gray-500">
+                                at {lastSavedAt.toLocaleTimeString()}
+                            </span>
+                        )}
+                    </span>
+                );
+            case "error":
+                return (
+                    <span className="text-sm text-red-600 flex items-center gap-2">
+                        ⚠ Failed to save
+                    </span>
+                );
+            default:
+                return lastSavedAt ? (
+                    <span className="text-sm text-gray-500">
+                        Last saved at {lastSavedAt.toLocaleTimeString()}
+                    </span>
+                ) : null;
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+                <div className="max-w-5xl mx-auto px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900">
+                                {isEditMode
+                                    ? "Edit Job Post"
+                                    : "Create New Job Post"}
+                            </h1>
+                            <p className="text-sm text-gray-500 mt-1">
+                                Fill in the details to post your job
+                            </p>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            {getSaveStatusIndicator()}
+
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => navigate(ROUTES.JOB_POSTS)}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Progress Stepper */}
+                    <div className="mt-6">
+                        <div className="flex items-center justify-between">
+                            {FORM_STEPS.map((step, index) => (
+                                <React.Fragment key={step.id}>
+                                    <button
+                                        onClick={() => handleStepClick(step.id)}
+                                        className={clsx(
+                                            "flex items-center gap-3 transition-all",
+                                            step.id <= currentStep
+                                                ? "cursor-pointer"
+                                                : "cursor-not-allowed opacity-50"
+                                        )}
+                                    >
+                                        <div
+                                            className={clsx(
+                                                "w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all",
+                                                step.id === currentStep
+                                                    ? "bg-blue-600 text-white ring-4 ring-blue-100"
+                                                    : step.id < currentStep
+                                                      ? "bg-green-500 text-white"
+                                                      : "bg-gray-200 text-gray-500"
+                                            )}
+                                        >
+                                            {step.id < currentStep ? (
+                                                "✓"
+                                            ) : (
+                                                <span>{index + 1}</span>
+                                            )}
+                                        </div>
+                                        <div className="hidden sm:block text-left">
+                                            <div
+                                                className={clsx(
+                                                    "text-sm font-medium",
+                                                    step.id === currentStep
+                                                        ? "text-blue-600"
+                                                        : step.id < currentStep
+                                                          ? "text-green-600"
+                                                          : "text-gray-500"
+                                                )}
+                                            >
+                                                {step.label}
+                                            </div>
+                                        </div>
+                                    </button>
+
+                                    {index < FORM_STEPS.length - 1 && (
+                                        <div
+                                            className={clsx(
+                                                "flex-1 h-1 mx-2 rounded transition-all",
+                                                step.id < currentStep
+                                                    ? "bg-green-500"
+                                                    : "bg-gray-200"
+                                            )}
+                                        />
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Form Content */}
+            <div className="max-w-3xl mx-auto px-6 py-8">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                        {FORM_STEPS[currentStep].title}
+                    </h2>
+
+                    {renderStep()}
+
+                    {/* Navigation Buttons (for steps 1-3) */}
+                    {currentStep < FormStep.VISIBILITY && (
+                        <div className="flex justify-between mt-8 pt-6 border-t">
+                            <Button
+                                variant="outline"
+                                onClick={handlePrevious}
+                                disabled={currentStep === FormStep.BASICS}
+                            >
+                                ← Previous
+                            </Button>
+
+                            <Button variant="primary" onClick={handleNext}>
+                                Next →
+                            </Button>
+                        </div>
+                    )}
+
+                    {/* Step 4 has its own action buttons */}
+                </div>
+
+                {/* Helper Tips */}
+                {currentStep === FormStep.BASICS && (
+                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-800">
+                            💡 <strong>Pro tip:</strong> Be specific with your
+                            job title to attract the right candidates. Use
+                            common industry terms.
+                        </p>
+                    </div>
+                )}
+            </div>
+
+            {/* Preview Modal */}
+            <JobPostPreviewModal
+                isOpen={showPreview}
+                onClose={() => setShowPreview(false)}
+                formData={formData}
+            />
+        </div>
+    );
+};
+
+export default CreateJobPostPage;
