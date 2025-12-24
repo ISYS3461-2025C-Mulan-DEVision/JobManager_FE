@@ -2,8 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { HeadlessModal } from "@/components/headless";
 import { Input, Button, Alert, GoogleLogo } from "@/components/ui";
+import { PasswordRequirements } from "@/components/ui/PasswordRequirements";
 import { SignupPayload } from "./types.ts";
 import { validateSignupFields } from "./validation.ts";
+import { isPasswordValid } from "@/utils/passwordValidation";
 import httpClient from "@/services/httpClient";
 import AuthService from "../api/AuthService";
 import { storeAuthSession } from "../../../../services/authStorage";
@@ -389,41 +391,49 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
 
             {!isGoogleSignup && (
                 <>
-                    <Input
-                        label="Password *"
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        autoComplete="new-password"
-                        required
-                        placeholder="Create a strong password"
-                        value={values.password}
-                        onChange={handleFieldChange}
-                        onBlur={() => handleBlur("password")}
-                        onKeyUp={(event) =>
-                            setCapsLockOn(
-                                (event as any).getModifierState?.("CapsLock") ??
-                                    false
-                            )
-                        }
-                        error={getFieldError("password")}
-                        helperText={capsLockOn ? "Caps Lock is on." : undefined}
-                        endAdornment={
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword((prev) => !prev)}
-                                className="rounded-md px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"
-                                aria-label={
-                                    showPassword
-                                        ? "Hide password"
-                                        : "Show password"
-                                }
-                            >
-                                {showPassword ? "Hide" : "Show"}
-                            </button>
-                        }
-                        fullWidth
-                    />
+                    <div>
+                        <Input
+                            label="Password *"
+                            id="password"
+                            name="password"
+                            type={showPassword ? "text" : "password"}
+                            autoComplete="new-password"
+                            required
+                            placeholder="Create a strong password"
+                            value={values.password}
+                            onChange={handleFieldChange}
+                            onBlur={() => handleBlur("password")}
+                            onKeyUp={(event) =>
+                                setCapsLockOn(
+                                    (event as any).getModifierState?.("CapsLock") ??
+                                        false
+                                )
+                            }
+                            error={getFieldError("password")}
+                            helperText={capsLockOn ? "Caps Lock is on." : undefined}
+                            endAdornment={
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    className="rounded-md px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"
+                                    aria-label={
+                                        showPassword
+                                            ? "Hide password"
+                                            : "Show password"
+                                    }
+                                >
+                                    {showPassword ? "Hide" : "Show"}
+                                </button>
+                            }
+                            fullWidth
+                        />
+                        {values.password && (
+                            <PasswordRequirements
+                                password={values.password}
+                                className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+                            />
+                        )}
+                    </div>
 
                     <Input
                         label="Confirm password *"
@@ -508,7 +518,12 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                 size="md"
                 fullWidth
                 isLoading={isLoading}
-                disabled={isLoading || countryLoading}
+                disabled={
+                    isLoading || 
+                    countryLoading || 
+                    (!isGoogleSignup && !isPasswordValid(values.password)) ||
+                    (!isGoogleSignup && values.password !== values.confirmPassword)
+                }
             >
                 Create account
             </Button>
