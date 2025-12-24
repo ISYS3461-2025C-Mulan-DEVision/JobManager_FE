@@ -1,10 +1,14 @@
 import { SignupPayload } from "./types";
+import {
+    isPasswordValid,
+    getPasswordErrorMessage,
+} from "@/utils/passwordValidation";
 
 const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 const phoneRegex = /^[+]?[-0-9 ()]{7,}$/;
 
 export const validateSignupForm = (
-    values: SignupPayload,
+    values: SignupPayload
 ): Partial<Record<keyof SignupPayload, string>> => {
     const errors: Partial<Record<keyof SignupPayload, string>> = {};
 
@@ -21,8 +25,11 @@ export const validateSignupForm = (
     if (values.signupMethod !== "google") {
         if (!values.password) {
             errors.password = "Password is required";
-        } else if (values.password.length < 6) {
-            errors.password = "Password must be at least 6 characters";
+        } else if (!isPasswordValid(values.password)) {
+            const errorMessage = getPasswordErrorMessage(values.password);
+            if (errorMessage) {
+                errors.password = errorMessage;
+            }
         }
 
         if (!values.confirmPassword) {
@@ -32,30 +39,31 @@ export const validateSignupForm = (
         }
     }
 
-    if (!values.companyName) {
-        errors.companyName = "Company name is required";
-    }
+    // Company profile fields validation removed for initial signup
+    // if (!values.companyName) {
+    //     errors.companyName = "Company name is required";
+    // }
 
-    if (!values.phoneNumber) {
-        errors.phoneNumber = "Phone number is required";
-    } else if (!phoneRegex.test(values.phoneNumber)) {
-        errors.phoneNumber = "Enter a valid phone number";
-    }
+    // if (!values.phoneNumber) {
+    //     errors.phoneNumber = "Phone number is required";
+    // } else if (!phoneRegex.test(values.phoneNumber)) {
+    //     errors.phoneNumber = "Enter a valid phone number";
+    // }
 
-    if (!values.address) {
-        errors.address = "Detailed address is required";
-    }
+    // if (!values.address) {
+    //     errors.address = "Detailed address is required";
+    // }
 
-    if (!values.companyLogo) {
-        errors.companyLogo = "Company logo is required";
-    }
+    // if (!values.companyLogo) {
+    //     errors.companyLogo = "Company logo is required";
+    // }
 
     return errors;
 };
 
 export const validateSignupFields = (
     values: SignupPayload,
-    fields: (keyof SignupPayload)[],
+    fields: (keyof SignupPayload)[]
 ): Partial<Record<keyof SignupPayload, string>> => {
     const allErrors = validateSignupForm(values);
     const stepErrors: Partial<Record<keyof SignupPayload, string>> = {};

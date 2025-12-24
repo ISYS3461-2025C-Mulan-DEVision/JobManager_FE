@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { storeAuthSession } from "../../../../../services/authStorage";
+import CompanyService from "@/services/companyService";
 
 interface SsoLoginResult {
     success: boolean;
@@ -37,70 +38,118 @@ export const useSsoLogin = (): UseSsoLoginReturn => {
         const authProvider = searchParams.get("authProvider");
         const error = searchParams.get("error");
 
-        if (sso === "google") {
-            console.log("SSO Login Parameters:", {
-                sso,
-                success,
-                hasAccessToken: !!accessToken,
-                hasRefreshToken: !!refreshToken,
-                companyId,
-                email,
-                role,
-                authProvider,
-                error,
-                fullURL: window.location.href,
-            });
-            setIsProcessingSso(true);
-
-            if (
-                success === "true" &&
-                accessToken &&
-                refreshToken &&
-                companyId &&
-                email &&
-                role &&
-                authProvider
-            ) {
-                console.log("Storing auth session and navigating to dashboard");
-                // Successful SSO login - store tokens with user data
-                storeAuthSession({
-                    accessToken,
-                    refreshToken,
-                    tokenType: "Bearer",
-                    expiresIn: 86400, // 24 hours
+        const processSso = async () => {
+            if (sso === "google") {
+                console.log("SSO Login Parameters:", {
+                    sso,
+                    success,
+                    hasAccessToken: !!accessToken,
+                    hasRefreshToken: !!refreshToken,
                     companyId,
-                    email: decodeURIComponent(email),
+                    email,
                     role,
                     authProvider,
+                    error,
+                    fullURL: window.location.href,
                 });
+                setIsProcessingSso(true);
 
-                setSsoLoginResult({ success: true, error: null });
-                setHasProcessed(true);
-                setIsProcessingSso(false);
+                if (
+                    success === "true" &&
+                    accessToken &&
+                    refreshToken &&
+                    companyId &&
+                    email &&
+                    role &&
+                    authProvider
+                ) {
+                    console.log("Storing auth session");
+                    // Successful SSO login - store tokens with user data
+                    storeAuthSession({
+                        accessToken,
+                        refreshToken,
+                        tokenType: "Bearer",
+                        expiresIn: 86400, // 24 hours
+                        companyId,
+                        email: decodeURIComponent(email),
+                        role,
+                        authProvider,
+                    });
 
-                // Navigate directly without clearing params first
-                navigate("/dashboard", { replace: true });
-            } else if (success === "false" && error) {
-                console.log("SSO login failed:", error);
-                // Failed SSO login
-                setSsoLoginResult({
-                    success: false,
-                    error: decodeURIComponent(error),
-                });
+                    setSsoLoginResult({ success: true, error: null });
+                    setHasProcessed(true);
+                    setIsProcessingSso(false);
 
-                setHasProcessed(true);
-                setIsProcessingSso(false);
+                    // Check profile completion
+                    try {
+                        console.log(
+                            "Fetching company profile for ID:",
+                            companyId
+                        );
+                        const companyResponse =
+                            await CompanyService.getCompany(companyId);
+                        console.log(
+                            "Company profile response:",
+                            companyResponse
+                        );
 
-                // Clear URL params but stay on login page
-                const newParams = new URLSearchParams();
-                setSearchParams(newParams, { replace: true });
-            } else if (sso === "google") {
-                // If we have sso=google but missing required params, stop processing
-                console.log("SSO parameters incomplete");
-                setIsProcessingSso(false);
+                        if (companyResponse.success && companyResponse.data) {
+                            const company = companyResponse.data;
+                            console.log("Company data:", company);
+
+                            const isProfileIncomplete =
+                                !company.name ||
+                                !company.phone ||
+                                !company.streetAddress;
+                            console.log(
+                                "Is profile incomplete?",
+                                isProfileIncomplete
+                            );
+
+                            if (isProfileIncomplete) {
+                                console.log(
+                                    "Profile incomplete, navigating to complete-profile"
+                                );
+                                navigate("/complete-profile", {
+                                    replace: true,
+                                });
+                                return;
+                            }
+                        } else {
+                            console.warn(
+                                "Company response not successful or data missing"
+                            );
+                        }
+                    } catch (err) {
+                        console.error("Failed to check profile:", err);
+                    }
+
+                    // Navigate directly without clearing params first
+                    navigate("/dashboard", { replace: true });
+                } else if (success === "false" && error) {
+                    console.log("SSO login failed:", error);
+                    // Failed SSO login
+                    setSsoLoginResult({
+                        success: false,
+                        error: decodeURIComponent(error),
+                    });
+
+                    setHasProcessed(true);
+                    setIsProcessingSso(false);
+
+                    // Clear URL params but stay on login page
+                    const newParams = new URLSearchParams();
+                    setSearchParams(newParams, { replace: true });
+                } else if (sso === "google") {
+                    // If we have sso=google but missing required params, stop processing
+                    console.log("SSO parameters incomplete");
+                    setIsProcessingSso(false);
+                }
             }
-        }
-    }, [searchParams, setSearchParams, navigate, hasProcessed]);
+        };
+
+        processSso();
+    }, [searchParams, navigate, hasProcessed, setSearchParams]);
 
     const clearSsoResult = useCallback(() => {
         setSsoLoginResult(null);
@@ -112,5 +161,3 @@ export const useSsoLogin = (): UseSsoLoginReturn => {
         clearSsoResult,
     };
 };
-
-export default useSsoLogin;

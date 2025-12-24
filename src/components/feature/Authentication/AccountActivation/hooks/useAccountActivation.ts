@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { ActivationState } from "../types";
+import { ActivationState } from "../types.ts";
 
 export const useAccountActivation = () => {
     const [searchParams] = useSearchParams();
@@ -26,16 +26,12 @@ export const useAccountActivation = () => {
             }
 
             try {
-                console.log('Attempting to activate account...');
-
                 const response = await axios.post(
-                    `${process.env.VITE_API_URL || "http://localhost:8081"}/api/auth/activate`,
+                    `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api/auth/activate`,
                     {
                         token: token,
                     }
                 );
-
-                console.log('2. Attempting to activate account...');
 
                 if (response.data.success) {
                     setState({
