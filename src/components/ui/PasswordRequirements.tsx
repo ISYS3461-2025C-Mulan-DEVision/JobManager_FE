@@ -19,10 +19,7 @@ export const PasswordRequirements: React.FC<PasswordRequirementsProps> = ({
             </p>
             <ul className="space-y-1">
                 {requirements.map((req, index) => (
-                    <li
-                        key={index}
-                        className="flex items-center gap-2 text-xs"
-                    >
+                    <li key={index} className="flex items-center gap-2 text-xs">
                         {req.met ? (
                             <svg
                                 className="h-4 w-4 flex-shrink-0 text-green-600"

@@ -1,5 +1,8 @@
 import { SignupPayload } from "./types";
-import { isPasswordValid, getPasswordErrorMessage } from "@/utils/passwordValidation";
+import {
+    isPasswordValid,
+    getPasswordErrorMessage,
+} from "@/utils/passwordValidation";
 
 const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 const phoneRegex = /^[+]?[-0-9 ()]{7,}$/;
