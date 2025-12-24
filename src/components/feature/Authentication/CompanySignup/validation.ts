@@ -1,4 +1,5 @@
 import { SignupPayload } from "./types";
+import { isPasswordValid, getPasswordErrorMessage } from "@/utils/passwordValidation";
 
 const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 const phoneRegex = /^[+]?[-0-9 ()]{7,}$/;
@@ -21,8 +22,11 @@ export const validateSignupForm = (
     if (values.signupMethod !== "google") {
         if (!values.password) {
             errors.password = "Password is required";
-        } else if (values.password.length < 6) {
-            errors.password = "Password must be at least 6 characters";
+        } else if (!isPasswordValid(values.password)) {
+            const errorMessage = getPasswordErrorMessage(values.password);
+            if (errorMessage) {
+                errors.password = errorMessage;
+            }
         }
 
         if (!values.confirmPassword) {
