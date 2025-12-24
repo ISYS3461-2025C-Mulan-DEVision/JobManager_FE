@@ -65,3 +65,8 @@ export const getStoredUser = (): StoredUser | null => {
         return null;
     }
 };
+
+export const getCompanyId = (): string | null => {
+    const user = getStoredUser();
+    return user?.companyId || null;
+};

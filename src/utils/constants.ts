@@ -27,6 +27,10 @@ export const ROUTES = {
     REGISTER: "/register",
     DASHBOARD: "/dashboard",
     JOBS: "/jobs",
+    JOB_POSTS: "/job-posts",
+    JOB_POST_CREATE: "/job-posts/create",
+    JOB_POST_EDIT: "/job-posts/:id/edit",
+    JOB_POST_DETAIL: "/job-posts/:id",
     JOB_DETAIL: "/jobs/:id",
     PROFILE: "/profile",
     SETTINGS: "/settings",
@@ -34,10 +38,11 @@ export const ROUTES = {
 
 // Status
 export const JOB_STATUS = {
-    DRAFT: "draft",
-    PUBLISHED: "published",
-    CLOSED: "closed",
-    ARCHIVED: "archived",
+    DRAFT: "DRAFT",
+    PUBLISHED: "PUBLISHED",
+    CLOSED: "CLOSED",
+    ARCHIVED: "ARCHIVED",
+    PRIVATE: "PRIVATE",
 } as const;
 
 export const APPLICATION_STATUS = {
@@ -45,6 +50,48 @@ export const APPLICATION_STATUS = {
     REVIEWED: "reviewed",
     ACCEPTED: "accepted",
     REJECTED: "rejected",
+} as const;
+
+// Employment Types
+export const EMPLOYMENT_TYPES = {
+    FULL_TIME: "FULL_TIME",
+    PART_TIME: "PART_TIME",
+    CONTRACT: "CONTRACT",
+    INTERNSHIP: "INTERNSHIP",
+    FREELANCE: "FREELANCE",
+} as const;
+
+export const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
+    FULL_TIME: "Full-time",
+    PART_TIME: "Part-time",
+    CONTRACT: "Contract",
+    INTERNSHIP: "Internship",
+    FREELANCE: "Freelance",
+};
+
+// Salary Types (matching backend SalaryType enum)
+export const SALARY_TYPES = {
+    RANGE: "RANGE",
+    ABOUT: "ABOUT",
+    UP_TO: "UP_TO",
+    FROM: "FROM",
+    NEGOTIABLE: "NEGOTIABLE",
+} as const;
+
+export const SALARY_TYPE_LABELS: Record<string, string> = {
+    RANGE: "Range",
+    ABOUT: "About",
+    UP_TO: "Up to",
+    FROM: "From",
+    NEGOTIABLE: "Negotiable",
+};
+
+// Kafka Sync Status
+export const SYNC_STATUS = {
+    SYNCED: "SYNCED",
+    PENDING: "PENDING",
+    UPDATING: "UPDATING",
+    FAILED: "FAILED",
 } as const;
 
 // Error Messages

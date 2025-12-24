@@ -19,3 +19,4 @@ export * from "./SocialLink";
 export * from "./InfoCard";
 export * from "./PhoneInput";
 export * from "./PasswordRequirements";
+export * from "./Badge";
