@@ -68,11 +68,14 @@ export const validateCompensation = (
         }
     } else if (
         data.salaryType === SALARY_TYPES.ABOUT ||
-        data.salaryType === SALARY_TYPES.UP_TO ||
         data.salaryType === SALARY_TYPES.FROM
     ) {
         if (!data.salaryMin || parseFloat(data.salaryMin) <= 0) {
             errors.salaryMin = "Salary amount is required";
+        }
+    } else if (data.salaryType === SALARY_TYPES.UP_TO) {
+        if (!data.salaryMax || parseFloat(data.salaryMax) <= 0) {
+            errors.salaryMax = "Maximum salary is required";
         }
     }
 
@@ -80,9 +83,9 @@ export const validateCompensation = (
         errors.locationCity = "Location city is required";
     }
 
-    if (!data.countryId) {
-        errors.countryId = "Country is required";
-    }
+    // if (!data.countryId) {
+    //     errors.countryId = "Country is required";
+    // }
 
     return errors;
 };

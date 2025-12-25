@@ -17,15 +17,16 @@ export type SyncStatus = (typeof SYNC_STATUS)[keyof typeof SYNC_STATUS];
  * JobPost interface matching the database schema
  */
 export interface JobPost {
-    // Database fields
-    jobPostId: number; // bigint in DB
+    // Database fields (as returned from backend DTO)
+    id: string; // uuid - primary key from backend
+    jobPostId?: string; // optional alias for compatibility
     title: string;
     description: string;
     isPublished: boolean; // Maps to PUBLISHED status
     isPrivate: boolean; // Maps to PRIVATE status
     isFresher: boolean; // Whether accepting fresh graduates
     companyId: string; // uuid
-    countryId: string; // uuid
+    // countryId: string; // uuid
     locationCity: string;
     salaryMin: number | null; // numeric in DB
     salaryMax: number | null; // numeric in DB
@@ -37,7 +38,6 @@ export interface JobPost {
     updatedAt: string; // timestamp
 
     // Frontend computed/extended fields
-    id?: string; // Computed from jobPostId for compatibility
     status?: JobStatus; // Computed from isPublished + isPrivate
     employmentType?: EmploymentType; // May come from additional data
     location?: string; // Computed from locationCity
@@ -65,7 +65,7 @@ export interface CreateJobPostRequest {
     title: string;
     description: string;
     companyId: string;
-    countryId: string;
+    // countryId: string;
     locationCity: string;
     salaryMin?: number;
     salaryMax?: number;
@@ -74,6 +74,7 @@ export interface CreateJobPostRequest {
     isFresher: boolean;
     expiryAt: string; // ISO 8601 timestamp
     isPrivate?: boolean; // Default: false
+    employmentType?: EmploymentType; // Single employment type
 }
 
 /**
@@ -82,7 +83,7 @@ export interface CreateJobPostRequest {
 export interface UpdateJobPostRequest {
     title?: string;
     description?: string;
-    countryId?: string;
+    // countryId?: string;
     locationCity?: string;
     salaryMin?: number;
     salaryMax?: number;

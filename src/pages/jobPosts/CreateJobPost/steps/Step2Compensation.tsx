@@ -121,9 +121,9 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                         label="Maximum Salary *"
                         type="number"
                         placeholder="100000"
-                        value={formData.salaryMin}
-                        onChange={(e) => onChange("salaryMin", e.target.value)}
-                        error={errors.salaryMin}
+                        value={formData.salaryMax}
+                        onChange={(e) => onChange("salaryMax", e.target.value)}
+                        error={errors.salaryMax}
                         helperText="The highest salary offered"
                         fullWidth
                     />
@@ -218,9 +218,9 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                                 label: country.displayName,
                             })),
                         ]}
-                        value={formData.countryId}
-                        onChange={(e) => onChange("countryId", e.target.value)}
-                        error={errors.countryId || countryError || undefined}
+                        // value={formData.countryId}
+                        // onChange={(e) => onChange("countryId", e.target.value)}
+                        // error={errors.countryId || countryError || undefined}
                         disabled={countryLoading}
                         fullWidth
                     />

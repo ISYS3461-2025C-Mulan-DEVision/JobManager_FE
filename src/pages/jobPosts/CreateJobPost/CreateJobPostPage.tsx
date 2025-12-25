@@ -22,6 +22,9 @@ import { Step4Visibility } from "./steps/Step4Visibility";
 import { JobPostPreviewModal } from "./components/JobPostPreviewModal";
 import { ROUTES } from "@/utils/constants";
 import clsx from "clsx";
+import { createJobPost, publishJobPost } from "@/services/jobPostService";
+import { getCompanyId } from "@/services/authStorage";
+import { CreateJobPostRequest } from "@/types";
 
 const CreateJobPostPage: React.FC = () => {
     const navigate = useNavigate();
@@ -39,7 +42,7 @@ const CreateJobPostPage: React.FC = () => {
         salaryMax: "",
         salaryNote: "",
         locationCity: "",
-        countryId: "",
+        // countryId: "",
         description: "",
         technicalSkills: [],
         isPrivate: false,
@@ -73,6 +76,39 @@ const CreateJobPostPage: React.FC = () => {
     const loadJobPost = async (jobId: string) => {
         // TODO: Fetch job post from API
         console.log("Loading job post:", jobId);
+    };
+
+    /**
+     * Convert form data to API request format
+     */
+    const convertFormDataToRequest = (
+        data: JobPostFormData
+    ): CreateJobPostRequest => {
+        const companyId = getCompanyId();
+        if (!companyId) {
+            throw new Error("Company ID not found. Please log in again.");
+        }
+
+        // Convert date string to ISO 8601 datetime (end of day)
+        // Input: "2026-01-09" -> Output: "2026-01-09T23:59:59"
+        const expiryAtDateTime = data.expiryAt
+            ? `${data.expiryAt}T23:59:59`
+            : data.expiryAt;
+
+        return {
+            companyId,
+            title: data.title,
+            description: data.description,
+            locationCity: data.locationCity,
+            salaryType: data.salaryType,
+            salaryMin: data.salaryMin ? parseFloat(data.salaryMin) : undefined,
+            salaryMax: data.salaryMax ? parseFloat(data.salaryMax) : undefined,
+            salaryNote: data.salaryNote || undefined,
+            isFresher: data.isFresher,
+            isPrivate: data.isPrivate,
+            expiryAt: expiryAtDateTime,
+            employmentType: data.employmentTypes.length > 0 ? data.employmentTypes[0] : undefined,
+        };
     };
 
     const handleAutoSave = useCallback(async () => {
@@ -168,8 +204,8 @@ const CreateJobPostPage: React.FC = () => {
         setSaveStatus("saving");
 
         try {
-            // TODO: Call API to save as draft
-            await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+            const requestData = convertFormDataToRequest(formData);
+            await createJobPost(requestData);
 
             setSaveStatus("saved");
             setLastSavedAt(new Date());
@@ -181,10 +217,14 @@ const CreateJobPostPage: React.FC = () => {
             setTimeout(() => {
                 navigate(ROUTES.JOB_POSTS);
             }, 500);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to save draft:", error);
             setSaveStatus("error");
-            alert("Failed to save draft. Please try again.");
+            const errorMessage =
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to save draft. Please try again.";
+            alert(errorMessage);
         } finally {
             setIsSubmitting(false);
         }
@@ -204,8 +244,12 @@ const CreateJobPostPage: React.FC = () => {
         setSaveStatus("saving");
 
         try {
-            // TODO: Call API to create/update and publish job post
-            await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call
+            const requestData = convertFormDataToRequest(formData);
+            // First create the job post
+            const createdJobPost = await createJobPost(requestData);
+            
+            // Then immediately publish it
+            await publishJobPost(createdJobPost.id);
 
             setSaveStatus("saved");
 
@@ -214,10 +258,14 @@ const CreateJobPostPage: React.FC = () => {
 
             // Navigate back to job posts
             navigate(ROUTES.JOB_POSTS);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to publish:", error);
             setSaveStatus("error");
-            alert("Failed to publish job post. Please try again.");
+            const errorMessage =
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to publish job post. Please try again.";
+            alert(errorMessage);
         } finally {
             setIsSubmitting(false);
         }

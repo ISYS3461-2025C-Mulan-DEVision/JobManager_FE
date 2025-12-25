@@ -27,7 +27,7 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
     className,
 }) => {
     const isExpiring = isExpiringSoon(jobPost.expiryAt);
-    const jobId = jobPost.id || jobPost.jobPostId.toString();
+    const jobId = jobPost.id;
 
     return (
         <tr

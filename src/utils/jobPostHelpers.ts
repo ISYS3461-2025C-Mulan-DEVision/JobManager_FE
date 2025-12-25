@@ -8,8 +8,8 @@ import { JOB_STATUS, SYNC_STATUS } from "@/utils/constants";
 export const transformJobPost = (jobPost: JobPost): JobPost => {
     return {
         ...jobPost,
-        // Add computed id for compatibility
-        id: jobPost.jobPostId?.toString() || "",
+        // Add jobPostId alias for backward compatibility
+        jobPostId: jobPost.id,
 
         // Compute status from boolean flags
         status: getJobStatus(jobPost),
