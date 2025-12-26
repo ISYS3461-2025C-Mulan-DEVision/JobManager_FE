@@ -18,6 +18,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
     const pathname = location.pathname;
     const onLogin = pathname === "/login";
     const onRegister = pathname === "/register";
+    const logoTarget = user ? "/dashboard" : "/";
 
     // Listen for auth changes
     useEffect(() => {
@@ -89,7 +90,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                     Dashboard
                                 </Link>
                                 <Link
-                                    to="/jobs"
+                                    to="/job-posts"
                                     className="text-sm font-medium text-gray-700 hover:text-gray-900"
                                 >
                                     Job Posts
