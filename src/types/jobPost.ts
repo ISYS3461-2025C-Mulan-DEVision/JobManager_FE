@@ -26,7 +26,7 @@ export interface JobPost {
     isPrivate: boolean; // Maps to PRIVATE status
     isFresher: boolean; // Whether accepting fresh graduates
     companyId: string; // uuid
-    // countryId: string; // uuid
+    countryCode?: string; // Country code for location
     locationCity: string;
     salaryMin: number | null; // numeric in DB
     salaryMax: number | null; // numeric in DB
@@ -36,6 +36,7 @@ export interface JobPost {
     postedAt: string | null; // timestamp - when published
     createdAt: string; // timestamp
     updatedAt: string; // timestamp
+    skillIds?: string[]; // List of skill IDs associated with this job post
 
     // Frontend computed/extended fields
     status?: JobStatus; // Computed from isPublished + isPrivate
@@ -65,7 +66,7 @@ export interface CreateJobPostRequest {
     title: string;
     description: string;
     companyId: string;
-    // countryId: string;
+    countryCode?: string;
     locationCity: string;
     salaryMin?: number;
     salaryMax?: number;
@@ -75,6 +76,7 @@ export interface CreateJobPostRequest {
     expiryAt: string; // ISO 8601 timestamp
     isPrivate?: boolean; // Default: false
     employmentType?: EmploymentType; // Single employment type
+    skillIds?: string[]; // List of skill IDs
 }
 
 /**
@@ -83,7 +85,7 @@ export interface CreateJobPostRequest {
 export interface UpdateJobPostRequest {
     title?: string;
     description?: string;
-    // countryId?: string;
+    countryCode?: string;
     locationCity?: string;
     salaryMin?: number;
     salaryMax?: number;
@@ -93,4 +95,5 @@ export interface UpdateJobPostRequest {
     expiryAt?: string;
     isPublished?: boolean; // Publish/unpublish
     isPrivate?: boolean; // Make private/public
+    skillIds?: string[]; // List of skill IDs
 }

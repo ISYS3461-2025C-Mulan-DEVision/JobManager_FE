@@ -22,9 +22,14 @@ import { Step4Visibility } from "./steps/Step4Visibility";
 import { JobPostPreviewModal } from "./components/JobPostPreviewModal";
 import { ROUTES } from "@/utils/constants";
 import clsx from "clsx";
-import { createJobPost, publishJobPost } from "@/services/jobPostService";
+import {
+    createJobPost,
+    publishJobPost,
+    fetchJobPostById,
+    updateJobPost,
+} from "@/services/jobPostService";
 import { getCompanyId } from "@/services/authStorage";
-import { CreateJobPostRequest } from "@/types";
+import { CreateJobPostRequest, UpdateJobPostRequest, JobPost } from "@/types";
 
 const CreateJobPostPage: React.FC = () => {
     const navigate = useNavigate();
@@ -54,6 +59,7 @@ const CreateJobPostPage: React.FC = () => {
     const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
     const [showPreview, setShowPreview] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Auto-save draft every 30 seconds
     useEffect(() => {
@@ -73,9 +79,56 @@ const CreateJobPostPage: React.FC = () => {
         }
     }, [id, isEditMode]);
 
+    /**
+     * Convert JobPost API response to form data format
+     */
+    const convertJobPostToFormData = (jobPost: JobPost): JobPostFormData => {
+        // Extract date part from ISO datetime string (e.g., "2026-01-09T23:59:59" -> "2026-01-09")
+        const expiryDate = jobPost.expiryAt
+            ? jobPost.expiryAt.split("T")[0]
+            : "";
+
+        return {
+            title: jobPost.title,
+            employmentTypes: jobPost.employmentType
+                ? [jobPost.employmentType]
+                : [],
+            isFresher: jobPost.isFresher,
+            salaryType: jobPost.salaryType,
+            salaryMin:
+                jobPost.salaryMin !== null ? jobPost.salaryMin.toString() : "",
+            salaryMax:
+                jobPost.salaryMax !== null ? jobPost.salaryMax.toString() : "",
+            salaryNote: jobPost.salaryNote || "",
+            locationCity: jobPost.locationCity,
+            description: jobPost.description,
+            // TODO: Fetch actual skill names from skill service using jobPost.skillIds
+            // For now, skills will be lost on edit until skill service integration is complete
+            technicalSkills: [],
+            isPrivate: jobPost.isPrivate,
+            expiryAt: expiryDate,
+            isPublished: jobPost.isPublished,
+        };
+    };
+
     const loadJobPost = async (jobId: string) => {
-        // TODO: Fetch job post from API
-        console.log("Loading job post:", jobId);
+        setIsLoading(true);
+        try {
+            const jobPost = await fetchJobPostById(jobId);
+            const formData = convertJobPostToFormData(jobPost);
+            setFormData(formData);
+        } catch (error: any) {
+            console.error("Failed to load job post:", error);
+            const errorMessage =
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to load job post. Please try again.";
+            alert(errorMessage);
+            // Navigate back to job posts page on error
+            navigate(ROUTES.JOB_POSTS);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     /**
@@ -95,6 +148,10 @@ const CreateJobPostPage: React.FC = () => {
             ? `${data.expiryAt}T23:59:59`
             : data.expiryAt;
 
+        // TODO: Convert technicalSkills (names) to skillIds (UUIDs) using skill service
+        // Currently, skills are not being sent to the backend
+        // Need to integrate with skill service to map skill names to IDs
+
         return {
             companyId,
             title: data.title,
@@ -107,7 +164,11 @@ const CreateJobPostPage: React.FC = () => {
             isFresher: data.isFresher,
             isPrivate: data.isPrivate,
             expiryAt: expiryAtDateTime,
-            employmentType: data.employmentTypes.length > 0 ? data.employmentTypes[0] : undefined,
+            employmentType:
+                data.employmentTypes.length > 0
+                    ? data.employmentTypes[0]
+                    : undefined,
+            // skillIds: undefined, // TODO: Map technicalSkills to skillIds
         };
     };
 
@@ -204,14 +265,37 @@ const CreateJobPostPage: React.FC = () => {
         setSaveStatus("saving");
 
         try {
-            const requestData = convertFormDataToRequest(formData);
-            await createJobPost(requestData);
+            if (isEditMode && id) {
+                // Update existing job post
+                const updateData: UpdateJobPostRequest = {
+                    title: formData.title,
+                    description: formData.description,
+                    locationCity: formData.locationCity,
+                    salaryType: formData.salaryType,
+                    salaryMin: formData.salaryMin
+                        ? parseFloat(formData.salaryMin)
+                        : undefined,
+                    salaryMax: formData.salaryMax
+                        ? parseFloat(formData.salaryMax)
+                        : undefined,
+                    salaryNote: formData.salaryNote || undefined,
+                    isFresher: formData.isFresher,
+                    isPrivate: formData.isPrivate,
+                    expiryAt: formData.expiryAt
+                        ? `${formData.expiryAt}T23:59:59`
+                        : undefined,
+                };
+                await updateJobPost(id, updateData);
+                alert("Job post updated successfully!");
+            } else {
+                // Create new job post
+                const requestData = convertFormDataToRequest(formData);
+                await createJobPost(requestData);
+                alert("Draft saved successfully!");
+            }
 
             setSaveStatus("saved");
             setLastSavedAt(new Date());
-
-            // Show success message
-            alert("Draft saved successfully!");
 
             // Navigate back to job posts
             setTimeout(() => {
@@ -244,17 +328,42 @@ const CreateJobPostPage: React.FC = () => {
         setSaveStatus("saving");
 
         try {
-            const requestData = convertFormDataToRequest(formData);
-            // First create the job post
-            const createdJobPost = await createJobPost(requestData);
-            
-            // Then immediately publish it
-            await publishJobPost(createdJobPost.id);
+            if (isEditMode && id) {
+                // Update existing job post and publish
+                const updateData: UpdateJobPostRequest = {
+                    title: formData.title,
+                    description: formData.description,
+                    locationCity: formData.locationCity,
+                    salaryType: formData.salaryType,
+                    salaryMin: formData.salaryMin
+                        ? parseFloat(formData.salaryMin)
+                        : undefined,
+                    salaryMax: formData.salaryMax
+                        ? parseFloat(formData.salaryMax)
+                        : undefined,
+                    salaryNote: formData.salaryNote || undefined,
+                    isFresher: formData.isFresher,
+                    isPrivate: formData.isPrivate,
+                    expiryAt: formData.expiryAt
+                        ? `${formData.expiryAt}T23:59:59`
+                        : undefined,
+                };
+                await updateJobPost(id, updateData);
+
+                // Publish the updated job post
+                await publishJobPost(id);
+                alert("Job post updated and published successfully! 🎉");
+            } else {
+                // Create new job post and publish
+                const requestData = convertFormDataToRequest(formData);
+                const createdJobPost = await createJobPost(requestData);
+
+                // Then immediately publish it
+                await publishJobPost(createdJobPost.id);
+                alert("Job post published successfully! 🎉");
+            }
 
             setSaveStatus("saved");
-
-            // Show success message
-            alert("Job post published successfully! 🎉");
 
             // Navigate back to job posts
             navigate(ROUTES.JOB_POSTS);
@@ -348,6 +457,18 @@ const CreateJobPostPage: React.FC = () => {
                 ) : null;
         }
     };
+
+    // Show loading spinner while fetching job post data
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <Spinner className="w-12 h-12 mx-auto mb-4" />
+                    <p className="text-gray-600">Loading job post...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">

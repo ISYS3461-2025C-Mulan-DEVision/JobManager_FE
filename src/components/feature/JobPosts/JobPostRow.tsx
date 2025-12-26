@@ -15,7 +15,6 @@ interface JobPostRowProps {
     jobPost: JobPost;
     onView?: (id: string) => void;
     onEdit?: (id: string) => void;
-    onArchive?: (id: string) => void;
     className?: string;
 }
 
@@ -23,7 +22,6 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
     jobPost,
     onView,
     onEdit,
-    onArchive,
     className,
 }) => {
     const isExpiring = isExpiringSoon(jobPost.expiryAt);
@@ -128,14 +126,6 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
                         className="text-gray-600 hover:text-gray-700 hover:bg-gray-100"
                     >
                         Edit
-                    </Button>
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => onArchive?.(jobId)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                        Archive
                     </Button>
                 </div>
             </td>

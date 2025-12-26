@@ -1,6 +1,7 @@
 import { Route } from "react-router-dom";
 import { JobPostsPage } from "@/pages/jobPosts";
 import { CreateJobPostPage } from "@/pages/jobPosts/CreateJobPost";
+import JobPostDetailPage from "@/pages/jobPosts/JobPostDetailPage";
 import { ROUTES } from "@/utils";
 
 /**
@@ -23,6 +24,9 @@ export const jobRoutes = [
         path={ROUTES.JOB_POST_EDIT}
         element={<CreateJobPostPage />}
     />,
-    // Future routes can be added here:
-    // <Route key="job-post-detail" path={ROUTES.JOB_POST_DETAIL} element={<JobPostDetailPage />} />,
+    <Route
+        key="job-post-detail"
+        path={ROUTES.JOB_POST_DETAIL}
+        element={<JobPostDetailPage />}
+    />,
 ];

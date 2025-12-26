@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { JobPost, JobStatus, EmploymentType } from "@/types";
-import { JOB_STATUS, EMPLOYMENT_TYPES, EMPLOYMENT_TYPE_LABELS, ROUTES } from "@/utils/constants";
+import {
+    JOB_STATUS,
+    EMPLOYMENT_TYPES,
+    EMPLOYMENT_TYPE_LABELS,
+    ROUTES,
+} from "@/utils/constants";
 import { fetchJobPosts, archiveJobPost } from "@/services/jobPostService";
 import { Button, Spinner } from "@/components/ui";
 import { HeadlessTabs, TabItem } from "@/components/headless";
@@ -185,7 +190,8 @@ const JobPostsPage: React.FC = () => {
                                 ) as EmploymentType[]
                             )
                                 .filter(
-                                    (type) => type !== EMPLOYMENT_TYPES.FREELANCE
+                                    (type) =>
+                                        type !== EMPLOYMENT_TYPES.FREELANCE
                                 )
                                 .map((type) => (
                                     <button

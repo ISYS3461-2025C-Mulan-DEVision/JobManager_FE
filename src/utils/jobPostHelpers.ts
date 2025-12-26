@@ -27,15 +27,23 @@ export const transformJobPost = (jobPost: JobPost): JobPost => {
 
 /**
  * Determine job status from database boolean flags
+ * Logic:
+ * - Draft: Not yet published (isPublished = false)
+ * - Private: Published but private (isPublished = true, isPrivate = true)
+ * - Published: Published and public (isPublished = true, isPrivate = false)
  */
 export const getJobStatus = (jobPost: JobPost): JobStatus => {
+    // First check if it's published at all
+    if (!jobPost.isPublished) {
+        return JOB_STATUS.DRAFT;
+    }
+    
+    // If published, check visibility
     if (jobPost.isPrivate) {
         return JOB_STATUS.PRIVATE;
     }
-    if (jobPost.isPublished) {
-        return JOB_STATUS.PUBLISHED;
-    }
-    return JOB_STATUS.DRAFT;
+    
+    return JOB_STATUS.PUBLISHED;
 };
 
 /**
