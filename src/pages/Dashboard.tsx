@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { KPICard } from "../components/feature/Dashboard/KPICard";
 import {
     JobPostsTable,
@@ -15,55 +16,161 @@ import {
 } from "../components/feature/Dashboard/NotificationsCard";
 import { Button } from "../components/ui/Button/Button";
 import DashboardLayout from "../layout/DashboardLayout";
+import { fetchJobPosts } from "@/services/jobPostService";
+import { JobPost } from "@/types";
+import { formatSalary } from "@/utils/jobPostHelpers";
+import { EMPLOYMENT_TYPE_LABELS, ROUTES } from "@/utils/constants";
 
 const Dashboard: React.FC = () => {
+    const navigate = useNavigate();
+
     // Mock Data
     const [premiumStatus] = useState<
         "FREE" | "PREMIUM" | "EXPIRING" | "EXPIRED"
     >("EXPIRING");
 
-    const kpis = {
-        activeJobs: 12,
-        totalApplications: 145,
-        newApplications: 8,
-        unreadNotifications: 3,
+    // State for real job posts
+    const [jobPosts, setJobPosts] = useState<JobPostSummary[]>([]);
+    const [allJobPosts, setAllJobPosts] = useState<JobPost[]>([]);
+    const [isLoadingJobs, setIsLoadingJobs] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Load job posts on mount
+    useEffect(() => {
+        loadJobPosts();
+    }, []);
+
+    const loadJobPosts = async () => {
+        try {
+            setIsLoadingJobs(true);
+            setError(null);
+            
+            // Fetch more data for trend calculation
+            const response = await fetchJobPosts({ page: 0, pageSize: 100 });
+            setAllJobPosts(response.data);
+            
+            // Get top 5 for display
+            const displayPosts = response.data.slice(0, 5);
+            
+            // Transform JobPost to JobPostSummary
+            const summaries: JobPostSummary[] = displayPosts.map((job: JobPost) => {
+                // Map JobStatus to JobPostSummary status
+                let status: "PUBLISHED" | "DRAFT" | "EXPIRED" = "DRAFT";
+                if (job.status === "PUBLISHED" || job.status === "PRIVATE") {
+                    status = "PUBLISHED";
+                } else if (job.status === "DRAFT") {
+                    status = "DRAFT";
+                } else if (job.status === "CLOSED" || job.status === "ARCHIVED") {
+                    status = "EXPIRED";
+                }
+                
+                // Map SyncStatus to propagationStatus
+                let propagationStatus: "SYNCED" | "PENDING" | "FAILED" | undefined = undefined;
+                if (job.syncStatus === "SYNCED") {
+                    propagationStatus = "SYNCED";
+                } else if (job.syncStatus === "PENDING" || job.syncStatus === "UPDATING") {
+                    propagationStatus = "PENDING";
+                } else if (job.syncStatus === "FAILED") {
+                    propagationStatus = "FAILED";
+                }
+                
+                return {
+                    id: job.id,
+                    title: job.title,
+                    status: status,
+                    employmentType: job.employmentType 
+                        ? EMPLOYMENT_TYPE_LABELS[job.employmentType] 
+                        : "Not specified",
+                    salary: formatSalary(
+                        job.salaryMin,
+                        job.salaryMax,
+                        job.salaryType,
+                        job.salaryNote
+                    ),
+                    applicationsCount: job.applicationsCount || 0,
+                    expiryDate: job.expiryAt,
+                    lastUpdated: job.updatedAt,
+                    propagationStatus: propagationStatus,
+                };
+            });
+            
+            setJobPosts(summaries);
+        } catch (err) {
+            console.error("Error fetching job posts:", err);
+            setError("Failed to load job posts");
+            setJobPosts([]);
+        } finally {
+            setIsLoadingJobs(false);
+        }
     };
 
-    const jobPosts: JobPostSummary[] = [
-        {
-            id: "1",
-            title: "Senior Frontend Engineer",
-            status: "PUBLISHED",
-            employmentType: "Full-time",
-            salary: "$120k - $150k",
-            applicationsCount: 45,
-            expiryDate: "2025-01-15",
-            lastUpdated: "2024-12-15",
-            propagationStatus: "SYNCED",
-        },
-        {
-            id: "2",
-            title: "Backend Developer (Java)",
-            status: "PUBLISHED",
-            employmentType: "Contract",
-            salary: "$80/hr",
-            applicationsCount: 12,
-            expiryDate: "2025-01-20",
-            lastUpdated: "2024-12-16",
-            propagationStatus: "SYNCED",
-        },
-        {
-            id: "3",
-            title: "Product Designer",
-            status: "DRAFT",
-            employmentType: "Full-time",
-            salary: "Negotiable",
-            applicationsCount: 0,
-            expiryDate: "2025-02-01",
-            lastUpdated: "2024-12-17",
-            propagationStatus: "PENDING",
-        },
-    ];
+    // Calculate trends based on historical data
+    const calculateTrends = () => {
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+        // Current period (last 30 days)
+        const currentPeriodJobs = allJobPosts.filter(
+            (job) => new Date(job.createdAt) >= thirtyDaysAgo
+        );
+        
+        // Previous period (30-60 days ago)
+        const previousPeriodJobs = allJobPosts.filter(
+            (job) => {
+                const createdDate = new Date(job.createdAt);
+                return createdDate >= sixtyDaysAgo && createdDate < thirtyDaysAgo;
+            }
+        );
+
+        // Active jobs trend
+        const currentActiveJobs = allJobPosts.filter(
+            (job) => job.status === "PUBLISHED"
+        ).length;
+        const previousActiveJobs = allJobPosts.filter(
+            (job) => job.status === "PUBLISHED" && new Date(job.createdAt) < thirtyDaysAgo
+        ).length;
+        
+        const activeJobsDiff = currentActiveJobs - previousActiveJobs;
+        const activeJobsTrend = activeJobsDiff > 0 ? "up" : activeJobsDiff < 0 ? "down" : "neutral";
+
+        // Applications trend (sum of all applications)
+        const currentApplications = currentPeriodJobs.reduce(
+            (sum, job) => sum + (job.applicationsCount || 0),
+            0
+        );
+        const previousApplications = previousPeriodJobs.reduce(
+            (sum, job) => sum + (job.applicationsCount || 0),
+            0
+        );
+        
+        const applicationsDiff = currentApplications - previousApplications;
+        const applicationsPercent = previousApplications > 0 
+            ? Math.round((applicationsDiff / previousApplications) * 100)
+            : 0;
+        const applicationsTrend = applicationsDiff > 0 ? "up" : applicationsDiff < 0 ? "down" : "neutral";
+
+        return {
+            activeJobs: {
+                trend: activeJobsTrend as "up" | "down" | "neutral",
+                value: Math.abs(activeJobsDiff).toString(),
+            },
+            applications: {
+                trend: applicationsTrend as "up" | "down" | "neutral",
+                value: `${Math.abs(applicationsPercent)}%`,
+            },
+        };
+    };
+
+    const trends = calculateTrends();
+
+    // Calculate KPIs from real data
+    const kpis = {
+        activeJobs: allJobPosts.filter(jp => jp.status === "PUBLISHED").length,
+        totalApplications: allJobPosts.reduce((sum, jp) => sum + (jp.applicationsCount || 0), 0),
+        newApplications: 0, // TODO: Calculate from recent applications
+        unreadNotifications: 3, // TODO: Fetch from notifications API
+    };
 
     const applications: ApplicationSummary[] = [
         {
@@ -136,7 +243,7 @@ const Dashboard: React.FC = () => {
                         Overview of your hiring pipeline
                     </p>
                 </div>
-                <Button onClick={() => console.log("Create Job")}>
+                <Button onClick={() => navigate(ROUTES.JOB_POST_CREATE)}>
                     + Create Job Post
                 </Button>
             </div>
@@ -154,31 +261,31 @@ const Dashboard: React.FC = () => {
                     title="Active Jobs"
                     value={kpis.activeJobs}
                     subValue="posts"
-                    trend="up"
-                    trendValue="2"
-                    onClick={() => console.log("View Jobs")}
+                    trend={trends.activeJobs.trend}
+                    trendValue={trends.activeJobs.value}
+                    onClick={() => navigate(ROUTES.JOB_POSTS)}
+                    isLoading={isLoadingJobs}
                 />
                 <KPICard
                     title="Total Applications"
                     value={kpis.totalApplications}
                     subValue="candidates"
-                    trend="up"
-                    trendValue="12%"
+                    trend={trends.applications.trend}
+                    trendValue={trends.applications.value}
                     onClick={() => console.log("View Applications")}
+                    isLoading={isLoadingJobs}
                 />
                 <KPICard
                     title="New Applications"
                     value={kpis.newApplications}
                     subValue="last 24h"
-                    trend="neutral"
-                    trendValue="0%"
                     active={true} // Highlight this as it's actionable
                     onClick={() => console.log("View New")}
+                    isLoading={isLoadingJobs}
                 />
                 <KPICard
                     title="Unread Notifications"
                     value={kpis.unreadNotifications}
-                    trend="down" // Good thing if it goes down? Or maybe just neutral.
                     onClick={() => console.log("View Notifications")}
                 />
             </div>
@@ -192,15 +299,24 @@ const Dashboard: React.FC = () => {
                             <h2 className="text-lg font-semibold text-gray-900">
                                 Job Posts Overview
                             </h2>
-                            <button className="text-sm text-blue-600 hover:text-blue-800">
+                            <button 
+                                onClick={() => navigate(ROUTES.JOB_POSTS)}
+                                className="text-sm text-blue-600 hover:text-blue-800"
+                            >
                                 View All Jobs
                             </button>
                         </div>
+                        {error && (
+                            <div className="text-red-600 text-sm mb-4">
+                                {error}
+                            </div>
+                        )}
                         <JobPostsTable
                             data={jobPosts}
-                            onView={(id) => console.log("View", id)}
-                            onEdit={(id) => console.log("Edit", id)}
+                            onView={(id) => navigate(`/job-posts/${id}`)}
+                            onEdit={(id) => navigate(`/job-posts/${id}/edit`)}
                             onArchive={(id) => console.log("Archive", id)}
+                            isLoading={isLoadingJobs}
                         />
                     </section>
                 </div>
