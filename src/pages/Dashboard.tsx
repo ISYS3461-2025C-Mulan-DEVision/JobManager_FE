@@ -44,56 +44,71 @@ const Dashboard: React.FC = () => {
         try {
             setIsLoadingJobs(true);
             setError(null);
-            
+
             // Fetch more data for trend calculation
             const response = await fetchJobPosts({ page: 0, pageSize: 100 });
             setAllJobPosts(response.data);
-            
+
             // Get top 5 for display
             const displayPosts = response.data.slice(0, 5);
-            
+
             // Transform JobPost to JobPostSummary
-            const summaries: JobPostSummary[] = displayPosts.map((job: JobPost) => {
-                // Map JobStatus to JobPostSummary status
-                let status: "PUBLISHED" | "DRAFT" | "EXPIRED" = "DRAFT";
-                if (job.status === "PUBLISHED" || job.status === "PRIVATE") {
-                    status = "PUBLISHED";
-                } else if (job.status === "DRAFT") {
-                    status = "DRAFT";
-                } else if (job.status === "CLOSED" || job.status === "ARCHIVED") {
-                    status = "EXPIRED";
+            const summaries: JobPostSummary[] = displayPosts.map(
+                (job: JobPost) => {
+                    // Map JobStatus to JobPostSummary status
+                    let status: "PUBLISHED" | "DRAFT" | "EXPIRED" = "DRAFT";
+                    if (
+                        job.status === "PUBLISHED" ||
+                        job.status === "PRIVATE"
+                    ) {
+                        status = "PUBLISHED";
+                    } else if (job.status === "DRAFT") {
+                        status = "DRAFT";
+                    } else if (
+                        job.status === "CLOSED" ||
+                        job.status === "ARCHIVED"
+                    ) {
+                        status = "EXPIRED";
+                    }
+
+                    // Map SyncStatus to propagationStatus
+                    let propagationStatus:
+                        | "SYNCED"
+                        | "PENDING"
+                        | "FAILED"
+                        | undefined = undefined;
+                    if (job.syncStatus === "SYNCED") {
+                        propagationStatus = "SYNCED";
+                    } else if (
+                        job.syncStatus === "PENDING" ||
+                        job.syncStatus === "UPDATING"
+                    ) {
+                        propagationStatus = "PENDING";
+                    } else if (job.syncStatus === "FAILED") {
+                        propagationStatus = "FAILED";
+                    }
+
+                    return {
+                        id: job.id,
+                        title: job.title,
+                        status: status,
+                        employmentType: job.employmentType
+                            ? EMPLOYMENT_TYPE_LABELS[job.employmentType]
+                            : "Not specified",
+                        salary: formatSalary(
+                            job.salaryMin,
+                            job.salaryMax,
+                            job.salaryType,
+                            job.salaryNote
+                        ),
+                        applicationsCount: job.applicationsCount || 0,
+                        expiryDate: job.expiryAt,
+                        lastUpdated: job.updatedAt,
+                        propagationStatus: propagationStatus,
+                    };
                 }
-                
-                // Map SyncStatus to propagationStatus
-                let propagationStatus: "SYNCED" | "PENDING" | "FAILED" | undefined = undefined;
-                if (job.syncStatus === "SYNCED") {
-                    propagationStatus = "SYNCED";
-                } else if (job.syncStatus === "PENDING" || job.syncStatus === "UPDATING") {
-                    propagationStatus = "PENDING";
-                } else if (job.syncStatus === "FAILED") {
-                    propagationStatus = "FAILED";
-                }
-                
-                return {
-                    id: job.id,
-                    title: job.title,
-                    status: status,
-                    employmentType: job.employmentType 
-                        ? EMPLOYMENT_TYPE_LABELS[job.employmentType] 
-                        : "Not specified",
-                    salary: formatSalary(
-                        job.salaryMin,
-                        job.salaryMax,
-                        job.salaryType,
-                        job.salaryNote
-                    ),
-                    applicationsCount: job.applicationsCount || 0,
-                    expiryDate: job.expiryAt,
-                    lastUpdated: job.updatedAt,
-                    propagationStatus: propagationStatus,
-                };
-            });
-            
+            );
+
             setJobPosts(summaries);
         } catch (err) {
             console.error("Error fetching job posts:", err);
@@ -107,32 +122,35 @@ const Dashboard: React.FC = () => {
     // Calculate trends based on historical data
     const calculateTrends = () => {
         const now = new Date();
-        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const thirtyDaysAgo = new Date(
+            now.getTime() - 30 * 24 * 60 * 60 * 1000
+        );
         const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
         // Current period (last 30 days)
         const currentPeriodJobs = allJobPosts.filter(
             (job) => new Date(job.createdAt) >= thirtyDaysAgo
         );
-        
+
         // Previous period (30-60 days ago)
-        const previousPeriodJobs = allJobPosts.filter(
-            (job) => {
-                const createdDate = new Date(job.createdAt);
-                return createdDate >= sixtyDaysAgo && createdDate < thirtyDaysAgo;
-            }
-        );
+        const previousPeriodJobs = allJobPosts.filter((job) => {
+            const createdDate = new Date(job.createdAt);
+            return createdDate >= sixtyDaysAgo && createdDate < thirtyDaysAgo;
+        });
 
         // Active jobs trend
         const currentActiveJobs = allJobPosts.filter(
             (job) => job.status === "PUBLISHED"
         ).length;
         const previousActiveJobs = allJobPosts.filter(
-            (job) => job.status === "PUBLISHED" && new Date(job.createdAt) < thirtyDaysAgo
+            (job) =>
+                job.status === "PUBLISHED" &&
+                new Date(job.createdAt) < thirtyDaysAgo
         ).length;
-        
+
         const activeJobsDiff = currentActiveJobs - previousActiveJobs;
-        const activeJobsTrend = activeJobsDiff > 0 ? "up" : activeJobsDiff < 0 ? "down" : "neutral";
+        const activeJobsTrend =
+            activeJobsDiff > 0 ? "up" : activeJobsDiff < 0 ? "down" : "neutral";
 
         // Applications trend (sum of all applications)
         const currentApplications = currentPeriodJobs.reduce(
@@ -143,12 +161,18 @@ const Dashboard: React.FC = () => {
             (sum, job) => sum + (job.applicationsCount || 0),
             0
         );
-        
+
         const applicationsDiff = currentApplications - previousApplications;
-        const applicationsPercent = previousApplications > 0 
-            ? Math.round((applicationsDiff / previousApplications) * 100)
-            : 0;
-        const applicationsTrend = applicationsDiff > 0 ? "up" : applicationsDiff < 0 ? "down" : "neutral";
+        const applicationsPercent =
+            previousApplications > 0
+                ? Math.round((applicationsDiff / previousApplications) * 100)
+                : 0;
+        const applicationsTrend =
+            applicationsDiff > 0
+                ? "up"
+                : applicationsDiff < 0
+                  ? "down"
+                  : "neutral";
 
         return {
             activeJobs: {
@@ -166,8 +190,12 @@ const Dashboard: React.FC = () => {
 
     // Calculate KPIs from real data
     const kpis = {
-        activeJobs: allJobPosts.filter(jp => jp.status === "PUBLISHED").length,
-        totalApplications: allJobPosts.reduce((sum, jp) => sum + (jp.applicationsCount || 0), 0),
+        activeJobs: allJobPosts.filter((jp) => jp.status === "PUBLISHED")
+            .length,
+        totalApplications: allJobPosts.reduce(
+            (sum, jp) => sum + (jp.applicationsCount || 0),
+            0
+        ),
         newApplications: 0, // TODO: Calculate from recent applications
         unreadNotifications: 3, // TODO: Fetch from notifications API
     };
@@ -299,7 +327,7 @@ const Dashboard: React.FC = () => {
                             <h2 className="text-lg font-semibold text-gray-900">
                                 Job Posts Overview
                             </h2>
-                            <button 
+                            <button
                                 onClick={() => navigate(ROUTES.JOB_POSTS)}
                                 className="text-sm text-blue-600 hover:text-blue-800"
                             >
