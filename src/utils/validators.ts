@@ -68,9 +68,7 @@ export const validators = {
     },
 };
 
-// ============================================================================
-// Company-specific validators (consistent with backend validation)
-// ============================================================================
+// Company-specific validators
 
 // Country codes with names
 export interface CountryCode {
@@ -79,7 +77,7 @@ export interface CountryCode {
     flag?: string;
 }
 
-export const COUNTRY_CODES: CountryCode[] = [
+export const COUNTRY_DIALING_CODES: CountryCode[] = [
     { code: "1", name: "USA/Canada" },
     { code: "7", name: "Russia" },
     { code: "20", name: "Egypt" },
@@ -137,7 +135,7 @@ export const COUNTRY_CODES: CountryCode[] = [
 ];
 
 // Valid international dial codes (for backward compatibility)
-const VALID_DIAL_CODES = COUNTRY_CODES.map((c) => c.code);
+const VALID_DIAL_CODES = COUNTRY_DIALING_CODES.map((c) => c.code);
 
 // Valid company size ranges
 const VALID_COMPANY_SIZES = [

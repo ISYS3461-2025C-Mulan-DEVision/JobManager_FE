@@ -42,5 +42,17 @@ export const API_ENDPOINTS = {
         LIST: "/companies",
         GET: (id: string) => `/companies/${id}`,
         UPDATE: (id: string) => `/companies/${id}`,
+        // Profile endpoints
+        PROFILE: (id: string) => `/companies/${id}/profile`,
+        // Media endpoints
+        MEDIA: {
+            BASE: (id: string) => `/companies/${id}/media`,
+            LOGO: (id: string) => `/companies/${id}/media/logo`,
+            BANNER: (id: string) => `/companies/${id}/media/banner`,
+            GET: (companyId: string, mediaId: string) => `/companies/${companyId}/media/${mediaId}`,
+            REORDER: (id: string) => `/companies/${id}/media/reorder`,
+        },
+        // Dial codes
+        DIAL_CODES: "/companies/dial-codes",
     },
 } as const;
