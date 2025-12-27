@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Button, Input, Alert } from "@/components/ui";
 import { HeadlessModal } from "@/components/headless";
-import type { ChangeEmailPayload, ChangePasswordPayload } from "../types";
+import AuthService from "@/components/feature/Authentication/api/AuthService";
+import { getStoredUser } from "@/services/authStorage";
+import type { ChangeEmailPayload } from "../types";
 
 // Change Email Modal
 interface ChangeEmailModalProps {
@@ -43,7 +45,7 @@ const ChangeEmailModal: React.FC<ChangeEmailModalProps> = ({ isOpen, onClose, on
         <HeadlessModal
             isOpen={isOpen}
             onClose={handleClose}
-            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            overlayClassName="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
             className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4"
         >
             <form onSubmit={handleSubmit}>
@@ -90,53 +92,34 @@ const ChangeEmailModal: React.FC<ChangeEmailModalProps> = ({ isOpen, onClose, on
     );
 };
 
-// Change Password Modal
+// Change Password Modal - Sends reset password email
 interface ChangePasswordModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (data: ChangePasswordPayload) => Promise<void>;
+    userEmail: string;
 }
 
-const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose, onSubmit }) => {
-    const [currentPassword, setCurrentPassword] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose, userEmail }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (newPassword !== confirmPassword) {
-            setError("New passwords do not match");
-            return;
-        }
-
-        if (newPassword.length < 8) {
-            setError("New password must be at least 8 characters long");
-            return;
-        }
-
+    const handleSendResetEmail = async () => {
         setIsLoading(true);
         setError(null);
         try {
-            await onSubmit({ currentPassword, newPassword, confirmPassword });
-            onClose();
-            setCurrentPassword("");
-            setNewPassword("");
-            setConfirmPassword("");
+            await AuthService.forgotPasswordCompany({ email: userEmail });
+            setSuccess(true);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to change password");
+            setError(err instanceof Error ? err.message : "Failed to send reset email");
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleClose = () => {
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
         setError(null);
+        setSuccess(false);
         onClose();
     };
 
@@ -144,57 +127,58 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
         <HeadlessModal
             isOpen={isOpen}
             onClose={handleClose}
-            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            overlayClassName="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
             className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4"
         >
-            <form onSubmit={handleSubmit}>
-                <div className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
+            <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
 
-                    {error && (
-                        <Alert type="error" className="mb-4">
-                            {error}
-                        </Alert>
-                    )}
+                {error && (
+                    <Alert type="error" className="mb-4">
+                        {error}
+                    </Alert>
+                )}
 
+                {success ? (
                     <div className="space-y-4">
-                        <Input
-                            label="Current Password"
-                            type="password"
-                            value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
-                            required
-                            fullWidth
-                        />
-                        <Input
-                            label="New Password"
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            helperText="Must be at least 8 characters"
-                            required
-                            fullWidth
-                        />
-                        <Input
-                            label="Confirm New Password"
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                            fullWidth
-                        />
+                        <Alert type="success">
+                            Password reset email sent! Please check your inbox at <strong>{userEmail}</strong> and follow the instructions to reset your password.
+                        </Alert>
+                        <p className="text-sm text-gray-500">
+                            If you don't see the email, please check your spam folder.
+                        </p>
                     </div>
-                </div>
+                ) : (
+                    <div className="space-y-4">
+                        <p className="text-sm text-gray-600">
+                            To change your password, we'll send a password reset link to your email address:
+                        </p>
+                        <p className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                            {userEmail}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                            Click the link in the email to set a new password for your account.
+                        </p>
+                    </div>
+                )}
+            </div>
 
-                <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-                    <Button type="button" variant="ghost" onClick={handleClose}>
-                        Cancel
+            <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+                {success ? (
+                    <Button onClick={handleClose}>
+                        Done
                     </Button>
-                    <Button type="submit" isLoading={isLoading}>
-                        Change Password
-                    </Button>
-                </div>
-            </form>
+                ) : (
+                    <>
+                        <Button type="button" variant="ghost" onClick={handleClose}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSendResetEmail} isLoading={isLoading}>
+                            Send Reset Email
+                        </Button>
+                    </>
+                )}
+            </div>
         </HeadlessModal>
     );
 };
@@ -205,24 +189,15 @@ export const AccountSecurityPanel: React.FC = () => {
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-    // Get current email from storage (in real app, this would come from auth context)
-    const currentEmail = localStorage.getItem("user_email") || "company@example.com";
+    // Get current user from storage
+    const storedUser = getStoredUser();
+    const currentEmail = storedUser?.email || "company@example.com";
 
-    // TODO: Implement actual API calls when Auth Service endpoints are ready
+    // TODO: Implement actual API calls when change email endpoint is ready
     const handleChangeEmail = async (data: ChangeEmailPayload): Promise<void> => {
         console.log("Change email request:", data);
-        // TODO: Call Auth Service API
-        // await authService.changeEmail(data);
-        setSuccessMessage("Email change request sent. Please check your new email for verification.");
+        // Email change will be implemented in the future
         throw new Error("Email change functionality is not yet implemented. Please contact support.");
-    };
-
-    const handleChangePassword = async (data: ChangePasswordPayload): Promise<void> => {
-        console.log("Change password request:", data);
-        // TODO: Call Auth Service API
-        // await authService.changePassword(data);
-        setSuccessMessage("Password changed successfully!");
-        throw new Error("Password change functionality is not yet implemented. Please contact support.");
     };
 
     return (
@@ -310,7 +285,7 @@ export const AccountSecurityPanel: React.FC = () => {
             <ChangePasswordModal
                 isOpen={showPasswordModal}
                 onClose={() => setShowPasswordModal(false)}
-                onSubmit={handleChangePassword}
+                userEmail={currentEmail}
             />
         </div>
     );

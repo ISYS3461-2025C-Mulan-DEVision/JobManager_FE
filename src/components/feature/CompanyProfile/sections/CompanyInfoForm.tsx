@@ -16,6 +16,7 @@ import {
     InfoCard,
     Select,
     PhoneInput,
+    Badge,
 } from "@/components/ui";
 import { HeadlessModal } from "@/components/headless";
 import {
@@ -34,12 +35,14 @@ import {
 import { useCompanyInfoForm } from "../hooks/useCompanyInfoForm";
 import { companyValidators, COMPANY_SIZE_OPTIONS } from "@/utils/validators";
 import type { CompanyProfileFormData } from "../types";
+import { checkIsPremium } from "@/components/feature/Subscription/api/SubscriptionService";
 
 // Banner with Logo Component
 interface BannerWithLogoProps {
     bannerUrl?: string;
     logoUrl?: string;
     companyName?: string;
+    isPremium?: boolean;
     onBannerUpload: (file: File) => void;
     onLogoUpload: (file: File) => void;
 }
@@ -48,6 +51,7 @@ const BannerWithLogo: React.FC<BannerWithLogoProps> = ({
     bannerUrl,
     logoUrl,
     companyName,
+    isPremium = false,
     onBannerUpload,
     onLogoUpload,
 }) => {
@@ -177,9 +181,14 @@ const BannerWithLogo: React.FC<BannerWithLogoProps> = ({
                 {/* Company Name */}
                 {companyName && (
                     <div className="pb-2">
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            {companyName}
-                        </h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-2xl font-bold text-gray-900">
+                                {companyName}
+                            </h1>
+                            {isPremium && (
+                                <Badge variant="gradient"><i>Premium</i></Badge>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>
@@ -245,12 +254,12 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
                     <h3 className="text-lg font-semibold text-gray-900">
                         Edit Company Information
                     </h3>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                        leftIcon={<X className="w-5 h-5" />}
+                    />
                 </div>
 
                 <div className="space-y-4">
@@ -391,12 +400,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     <h3 className="text-lg font-semibold text-gray-900">
                         Edit Profile Details
                     </h3>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                        leftIcon={<X className="w-5 h-5" />}
+                    />
                 </div>
 
                 <div className="space-y-4">
@@ -527,12 +536,12 @@ const EditAboutModal: React.FC<EditAboutModalProps> = ({
                     <h3 className="text-lg font-semibold text-gray-900">
                         Edit About
                     </h3>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                        leftIcon={<X className="w-5 h-5" />}
+                    />
                 </div>
 
                 <div className="space-y-4">
@@ -619,6 +628,7 @@ export const CompanyInfoForm: React.FC = () => {
     const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+    const [isPremium, setIsPremium] = useState(false);
 
     // Modal handlers
     const openCompanyModal = useCallback(() => setIsCompanyModalOpen(true), []);
@@ -633,6 +643,21 @@ export const CompanyInfoForm: React.FC = () => {
     );
     const openAboutModal = useCallback(() => setIsAboutModalOpen(true), []);
     const closeAboutModal = useCallback(() => setIsAboutModalOpen(false), []);
+
+    // Fetch premium status
+    useEffect(() => {
+        const fetchPremiumStatus = async () => {
+            try {
+                const premiumStatus = await checkIsPremium();
+                setIsPremium(premiumStatus.data ?? false);
+            } catch (error) {
+                console.error("Failed to fetch premium status:", error);
+                setIsPremium(false);
+            }
+        };
+
+        fetchPremiumStatus();
+    }, []);
 
     if (isLoading) {
         return (
@@ -664,12 +689,13 @@ export const CompanyInfoForm: React.FC = () => {
                 bannerUrl={profile?.bannerUrl}
                 logoUrl={profile?.logoUrl}
                 companyName={formData.name}
+                isPremium={isPremium}
                 onBannerUpload={handleBannerUpload}
                 onLogoUpload={handleLogoUpload}
             />
 
             {/* Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Left Sidebar: Metadata */}
                 <div className="space-y-6">
                     {/* At a Glance Card */}
@@ -709,7 +735,7 @@ export const CompanyInfoForm: React.FC = () => {
                     </InfoCard>
 
                     {/* Connect Card */}
-                    <InfoCard title="Connect" variant="subtle">
+                    <InfoCard title="Connect">
                         {hasLinks && (
                             <div className="flex gap-3 mb-4">
                                 {formData.websiteUrl && (
@@ -768,16 +794,17 @@ export const CompanyInfoForm: React.FC = () => {
                     </InfoCard>
                 </div>
 
-                {/* Right Content: Narrative */}
-                <div className="lg:col-span-2 space-y-8">
+                {/* Right Content */}
+                <div className="lg:col-span-3 space-y-8">
                     <div className="relative group">
                         {/* Edit button for About section */}
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={openAboutModal}
-                            className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-gray-100 hover:bg-gray-200 rounded-full z-10"
-                        >
-                            <Pencil className="w-4 h-4 text-gray-600" />
-                        </button>
+                            leftIcon={<Pencil className="w-4 h-4" />}
+                            className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity rounded-full z-10 p-2"
+                        />
 
                         {/* About Us Section */}
                         <section>

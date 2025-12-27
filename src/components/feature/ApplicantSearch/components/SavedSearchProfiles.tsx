@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Select, Button } from "@/components/ui";
+import { Select, Button, Badge } from "@/components/ui";
 import { HeadlessModal } from "@/components/headless";
+import { Plus, Save, Pencil, Trash2 } from "lucide-react";
 import type { SearchProfileResponse, SearchState } from "../types";
 
 interface SavedSearchProfilesProps {
@@ -109,125 +110,54 @@ export const SavedSearchProfiles: React.FC<SavedSearchProfilesProps> = ({
             />
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-2">
-                {selectedProfile && (
-                    <>
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={onSaveChanges}
-                            disabled={!isPremium || isSaving}
-                            className="flex items-center gap-1"
-                        >
-                            <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                                />
-                            </svg>
-                            Save
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIsEditNameModalOpen(true)}
-                            disabled={!isPremium || isSaving}
-                            className="flex items-center gap-1"
-                        >
-                            <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M15.232 5.232l3.536 3.536M9 13l6.536-6.536a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L9 13z"
-                                />
-                            </svg>
-                            Edit Name
-                        </Button>
-                        <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => setIsDeleteModalOpen(true)}
-                            disabled={!isPremium || isSaving}
-                            className="flex items-center gap-1"
-                        >
-                            <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                            </svg>
-                            Delete
-                        </Button>
-                    </>
-                )}
-            </div>
+            {selectedProfile && (
+                <div className="grid grid-cols-2 gap-2">
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={onSaveChanges}
+                        disabled={!isPremium || isSaving}
+                        leftIcon={<Save className="w-4 h-4" />}
+                        fullWidth
+                        className="col-span-2"
+                    >
+                        Save
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditNameModalOpen(true)}
+                        disabled={!isPremium || isSaving}
+                        leftIcon={<Pencil className="w-4 h-4" />}
+                        fullWidth
+                    >
+                        Edit Name
+                    </Button>
+                    <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => setIsDeleteModalOpen(true)}
+                        disabled={!isPremium || isSaving}
+                        leftIcon={<Trash2 className="w-4 h-4" />}
+                        fullWidth
+                    >
+                        Delete
+                    </Button>
+                </div>
+            )}
 
             {/* Save As New Button */}
             <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={openSaveModal}
                 disabled={!isPremium || isSaving}
                 fullWidth
-                className="flex items-center justify-center gap-1"
+                leftIcon={<Plus className="w-4 h-4" />}
+                badge={!isPremium ? <Badge variant="gradient"><i>Premium</i></Badge> : undefined}
             >
-                <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                </svg>
                 Save As New
             </Button>
-
-            {/* Premium Banner */}
-            {!isPremium && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <p className="text-sm text-amber-800">
-                        <svg
-                            className="inline w-4 h-4 mr-1"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                            />
-                        </svg>
-                        Upgrade to Premium to save search profiles
-                    </p>
-                </div>
-            )}
 
             {/* Editing indicator */}
             {selectedProfile && (

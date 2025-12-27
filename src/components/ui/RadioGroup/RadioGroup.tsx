@@ -71,7 +71,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
                                 onChange={() => handleChange(option.value)}
                                 disabled={isDisabled}
                                 className={clsx(
-                                    "w-4 h-4 rounded border-gray-300 text-blue-600",
+                                    "w-4 h-4 rounded border-gray-300 accent-blue-600",
                                     "focus:ring-2 focus:ring-blue-500 focus:ring-offset-0",
                                     "transition-colors cursor-pointer",
                                     error && "border-red-500",
