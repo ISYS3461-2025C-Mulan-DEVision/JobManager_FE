@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Select, Button } from "@/components/ui";
 import { HeadlessModal } from "@/components/headless";
 import type { SearchProfileResponse, SearchState } from "../types";
@@ -11,7 +11,7 @@ interface SavedSearchProfilesProps {
     searchState: SearchState;
     onSelectProfile: (profileId: string | null) => void;
     onSaveAsNew: (name: string) => Promise<void>;
-    onSaveChanges: () => Promise<void>;
+    onSaveChanges: (data: { profileName: string }) => Promise<void>;
     onDelete: () => Promise<void>;
 }
 
@@ -29,8 +29,17 @@ export const SavedSearchProfiles: React.FC<SavedSearchProfilesProps> = ({
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
     const [newProfileName, setNewProfileName] = useState("");
+    const [editProfileName, setEditProfileName] = useState(
+        selectedProfile?.profileName || ""
+    );
     const [nameError, setNameError] = useState("");
+    const [editNameError, setEditNameError] = useState("");
+
+    useEffect(() => {
+        setEditProfileName(selectedProfile?.profileName || "");
+    }, [selectedProfile?.profileName]);
 
     const profileOptions = [
         { value: "", label: "Select profile" },
@@ -56,6 +65,21 @@ export const SavedSearchProfiles: React.FC<SavedSearchProfilesProps> = ({
         setIsModalOpen(false);
         setNewProfileName("");
         setNameError("");
+    };
+
+    const handleEditName = async () => {
+        if (!editProfileName.trim()) {
+            setEditNameError("Profile name is required");
+            return;
+        }
+        if (editProfileName.length > 255) {
+            setEditNameError("Profile name must be less than 255 characters");
+            return;
+        }
+        if (!selectedProfile) return;
+        await onSaveChanges({ profileName: editProfileName.trim() });
+        setIsEditNameModalOpen(false);
+        setEditNameError("");
     };
 
     const handleDelete = async () => {
@@ -109,6 +133,28 @@ export const SavedSearchProfiles: React.FC<SavedSearchProfilesProps> = ({
                                 />
                             </svg>
                             Save
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsEditNameModalOpen(true)}
+                            disabled={!isPremium || isSaving}
+                            className="flex items-center gap-1"
+                        >
+                            <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15.232 5.232l3.536 3.536M9 13l6.536-6.536a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L9 13z"
+                                />
+                            </svg>
+                            Edit Name
                         </Button>
                         <Button
                             variant="danger"
@@ -228,6 +274,51 @@ export const SavedSearchProfiles: React.FC<SavedSearchProfilesProps> = ({
                     <Button
                         variant="primary"
                         onClick={handleSaveAsNew}
+                        disabled={isSaving}
+                    >
+                        {isSaving ? "Saving..." : "Save"}
+                    </Button>
+                </div>
+            </HeadlessModal>
+
+            {/* Edit Name Modal */}
+            <HeadlessModal
+                isOpen={isEditNameModalOpen}
+                onClose={() => setIsEditNameModalOpen(false)}
+                overlayClassName="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+            >
+                <h2 className="text-lg font-semibold mb-4">Edit Profile Name</h2>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Profile Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        value={editProfileName}
+                        onChange={(e) => {
+                            setEditProfileName(e.target.value);
+                            setEditNameError("");
+                        }}
+                        placeholder="Enter new profile name"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        maxLength={255}
+                    />
+                    {editNameError && (
+                        <p className="text-sm text-red-600 mt-1">{editNameError}</p>
+                    )}
+                </div>
+                <div className="flex justify-end gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsEditNameModalOpen(false)}
+                        disabled={isSaving}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={handleEditName}
                         disabled={isSaving}
                     >
                         {isSaving ? "Saving..." : "Save"}

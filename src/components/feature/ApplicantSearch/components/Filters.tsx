@@ -41,8 +41,6 @@ export const Filters: React.FC<FiltersProps> = ({
 }) => {
     const [countries, setCountries] = useState<Country[]>([]);
     const [isLoadingCountries, setIsLoadingCountries] = useState(true);
-    const [localMinSalary, setLocalMinSalary] = useState(searchState.minSalary || 0);
-    const [localMaxSalary, setLocalMaxSalary] = useState(searchState.maxSalary || 10000);
 
     // Load countries on mount
     useEffect(() => {
@@ -61,12 +59,6 @@ export const Filters: React.FC<FiltersProps> = ({
         loadCountries();
     }, []);
 
-    // Update local salary values when searchState changes
-    useEffect(() => {
-        setLocalMinSalary(searchState.minSalary || 0);
-        setLocalMaxSalary(searchState.maxSalary || 10000);
-    }, [searchState.minSalary, searchState.maxSalary]);
-
     const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
         onFilterChange({ countryCode: value || undefined });
@@ -83,11 +75,12 @@ export const Filters: React.FC<FiltersProps> = ({
         onFilterChange({ highestDegree: value as EducationDegree | undefined });
     };
 
-    const handleSalaryApply = () => {
-        onFilterChange({
-            minSalary: localMinSalary,
-            maxSalary: localMaxSalary,
-        });
+    const handleSalaryMinChange = (value: number) => {
+        onFilterChange({ minSalary: value });
+    };
+
+    const handleSalaryMaxChange = (value: number) => {
+        onFilterChange({ maxSalary: value });
     };
 
     const handleSkillAdd = (skillId: string) => {
@@ -171,11 +164,11 @@ export const Filters: React.FC<FiltersProps> = ({
                     min={0}
                     max={10000}
                     step={100}
-                    minValue={localMinSalary}
-                    maxValue={localMaxSalary}
-                    onMinChange={setLocalMinSalary}
-                    onMaxChange={setLocalMaxSalary}
-                    onApply={handleSalaryApply}
+                    minGap={100}
+                    minValue={searchState.minSalary ?? 0}
+                    maxValue={searchState.maxSalary ?? 10000}
+                    onMinChange={handleSalaryMinChange}
+                    onMaxChange={handleSalaryMaxChange}
                     formatValue={(v) => v.toLocaleString()}
                 />
             </div>

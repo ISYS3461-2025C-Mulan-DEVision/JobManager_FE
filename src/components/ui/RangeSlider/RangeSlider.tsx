@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 
 export interface RangeSliderProps {
@@ -14,6 +14,7 @@ export interface RangeSliderProps {
     className?: string;
     showInputs?: boolean;
     onApply?: () => void;
+    minGap?: number;
 }
 
 export const RangeSlider: React.FC<RangeSliderProps> = ({
@@ -29,22 +30,36 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
     className,
     showInputs = true,
     onApply,
+    minGap = 0,
 }) => {
     const [localMin, setLocalMin] = useState(minValue);
     const [localMax, setLocalMax] = useState(maxValue);
 
+    // Sync local state when external props change (e.g., when loading a profile)
+    useEffect(() => {
+        setLocalMin(minValue);
+    }, [minValue]);
+
+    useEffect(() => {
+        setLocalMax(maxValue);
+    }, [maxValue]);
+
     const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = Number(e.target.value);
-        if (value <= localMax) {
-            setLocalMin(value);
-        }
+        // Enforce minGap: min value cannot exceed (localMax - minGap)
+        const maxAllowed = localMax - minGap;
+        const newValue = value <= maxAllowed ? value : maxAllowed;
+        setLocalMin(newValue);
+        onMinChange(newValue);
     };
 
     const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = Number(e.target.value);
-        if (value >= localMin) {
-            setLocalMax(value);
-        }
+        // Enforce minGap: max value cannot go below (localMin + minGap)
+        const minAllowed = localMin + minGap;
+        const newValue = value >= minAllowed ? value : minAllowed;
+        setLocalMax(newValue);
+        onMaxChange(newValue);
     };
 
     // Input change handlers - available for future use with number inputs
