@@ -59,7 +59,6 @@ export const EMPLOYMENT_TYPES = {
     PART_TIME: "PART_TIME",
     CONTRACT: "CONTRACT",
     INTERNSHIP: "INTERNSHIP",
-    FREELANCE: "FREELANCE",
     FRESHER: "FRESHER",
 } as const;
 
@@ -68,23 +67,22 @@ export const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
     PART_TIME: "Part-time",
     CONTRACT: "Contract",
     INTERNSHIP: "Internship",
-    FREELANCE: "Freelance",
     FRESHER: "Fresher",
 };
 
 // Education Degrees (for applicant search)
 export const EDUCATION_DEGREES = {
-    OTHER: "OTHER",
     BACHELOR: "BACHELOR",
     MASTER: "MASTER",
     DOCTORATE: "DOCTORATE",
+    OTHER: "OTHER",
 } as const;
 
 export const EDUCATION_DEGREE_LABELS: Record<string, string> = {
-    OTHER: "Other",
     BACHELOR: "Bachelor",
     MASTER: "Master",
     DOCTORATE: "Doctorate",
+    OTHER: "Other",
 };
 
 // Education degree hierarchy (for filtering: minimum degree)

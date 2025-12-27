@@ -111,7 +111,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                     Job Posts
                                 </Link>
                                 <Link
-                                    to="/applicants"
+                                    to="/applicant-search"
                                     className="text-sm font-medium text-gray-700 hover:text-gray-900"
                                 >
                                     Applicant Search

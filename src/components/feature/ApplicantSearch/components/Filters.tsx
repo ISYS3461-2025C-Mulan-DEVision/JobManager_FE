@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Select, Checkbox, RangeSlider, TagInput } from "@/components/ui";
+import { Select, Checkbox, RangeSlider, TagInput, RadioGroup } from "@/components/ui";
+import type { RadioOption } from "@/components/ui";
 import type { Tag } from "@/components/ui/TagInput";
 import {
     EMPLOYMENT_TYPES,
@@ -78,11 +79,8 @@ export const Filters: React.FC<FiltersProps> = ({
         onFilterChange({ employmentTypes: newTypes });
     };
 
-    const handleDegreeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value as EducationDegree;
-        onFilterChange({
-            highestDegree: searchState.highestDegree === value ? undefined : value,
-        });
+    const handleDegreeChange = (value: string | undefined) => {
+        onFilterChange({ highestDegree: value as EducationDegree | undefined });
     };
 
     const handleSalaryApply = () => {
@@ -106,6 +104,13 @@ export const Filters: React.FC<FiltersProps> = ({
         { value: "", label: "Choose country" },
         ...countries.map((c) => ({ value: c.code, label: c.displayName })),
     ];
+
+    const educationDegreeOptions: RadioOption[] = Object.entries(EDUCATION_DEGREES).map(
+        ([, value]) => ({
+            value: value,
+            label: EDUCATION_DEGREE_LABELS[value],
+        })
+    );
 
     return (
         <div className="space-y-6">
@@ -149,26 +154,14 @@ export const Filters: React.FC<FiltersProps> = ({
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">
                     Education Degree
                 </h3>
-                <div className="space-y-2">
-                    {Object.entries(EDUCATION_DEGREES).map(([key, value]) => (
-                        <label
-                            key={key}
-                            className="flex items-center gap-2 cursor-pointer"
-                        >
-                            <input
-                                type="checkbox"
-                                value={value}
-                                checked={searchState.highestDegree === value}
-                                onChange={handleDegreeChange}
-                                disabled={disabled}
-                                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700">
-                                {EDUCATION_DEGREE_LABELS[value]}
-                            </span>
-                        </label>
-                    ))}
-                </div>
+                <RadioGroup
+                    name="education-degree"
+                    options={educationDegreeOptions}
+                    value={searchState.highestDegree}
+                    onChange={handleDegreeChange}
+                    disabled={disabled}
+                    allowDeselect
+                />
             </div>
 
             {/* Salary Range */}

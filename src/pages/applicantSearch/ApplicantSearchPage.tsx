@@ -5,13 +5,17 @@ import {
     SearchBar,
     ApplicantList,
     ApplicantDetailsModal,
-} from "./components";
+} from "@/components/feature/ApplicantSearch/components";
 import {
     useApplicantSearch,
     useSearchProfiles,
     useSubscription,
-} from "./hooks";
-import type { Applicant, SearchState, UpdateSearchProfileRequest } from "./types";
+} from "@/components/feature/ApplicantSearch/hooks";
+import type {
+    Applicant,
+    SearchState,
+    UpdateSearchProfileRequest,
+} from "@/components/feature/ApplicantSearch/types";
 
 export const ApplicantSearchPage: React.FC = () => {
     // Hooks
@@ -196,3 +200,5 @@ export const ApplicantSearchPage: React.FC = () => {
         </div>
     );
 };
+
+export default ApplicantSearchPage;

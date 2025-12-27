@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import ApplicantSearchService from "../api/ApplicantSearchService";
-import type { SubscriptionStatusResponse } from "../types";
+import { SubscriptionService } from "@/components/feature/Subscription";
+import type { SubscriptionStatusResponse } from "@/components/feature/Subscription";
 
 interface UseSubscriptionReturn {
     isPremium: boolean;
@@ -21,7 +21,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
         setError(null);
 
         try {
-            const response = await ApplicantSearchService.getSubscriptionStatus();
+            const response = await SubscriptionService.getSubscriptionStatus();
             if (response.success && response.data) {
                 setSubscription(response.data);
                 setIsPremium(response.data.isPremium);

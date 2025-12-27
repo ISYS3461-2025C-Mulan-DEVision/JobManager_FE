@@ -80,13 +80,13 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
                 </label>
             )}
 
-            <div className="relative pt-1">
+            <div className="relative pt-1 h-6">
                 {/* Track background */}
-                <div className="h-2 bg-gray-200 rounded-full" />
+                <div className="absolute top-2 left-0 right-0 h-2 bg-gray-200 rounded-full" />
 
                 {/* Active range highlight */}
                 <div
-                    className="absolute top-1 h-2 bg-blue-500 rounded-full"
+                    className="absolute top-2 h-2 bg-blue-500 rounded-full"
                     style={{
                         left: `${leftPercent}%`,
                         width: `${widthPercent}%`,
@@ -101,7 +101,8 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
                     step={step}
                     value={localMin}
                     onChange={handleMinChange}
-                    className="absolute top-0 w-full h-4 appearance-none bg-transparent pointer-events-auto cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md"
+                    className="absolute top-0 w-full h-6 appearance-none bg-transparent cursor-pointer z-20 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-md"
+                    style={{ pointerEvents: "none" }}
                 />
 
                 {/* Max slider */}
@@ -112,7 +113,8 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
                     step={step}
                     value={localMax}
                     onChange={handleMaxChange}
-                    className="absolute top-0 w-full h-4 appearance-none bg-transparent pointer-events-auto cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md"
+                    className="absolute top-0 w-full h-6 appearance-none bg-transparent cursor-pointer z-10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-md"
+                    style={{ pointerEvents: "none" }}
                 />
             </div>
 

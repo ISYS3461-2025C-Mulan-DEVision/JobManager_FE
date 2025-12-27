@@ -1,15 +1,12 @@
 // Applicant Search Types
 
-import { EDUCATION_DEGREES, EMPLOYMENT_TYPES, SUBSCRIPTION_STATUS, APPLICANT_SORT_OPTIONS } from "@/utils/constants";
+import { EDUCATION_DEGREES, EMPLOYMENT_TYPES, APPLICANT_SORT_OPTIONS } from "@/utils/constants";
 
 // Education Degree enum
 export type EducationDegree = typeof EDUCATION_DEGREES[keyof typeof EDUCATION_DEGREES];
 
 // Employment Type enum
 export type EmploymentType = typeof EMPLOYMENT_TYPES[keyof typeof EMPLOYMENT_TYPES];
-
-// Subscription Status enum
-export type SubscriptionStatus = typeof SUBSCRIPTION_STATUS[keyof typeof SUBSCRIPTION_STATUS];
 
 // Sort options
 export type ApplicantSortOption = typeof APPLICANT_SORT_OPTIONS[keyof typeof APPLICANT_SORT_OPTIONS];
@@ -51,16 +48,6 @@ export const DEFAULT_SEARCH_STATE: SearchState = {
 export interface SavedProfileState {
     selectedProfileId?: string;
     isEditing: boolean;
-}
-
-// ============================================================
-// Subscription State (Read-only from backend)
-// ============================================================
-
-export interface SubscriptionState {
-    isPremium: boolean;
-    status: SubscriptionStatus;
-    endAt: string | null;
 }
 
 // ============================================================
@@ -124,14 +111,6 @@ export interface ActiveSearchProfileResponse {
     highestDegree?: EducationDegree;
     employmentTypes: EmploymentType[];
     skillIds: string[];
-}
-
-// Subscription Status Response
-export interface SubscriptionStatusResponse {
-    companyId: string;
-    status: SubscriptionStatus;
-    endAt: string | null;
-    isPremium: boolean;
 }
 
 // ============================================================

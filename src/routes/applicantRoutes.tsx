@@ -1,7 +1,7 @@
 import { Route } from "react-router-dom";
 import { ROUTES } from "@/utils";
 import { ProtectedRoute } from "@/components/common/ProtectedRoute";
-import { ApplicantSearchPage } from "@/components/feature/ApplicantSearch";
+import ApplicantSearchPage from "@/pages/applicantSearch";
 
 export const applicantRoutes = [
     <Route

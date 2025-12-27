@@ -7,25 +7,19 @@ import type {
     CreateSearchProfileRequest,
     UpdateSearchProfileRequest,
     UpdateStatusRequest,
-    SubscriptionStatusResponse,
     ApplicantSearchResponse,
     SearchState,
     Country,
 } from "../types";
 
-// ============================================================
 // Helper Functions
-// ============================================================
-
 const getCompanyId = (): string => {
     const user = getStoredUser();
     return user?.companyId || "";
 };
 
-// ============================================================
 // Applicant Search API
 // TODO: Search endpoint not finalized - applicant attributes may change
-// ============================================================
 
 export const searchApplicants = async (
     searchState: SearchState
@@ -70,10 +64,7 @@ export const searchApplicants = async (
     return response.data;
 };
 
-// ============================================================
 // Search Profile APIs (Premium Feature)
-// ============================================================
-
 export const createSearchProfile = async (
     request: Omit<CreateSearchProfileRequest, "companyId">
 ): Promise<ApiResponse<SearchProfileResponse>> => {
@@ -149,45 +140,15 @@ export const updateSearchProfileStatus = async (
     return response.data;
 };
 
-// ============================================================
-// Subscription APIs
-// ============================================================
-
-export const getSubscriptionStatus = async (): Promise<
-    ApiResponse<SubscriptionStatusResponse>
-> => {
-    const companyId = getCompanyId();
-    const response = await httpClient.get<ApiResponse<SubscriptionStatusResponse>>(
-        API_ENDPOINTS.SUBSCRIPTIONS.STATUS(companyId)
-    );
-    return response.data;
-};
-
-export const checkIsPremium = async (): Promise<ApiResponse<boolean>> => {
-    const companyId = getCompanyId();
-    const response = await httpClient.get<ApiResponse<boolean>>(
-        API_ENDPOINTS.SUBSCRIPTIONS.IS_PREMIUM(companyId)
-    );
-    return response.data;
-};
-
-// ============================================================
 // Countries API (from auth service)
-// ============================================================
-
-export const getCountries = async (): Promise<
-    ApiResponse<Country[]>
-> => {
+export const getCountries = async (): Promise<ApiResponse<Country[]>> => {
     const response = await httpClient.get<ApiResponse<Country[]>>(
         "/auth/countries"
     );
     return response.data;
 };
 
-// ============================================================
 // Export as service object
-// ============================================================
-
 const ApplicantSearchService = {
     // Search
     searchApplicants,
@@ -199,9 +160,6 @@ const ApplicantSearchService = {
     getCompanySearchProfiles,
     getCompanyActiveSearchProfiles,
     updateSearchProfileStatus,
-    // Subscription
-    getSubscriptionStatus,
-    checkIsPremium,
     // Countries
     getCountries,
 };

@@ -75,11 +75,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                         key={option.value}
                         onClick={() => onSortChange(option.value as ApplicantSortOption)}
                         disabled={disabled}
-                        className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+                        className={`px-3 py-1.5 text-sm rounded-full transition-colors cursor-pointer ${
                             sortBy === option.value
                                 ? "bg-blue-600 text-white"
                                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        } disabled:opacity-50`}
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                         {option.label}
                         {sortBy === option.value && (
