@@ -55,4 +55,32 @@ export const API_ENDPOINTS = {
         // Dial codes
         DIAL_CODES: "/companies/dial-codes",
     },
+
+    // Applicant Search
+    APPLICANT_SEARCH: {
+        // TODO: Search endpoint - not finalized yet, applicant attributes may change
+        SEARCH: "/applicants/search",
+    },
+
+    // Search Profiles (Premium Feature)
+    SEARCH_PROFILES: {
+        // External endpoint (read-only)
+        ACTIVE: "/search-profiles/active",
+        // Internal endpoints (via gateway routing)
+        BASE: "/internal/search-profiles",
+        CREATE: "/internal/search-profiles",
+        GET: (id: string) => `/internal/search-profiles/${id}`,
+        UPDATE: (id: string) => `/internal/search-profiles/${id}`,
+        DELETE: (id: string) => `/internal/search-profiles/${id}`,
+        BY_COMPANY: (companyId: string) => `/internal/search-profiles/company/${companyId}`,
+        ACTIVE_BY_COMPANY: (companyId: string) => `/internal/search-profiles/company/${companyId}/active`,
+        UPDATE_STATUS: (id: string) => `/internal/search-profiles/${id}/status`,
+    },
+
+    // Subscriptions
+    SUBSCRIPTIONS: {
+        // External endpoints
+        STATUS: (companyId: string) => `/subscriptions/company/${companyId}`,
+        IS_PREMIUM: (companyId: string) => `/subscriptions/company/${companyId}/is-premium`,
+    },
 } as const;

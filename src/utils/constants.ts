@@ -34,6 +34,7 @@ export const ROUTES = {
     JOB_DETAIL: "/jobs/:id",
     PROFILE: "/profile",
     SETTINGS: "/settings",
+    APPLICANT_SEARCH: "/applicant-search",
 } as const;
 
 // Status
@@ -59,6 +60,7 @@ export const EMPLOYMENT_TYPES = {
     CONTRACT: "CONTRACT",
     INTERNSHIP: "INTERNSHIP",
     FREELANCE: "FREELANCE",
+    FRESHER: "FRESHER",
 } as const;
 
 export const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
@@ -67,6 +69,53 @@ export const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
     CONTRACT: "Contract",
     INTERNSHIP: "Internship",
     FREELANCE: "Freelance",
+    FRESHER: "Fresher",
+};
+
+// Education Degrees (for applicant search)
+export const EDUCATION_DEGREES = {
+    OTHER: "OTHER",
+    BACHELOR: "BACHELOR",
+    MASTER: "MASTER",
+    DOCTORATE: "DOCTORATE",
+} as const;
+
+export const EDUCATION_DEGREE_LABELS: Record<string, string> = {
+    OTHER: "Other",
+    BACHELOR: "Bachelor",
+    MASTER: "Master",
+    DOCTORATE: "Doctorate",
+};
+
+// Education degree hierarchy (for filtering: minimum degree)
+export const EDUCATION_DEGREE_HIERARCHY: Record<string, number> = {
+    OTHER: 0,
+    BACHELOR: 1,
+    MASTER: 2,
+    DOCTORATE: 3,
+};
+
+// Subscription Status
+export const SUBSCRIPTION_STATUS = {
+    ACTIVE: "ACTIVE",
+    INACTIVE: "INACTIVE",
+    EXPIRED: "EXPIRED",
+    CANCELLED: "CANCELLED",
+} as const;
+
+// Sort options for applicant search
+export const APPLICANT_SORT_OPTIONS = {
+    NEWEST: "newest",
+    SALARY_ASCENDING: "salaryAsc",
+    SALARY_DESCENDING: "salaryDesc",
+    IS_FRESHER: "isFresher",
+} as const;
+
+export const APPLICANT_SORT_LABELS: Record<string, string> = {
+    newest: "Newest",
+    salaryAsc: "Salary ascending",
+    salaryDesc: "Salary descending",
+    isFresher: "Is fresher",
 };
 
 // Salary Types (matching backend SalaryType enum)
