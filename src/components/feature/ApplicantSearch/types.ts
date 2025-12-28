@@ -144,7 +144,7 @@ export interface ApplicantWorkExperience {
     description?: string;
 }
 
-// TODO: Applicant model not finalized - salary might be removed
+// TODO: Applicant model - aligns with backend ApplicantProfileUpdatedEvent
 export interface Applicant {
     id: string;
     fullName: string;
@@ -154,9 +154,8 @@ export interface Applicant {
     bio?: string;
     countryCode?: string;
     highestDegree?: EducationDegree;
-    employmentType?: EmploymentType;
-    minSalary?: number;
-    maxSalary?: number;
+    employmentTypes: EmploymentType[];
+    desiredSalary?: number;
     skills: ApplicantSkill[];
     education: ApplicantEducation[];
     workExperience: ApplicantWorkExperience[];
