@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 
-export type BadgeVariant = "success" | "warning" | "error" | "info" | "neutral";
+export type BadgeVariant = "success" | "warning" | "error" | "info" | "neutral" | "gradient";
 
 interface BadgeProps {
     children: React.ReactNode;
@@ -20,6 +20,7 @@ export const Badge: React.FC<BadgeProps> = ({
         error: "bg-red-100 text-red-800",
         info: "bg-blue-100 text-blue-800",
         neutral: "bg-gray-100 text-gray-800",
+        gradient: "bg-gradient-to-r from-blue-600 to-purple-600 text-white",
     };
 
     return (

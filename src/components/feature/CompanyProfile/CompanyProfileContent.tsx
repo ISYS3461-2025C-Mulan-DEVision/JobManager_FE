@@ -32,7 +32,7 @@ export const CompanyProfileContent: React.FC<CompanyProfileContentProps> = ({ ac
 
     return (
         <div className="flex-1 p-6 lg:p-8 overflow-auto">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-7xl mx-auto">
                 {renderSection()}
             </div>
         </div>

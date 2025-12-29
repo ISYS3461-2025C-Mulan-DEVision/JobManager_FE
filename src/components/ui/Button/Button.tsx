@@ -6,7 +6,10 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
     size?: "sm" | "md" | "lg";
     isLoading?: boolean;
     fullWidth?: boolean;
-    children: React.ReactNode;
+    badge?: React.ReactNode;
+    leftIcon?: React.ReactNode;
+    rightIcon?: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -14,6 +17,9 @@ export const Button: React.FC<ButtonProps> = ({
     size = "md",
     isLoading = false,
     fullWidth = false,
+    badge,
+    leftIcon,
+    rightIcon,
     className,
     disabled,
     children,
@@ -23,13 +29,11 @@ export const Button: React.FC<ButtonProps> = ({
         "font-medium rounded-lg transition-[border-color] duration-250 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent cursor-pointer";
 
     const variants = {
-        primary: "bg-filled-button text-white hover:bg-filled-button/90 focus:ring-filled-button",
-        secondary:
-            "bg-zinc-200 text-gray-500 hover:bg-zinc-600 hover:text-white focus:ring-zinc-500",
-        outline:
-            "border border-heading-text text-heading hover:bg-heading-text/10 focus:ring-heading-text",
-        ghost: "text-gray-700 hover:bg-gray-100 focus:ring-gray-500",
-        danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
+        primary: "bg-filled-button text-white hover:bg-filled-button/90 focus:ring-filled-button shadow-sm",
+        secondary: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200 focus:ring-zinc-500",
+        outline: "bg-transparent border border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 hover:border-zinc-400 focus:ring-zinc-500",
+        ghost: "bg-transparent text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 focus:ring-zinc-500",
+        danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm",
     };
 
     const sizes = {
@@ -74,7 +78,12 @@ export const Button: React.FC<ButtonProps> = ({
                     Loading...
                 </span>
             ) : (
-                children
+                <span className="flex items-center justify-center gap-2">
+                    {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+                    {children && <span>{children}</span>}
+                    {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+                    {badge && <span className="ml-0.5">{badge}</span>}
+                </span>
             )}
         </button>
     );
