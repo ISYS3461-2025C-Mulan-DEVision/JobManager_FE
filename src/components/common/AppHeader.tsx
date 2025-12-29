@@ -6,6 +6,7 @@ import {
     getCompanyProfile,
     getCompany,
 } from "@/components/feature/CompanyProfile/api";
+import { checkIsPremium } from "@/components/feature/Subscription/api/SubscriptionService";
 
 type AppHeaderProps = {
     className?: string;
@@ -18,6 +19,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string | null>(null);
+    const [isPremium, setIsPremium] = useState(false);
 
     const pathname = location.pathname;
     const onLogin = pathname === "/login";
@@ -41,25 +43,29 @@ export default function AppHeader({ className }: AppHeaderProps) {
         setIsDropdownOpen(false);
     }, [user]);
 
-    // Fetch company logo and name when user is available
+    // Fetch company logo, name, and premium status when user is available
     useEffect(() => {
         const fetchCompanyData = async () => {
             if (user?.companyId) {
                 try {
-                    const [profile, company] = await Promise.all([
+                    const [profile, company, premiumStatus] = await Promise.all([
                         getCompanyProfile(),
                         getCompany(),
+                        checkIsPremium(),
                     ]);
                     setCompanyLogoUrl(profile.logoUrl || null);
                     setCompanyName(company.name || null);
+                    setIsPremium(premiumStatus.data ?? false);
                 } catch (error) {
                     console.error("Failed to fetch company data:", error);
                     setCompanyLogoUrl(null);
                     setCompanyName(null);
+                    setIsPremium(false);
                 }
             } else {
                 setCompanyLogoUrl(null);
                 setCompanyName(null);
+                setIsPremium(false);
             }
         };
 
@@ -97,22 +103,34 @@ export default function AppHeader({ className }: AppHeaderProps) {
                         </Link>
 
                         {user && (
-                            <nav className="hidden md:flex items-center gap-6">
+                            <nav className="hidden md:flex items-center gap-2">
                                 <Link
                                     to="/dashboard"
-                                    className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                                    className={`text-sm font-medium px-3 py-2 rounded-lg transition-all duration-200 ${
+                                        pathname === "/dashboard"
+                                            ? "text-blue-600 bg-blue-50 border-b-2 border-blue-600"
+                                            : "text-gray-700 hover:text-blue-600 hover:bg-blue-50 hover:scale-105"
+                                    }`}
                                 >
                                     Dashboard
                                 </Link>
                                 <Link
                                     to="/job-posts"
-                                    className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                                    className={`text-sm font-medium px-3 py-2 rounded-lg transition-all duration-200 ${
+                                        pathname.startsWith("/job-posts")
+                                            ? "text-blue-600 bg-blue-50 border-b-2 border-blue-600"
+                                            : "text-gray-700 hover:text-blue-600 hover:bg-blue-50 hover:scale-105"
+                                    }`}
                                 >
                                     Job Posts
                                 </Link>
                                 <Link
-                                    to="/applicants"
-                                    className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                                    to="/applicant-search"
+                                    className={`text-sm font-medium px-3 py-2 rounded-lg transition-all duration-200 ${
+                                        pathname === "/applicant-search"
+                                            ? "text-blue-600 bg-blue-50 border-b-2 border-blue-600"
+                                            : "text-gray-700 hover:text-blue-600 hover:bg-blue-50 hover:scale-105"
+                                    }`}
                                 >
                                     Applicant Search
                                 </Link>
@@ -130,22 +148,24 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                         setIsDropdownOpen(false)
                                     }
                                 >
-                                    <div className="flex items-center gap-2 cursor-pointer">
-                                        {companyLogoUrl ? (
-                                            <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200">
-                                                <img
-                                                    src={companyLogoUrl}
-                                                    alt="Company logo"
-                                                    className="h-full w-full object-cover"
-                                                />
-                                            </div>
-                                        ) : (
-                                            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
-                                                {user.email
-                                                    .charAt(0)
-                                                    .toUpperCase()}
-                                            </div>
-                                        )}
+                                    <div className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover: transition-all duration-200 hover:scale-105">
+                                        <div className={isPremium ? "p-0.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600" : ""}>
+                                            {companyLogoUrl ? (
+                                                <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200">
+                                                    <img
+                                                        src={companyLogoUrl}
+                                                        alt="Company logo"
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
+                                                    {user.email
+                                                        .charAt(0)
+                                                        .toUpperCase()}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {isDropdownOpen && (
@@ -156,11 +176,17 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                                         {companyName ||
                                                             user.email}
                                                     </p>
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        Subscription:{" "}
-                                                        <span className="font-semibold text-blue-600">
-                                                            Free
-                                                        </span>
+                                                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
+                                                        <span className={`inline-block w-2 h-2 rounded-full ${isPremium ? "bg-gradient-to-r from-blue-600 to-purple-600" : "bg-gray-400"}`}></span>
+                                                        {isPremium ? (
+                                                            <span className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                                                Premium
+                                                            </span>
+                                                        ) : (
+                                                            <span className="font-medium text-gray-600">
+                                                                Free Plan
+                                                            </span>
+                                                        )}
                                                     </p>
                                                 </div>
 
@@ -179,7 +205,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                                 <div className="border-t border-gray-100 my-1"></div>
                                                 <button
                                                     onClick={handleLogout}
-                                                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                                                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
                                                 >
                                                     Log out
                                                 </button>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 import { KPICard } from "../components/feature/Dashboard/KPICard";
 import {
     JobPostsTable,
@@ -271,8 +272,11 @@ const Dashboard: React.FC = () => {
                         Overview of your hiring pipeline
                     </p>
                 </div>
-                <Button onClick={() => navigate(ROUTES.JOB_POST_CREATE)}>
-                    + Create Job Post
+                <Button 
+                    onClick={() => navigate(ROUTES.JOB_POST_CREATE)}
+                    leftIcon={<Plus className="w-4 h-4" />}
+                >
+                    Create Job Post
                 </Button>
             </div>
 

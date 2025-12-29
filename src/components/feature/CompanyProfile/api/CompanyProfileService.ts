@@ -8,8 +8,8 @@ import type {
     MediaReorderItem,
 } from "../types";
 import { getAccessToken, getStoredUser } from "@/services/authStorage";
-
-const COMPANY_BASE_URL = `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api/companies`;
+import { API_BASE_URL } from "@/utils/constants";
+import { API_ENDPOINTS } from "@/utils/backendAPIs";
 
 // Helper function to get auth headers
 const getAuthHeaders = (): HeadersInit => {
@@ -33,10 +33,18 @@ const getCompanyId = (): string => {
     return user?.companyId || "";
 };
 
+// Helper to build full URL from endpoint
+const buildUrl = (endpoint: string): string => {
+    // API_BASE_URL ends with '/', endpoint starts without '/'
+    // Remove leading slash from endpoint if present
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+    return `${API_BASE_URL}${cleanEndpoint}`;
+};
+
 // Company APIs (GET/PUT /companies/{companyId})
 export const getCompany = async (): Promise<Company> => {
     const companyId = getCompanyId();
-    const response = await fetch(`${COMPANY_BASE_URL}/${companyId}`, {
+    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.GET(companyId)), {
         method: "GET",
         headers: getAuthHeaders(),
     });
@@ -53,7 +61,7 @@ export const updateCompany = async (
     companyData: Partial<CompanyFormData>
 ): Promise<Company> => {
     const companyId = getCompanyId();
-    const response = await fetch(`${COMPANY_BASE_URL}/${companyId}`, {
+    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.UPDATE(companyId)), {
         method: "PUT",
         headers: getAuthHeaders(),
         body: JSON.stringify(companyData),
@@ -70,7 +78,7 @@ export const updateCompany = async (
 // Profile APIs (GET/PUT /companies/{companyId}/profile)
 export const getCompanyProfile = async (): Promise<CompanyProfile> => {
     const companyId = getCompanyId();
-    const response = await fetch(`${COMPANY_BASE_URL}/${companyId}/profile`, {
+    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.PROFILE(companyId)), {
         method: "GET",
         headers: getAuthHeaders(),
     });
@@ -94,7 +102,7 @@ export const updateCompanyProfile = async (
             ? parseInt(profileData.foundedYear, 10)
             : undefined,
     };
-    const response = await fetch(`${COMPANY_BASE_URL}/${companyId}/profile`, {
+    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.PROFILE(companyId)), {
         method: "PUT",
         headers: getAuthHeaders(),
         body: JSON.stringify(payload),
@@ -115,7 +123,7 @@ export const uploadLogo = async (file: File): Promise<{ url: string }> => {
     formData.append("file", file);
 
     const response = await fetch(
-        `${COMPANY_BASE_URL}/${companyId}/media/logo`,
+        buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.LOGO(companyId)),
         {
             method: "POST",
             headers: getAuthHeadersFormData(),
@@ -137,7 +145,7 @@ export const uploadBanner = async (file: File): Promise<{ url: string }> => {
     formData.append("file", file);
 
     const response = await fetch(
-        `${COMPANY_BASE_URL}/${companyId}/media/banner`,
+        buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.BANNER(companyId)),
         {
             method: "POST",
             headers: getAuthHeadersFormData(),
@@ -164,7 +172,7 @@ export const uploadMedia = async (
     if (payload.description)
         formData.append("description", payload.description);
 
-    const response = await fetch(`${COMPANY_BASE_URL}/${companyId}/media`, {
+    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.BASE(companyId)), {
         method: "POST",
         headers: getAuthHeadersFormData(),
         body: formData,
@@ -180,7 +188,7 @@ export const uploadMedia = async (
 
 export const getAllMedia = async (): Promise<CompanyMedia[]> => {
     const companyId = getCompanyId();
-    const response = await fetch(`${COMPANY_BASE_URL}/${companyId}/media`, {
+    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.BASE(companyId)), {
         method: "GET",
         headers: getAuthHeaders(),
     });
@@ -205,7 +213,7 @@ export const getAllMedia = async (): Promise<CompanyMedia[]> => {
 export const getMediaById = async (mediaId: string): Promise<CompanyMedia> => {
     const companyId = getCompanyId();
     const response = await fetch(
-        `${COMPANY_BASE_URL}/${companyId}/media/${mediaId}`,
+        buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.GET(companyId, mediaId)),
         {
             method: "GET",
             headers: getAuthHeaders(),
@@ -226,7 +234,7 @@ export const updateMedia = async (
 ): Promise<CompanyMedia> => {
     const companyId = getCompanyId();
     const response = await fetch(
-        `${COMPANY_BASE_URL}/${companyId}/media/${mediaId}`,
+        buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.GET(companyId, mediaId)),
         {
             method: "PUT",
             headers: getAuthHeaders(),
@@ -253,7 +261,7 @@ export const reorderMedia = async (
         .map((item) => item.mediaId);
 
     const response = await fetch(
-        `${COMPANY_BASE_URL}/${companyId}/media/reorder`,
+        buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.REORDER(companyId)),
         {
             method: "PUT",
             headers: getAuthHeaders(),
@@ -269,7 +277,7 @@ export const reorderMedia = async (
 export const deleteMedia = async (mediaId: string): Promise<void> => {
     const companyId = getCompanyId();
     const response = await fetch(
-        `${COMPANY_BASE_URL}/${companyId}/media/${mediaId}`,
+        buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.GET(companyId, mediaId)),
         {
             method: "DELETE",
             headers: getAuthHeaders(),
@@ -285,7 +293,7 @@ export const getDialCodes = async (): Promise<
     Array<{ code: string; name: string }>
 > => {
     // Don't require authentication for dial codes - it's public data
-    const response = await fetch(`${COMPANY_BASE_URL}/dial-codes`, {
+    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.DIAL_CODES), {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

@@ -42,5 +42,45 @@ export const API_ENDPOINTS = {
         LIST: "/companies",
         GET: (id: string) => `/companies/${id}`,
         UPDATE: (id: string) => `/companies/${id}`,
+        // Profile endpoints
+        PROFILE: (id: string) => `/companies/${id}/profile`,
+        // Media endpoints
+        MEDIA: {
+            BASE: (id: string) => `/companies/${id}/media`,
+            LOGO: (id: string) => `/companies/${id}/media/logo`,
+            BANNER: (id: string) => `/companies/${id}/media/banner`,
+            GET: (companyId: string, mediaId: string) => `/companies/${companyId}/media/${mediaId}`,
+            REORDER: (id: string) => `/companies/${id}/media/reorder`,
+        },
+        // Dial codes
+        DIAL_CODES: "/companies/dial-codes",
+    },
+
+    // Applicant Search
+    APPLICANT_SEARCH: {
+        // TODO: Search endpoint - not finalized yet, applicant attributes may change
+        SEARCH: "/applicants/search",
+    },
+
+    // Search Profiles (Premium Feature)
+    SEARCH_PROFILES: {
+        // External endpoint (read-only)
+        ACTIVE: "/search-profiles/active",
+        // Internal endpoints (via gateway routing)
+        BASE: "/internal/search-profiles",
+        CREATE: "/internal/search-profiles",
+        GET: (id: string) => `/internal/search-profiles/${id}`,
+        UPDATE: (id: string) => `/internal/search-profiles/${id}`,
+        DELETE: (id: string) => `/internal/search-profiles/${id}`,
+        BY_COMPANY: (companyId: string) => `/internal/search-profiles/company/${companyId}`,
+        ACTIVE_BY_COMPANY: (companyId: string) => `/internal/search-profiles/company/${companyId}/active`,
+        UPDATE_STATUS: (id: string) => `/internal/search-profiles/${id}/status`,
+    },
+
+    // Subscriptions
+    SUBSCRIPTIONS: {
+        // External endpoints
+        STATUS: (companyId: string) => `/subscriptions/company/${companyId}`,
+        IS_PREMIUM: (companyId: string) => `/subscriptions/company/${companyId}/is-premium`,
     },
 } as const;
