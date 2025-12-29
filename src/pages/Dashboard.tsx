@@ -211,7 +211,7 @@ const Dashboard: React.FC = () => {
                         Overview of your hiring pipeline
                     </p>
                 </div>
-                <Button 
+                <Button
                     onClick={() => navigate(ROUTES.JOB_POST_CREATE)}
                     leftIcon={<Plus className="w-4 h-4" />}
                 >

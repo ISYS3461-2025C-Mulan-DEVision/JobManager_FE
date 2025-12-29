@@ -33,8 +33,7 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
                         {item.title}
                     </div>
                     <div className="text-xs text-gray-500">
-                        Updated{" "}
-                        {new Date(item.updatedAt).toLocaleDateString()}
+                        Updated {new Date(item.updatedAt).toLocaleDateString()}
                     </div>
                 </div>
             ),
@@ -51,8 +50,8 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
                                 {item.syncStatus === SYNC_STATUS.PENDING
                                     ? "Syncing..."
                                     : item.syncStatus === SYNC_STATUS.UPDATING
-                                    ? "Updating..."
-                                    : "Sync Failed"}
+                                      ? "Updating..."
+                                      : "Sync Failed"}
                             </span>
                         )}
                 </div>
@@ -83,9 +82,14 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
                 } else if (item.salaryMax) {
                     salaryDisplay = `Up to $${item.salaryMax.toLocaleString()}`;
                 }
-                
+
                 return (
-                    <Tooltip content={item.salaryNote || "Estimated annual or hourly range"}>
+                    <Tooltip
+                        content={
+                            item.salaryNote ||
+                            "Estimated annual or hourly range"
+                        }
+                    >
                         <span className="cursor-help border-b border-dotted border-gray-400">
                             {salaryDisplay}
                         </span>
