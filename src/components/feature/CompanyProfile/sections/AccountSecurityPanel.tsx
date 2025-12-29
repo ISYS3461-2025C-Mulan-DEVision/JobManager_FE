@@ -1,16 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Input, Alert } from "@/components/ui";
 import { HeadlessModal } from "@/components/headless";
 import type { ChangeEmailPayload, ChangePasswordPayload } from "../types";
+import AuthService from "@/components/feature/Authentication/api/AuthService";
+import { getStoredUser } from "@/services/authStorage";
 
 // Change Email Modal
 interface ChangeEmailModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: ChangeEmailPayload) => Promise<void>;
+    isSsoUser: boolean;
 }
 
-const ChangeEmailModal: React.FC<ChangeEmailModalProps> = ({ isOpen, onClose, onSubmit }) => {
+const ChangeEmailModal: React.FC<ChangeEmailModalProps> = ({ isOpen, onClose, onSubmit, isSsoUser }) => {
     const [newEmail, setNewEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -18,10 +21,16 @@ const ChangeEmailModal: React.FC<ChangeEmailModalProps> = ({ isOpen, onClose, on
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (isSsoUser) {
+            setError("Email change is not available for accounts registered via SSO (Google, etc.)");
+            return;
+        }
+        
         setIsLoading(true);
         setError(null);
         try {
-            await onSubmit({ newEmail, password });
+            await onSubmit({ newEmail, currentPassword: password });
             onClose();
             setNewEmail("");
             setPassword("");
@@ -95,9 +104,10 @@ interface ChangePasswordModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: ChangePasswordPayload) => Promise<void>;
+    isSsoUser: boolean;
 }
 
-const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose, onSubmit }) => {
+const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose, onSubmit, isSsoUser }) => {
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -106,6 +116,11 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isSsoUser) {
+            setError("Password change is not available for accounts registered via SSO (Google, etc.)");
+            return;
+        }
 
         if (newPassword !== confirmPassword) {
             setError("New passwords do not match");
@@ -204,25 +219,43 @@ export const AccountSecurityPanel: React.FC = () => {
     const [showEmailModal, setShowEmailModal] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [isSsoUser, setIsSsoUser] = useState(false);
+    const [currentEmail, setCurrentEmail] = useState("");
 
-    // Get current email from storage (in real app, this would come from auth context)
-    const currentEmail = localStorage.getItem("user_email") || "company@example.com";
+    // Check if user is SSO-based on stored auth data
+    useEffect(() => {
+        const user = getStoredUser();
+        if (user) {
+            setCurrentEmail(user.email);
+            // Check if user authenticated via SSO (anything other than LOCAL)
+            setIsSsoUser(user.authProvider !== "LOCAL");
+        }
+    }, []);
 
-    // TODO: Implement actual API calls when Auth Service endpoints are ready
     const handleChangeEmail = async (data: ChangeEmailPayload): Promise<void> => {
-        console.log("Change email request:", data);
-        // TODO: Call Auth Service API
-        // await authService.changeEmail(data);
-        setSuccessMessage("Email change request sent. Please check your new email for verification.");
-        throw new Error("Email change functionality is not yet implemented. Please contact support.");
+        try {
+            const response = await AuthService.changeEmailCompany(data);
+            if (response.success) {
+                setSuccessMessage(response.message || "A verification link has been sent to your new email address. Please check your inbox.");
+            } else {
+                throw new Error(response.message || "Failed to change email");
+            }
+        } catch (error) {
+            throw error;
+        }
     };
 
     const handleChangePassword = async (data: ChangePasswordPayload): Promise<void> => {
-        console.log("Change password request:", data);
-        // TODO: Call Auth Service API
-        // await authService.changePassword(data);
-        setSuccessMessage("Password changed successfully!");
-        throw new Error("Password change functionality is not yet implemented. Please contact support.");
+        try {
+            const response = await AuthService.changePasswordCompany(data);
+            if (response.success) {
+                setSuccessMessage(response.message || "Password changed successfully!");
+            } else {
+                throw new Error(response.message || "Failed to change password");
+            }
+        } catch (error) {
+            throw error;
+        }
     };
 
     return (
@@ -240,6 +273,13 @@ export const AccountSecurityPanel: React.FC = () => {
                 </Alert>
             )}
 
+            {/* SSO Account Notice */}
+            {isSsoUser && (
+                <Alert type="info">
+                    This account is registered via SSO (Single Sign-On). Email and password changes are managed by your SSO provider.
+                </Alert>
+            )}
+
             {/* Email Section */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center justify-between">
@@ -251,8 +291,18 @@ export const AccountSecurityPanel: React.FC = () => {
                         <p className="text-sm font-medium text-gray-900 mt-2">
                             {currentEmail}
                         </p>
+                        {isSsoUser && (
+                            <p className="text-xs text-amber-600 mt-1">
+                                Managed by SSO provider
+                            </p>
+                        )}
                     </div>
-                    <Button variant="outline" onClick={() => setShowEmailModal(true)}>
+                    <Button 
+                        variant="outline" 
+                        onClick={() => setShowEmailModal(true)}
+                        disabled={isSsoUser}
+                        title={isSsoUser ? "Email change not available for SSO accounts" : "Change email"}
+                    >
                         Change Email
                     </Button>
                 </div>
@@ -266,11 +316,23 @@ export const AccountSecurityPanel: React.FC = () => {
                         <p className="text-sm text-gray-500 mt-1">
                             Keep your account secure by using a strong password.
                         </p>
-                        <p className="text-sm text-gray-500 mt-2">
-                            ••••••••••••
-                        </p>
+                        {!isSsoUser && (
+                            <p className="text-sm text-gray-500 mt-2">
+                                ••••••••••••
+                            </p>
+                        )}
+                        {isSsoUser && (
+                            <p className="text-xs text-amber-600 mt-2">
+                                Managed by SSO provider
+                            </p>
+                        )}
                     </div>
-                    <Button variant="outline" onClick={() => setShowPasswordModal(true)}>
+                    <Button 
+                        variant="outline" 
+                        onClick={() => setShowPasswordModal(true)}
+                        disabled={isSsoUser}
+                        title={isSsoUser ? "Password change not available for SSO accounts" : "Change password"}
+                    >
                         Change Password
                     </Button>
                 </div>
@@ -306,11 +368,13 @@ export const AccountSecurityPanel: React.FC = () => {
                 isOpen={showEmailModal}
                 onClose={() => setShowEmailModal(false)}
                 onSubmit={handleChangeEmail}
+                isSsoUser={isSsoUser}
             />
             <ChangePasswordModal
                 isOpen={showPasswordModal}
                 onClose={() => setShowPasswordModal(false)}
                 onSubmit={handleChangePassword}
+                isSsoUser={isSsoUser}
             />
         </div>
     );
