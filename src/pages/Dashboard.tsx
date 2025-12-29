@@ -2,10 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { KPICard } from "../components/feature/Dashboard/KPICard";
-import {
-    JobPostsTable,
-    JobPostSummary,
-} from "../components/feature/Dashboard/JobPostsTable";
+import { JobPostsTable } from "../components/feature/Dashboard/JobPostsTable";
 import {
     RecentApplications,
     ApplicationSummary,
@@ -31,7 +28,7 @@ const Dashboard: React.FC = () => {
     >("EXPIRING");
 
     // State for real job posts
-    const [jobPosts, setJobPosts] = useState<JobPostSummary[]>([]);
+    const [jobPosts, setJobPosts] = useState<JobPost[]>([]);
     const [allJobPosts, setAllJobPosts] = useState<JobPost[]>([]);
     const [isLoadingJobs, setIsLoadingJobs] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -50,67 +47,9 @@ const Dashboard: React.FC = () => {
             const response = await fetchJobPosts({ page: 0, pageSize: 100 });
             setAllJobPosts(response.data);
 
-            // Get top 5 for display
+            // Get top 5 for display - no transformation needed, status is already computed by transformJobPost
             const displayPosts = response.data.slice(0, 5);
-
-            // Transform JobPost to JobPostSummary
-            const summaries: JobPostSummary[] = displayPosts.map(
-                (job: JobPost) => {
-                    // Map JobStatus to JobPostSummary status
-                    let status: "PUBLISHED" | "DRAFT" | "EXPIRED" = "DRAFT";
-                    if (
-                        job.status === "PUBLISHED" ||
-                        job.status === "PRIVATE"
-                    ) {
-                        status = "PUBLISHED";
-                    } else if (job.status === "DRAFT") {
-                        status = "DRAFT";
-                    } else if (
-                        job.status === "CLOSED" ||
-                        job.status === "ARCHIVED"
-                    ) {
-                        status = "EXPIRED";
-                    }
-
-                    // Map SyncStatus to propagationStatus
-                    let propagationStatus:
-                        | "SYNCED"
-                        | "PENDING"
-                        | "FAILED"
-                        | undefined = undefined;
-                    if (job.syncStatus === "SYNCED") {
-                        propagationStatus = "SYNCED";
-                    } else if (
-                        job.syncStatus === "PENDING" ||
-                        job.syncStatus === "UPDATING"
-                    ) {
-                        propagationStatus = "PENDING";
-                    } else if (job.syncStatus === "FAILED") {
-                        propagationStatus = "FAILED";
-                    }
-
-                    return {
-                        id: job.id,
-                        title: job.title,
-                        status: status,
-                        employmentType: job.employmentType
-                            ? EMPLOYMENT_TYPE_LABELS[job.employmentType]
-                            : "Not specified",
-                        salary: formatSalary(
-                            job.salaryMin,
-                            job.salaryMax,
-                            job.salaryType,
-                            job.salaryNote
-                        ),
-                        applicationsCount: job.applicationsCount || 0,
-                        expiryDate: job.expiryAt,
-                        lastUpdated: job.updatedAt,
-                        propagationStatus: propagationStatus,
-                    };
-                }
-            );
-
-            setJobPosts(summaries);
+            setJobPosts(displayPosts);
         } catch (err) {
             console.error("Error fetching job posts:", err);
             setError("Failed to load job posts");
@@ -272,7 +211,7 @@ const Dashboard: React.FC = () => {
                         Overview of your hiring pipeline
                     </p>
                 </div>
-                <Button 
+                <Button
                     onClick={() => navigate(ROUTES.JOB_POST_CREATE)}
                     leftIcon={<Plus className="w-4 h-4" />}
                 >

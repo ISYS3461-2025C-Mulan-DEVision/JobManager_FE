@@ -1,26 +1,15 @@
 import React from "react";
 import { HeadlessTable } from "../../headless/Table/Table";
 import { TableColumn } from "../../headless/Table/useTable";
-import { Badge, BadgeVariant } from "../../ui/Badge/Badge";
 import { Card } from "../../ui/Card/Card";
 import { Skeleton } from "../../ui/Skeleton/Skeleton";
 import { Tooltip } from "../../ui/Tooltip/Tooltip";
-
-// Mock type for now, should be replaced with shared type
-export interface JobPostSummary {
-    id: string;
-    title: string;
-    status: "PUBLISHED" | "DRAFT" | "EXPIRED";
-    employmentType: string;
-    salary: string;
-    applicationsCount: number;
-    expiryDate: string;
-    lastUpdated: string;
-    propagationStatus?: "SYNCED" | "PENDING" | "FAILED";
-}
+import { JobPost } from "@/types";
+import { SYNC_STATUS } from "@/utils/constants";
+import { JobStatusBadge } from "../JobPosts/JobStatusBadge";
 
 interface JobPostsTableProps {
-    data: JobPostSummary[];
+    data: JobPost[];
     onView: (id: string) => void;
     onEdit: (id: string) => void;
     onArchive: (id: string) => void;
@@ -34,7 +23,7 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
     onArchive,
     isLoading = false,
 }) => {
-    const columns: TableColumn<JobPostSummary>[] = [
+    const columns: TableColumn<JobPost>[] = [
         {
             key: "title",
             header: "Job Title",
@@ -44,8 +33,7 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
                         {item.title}
                     </div>
                     <div className="text-xs text-gray-500">
-                        Updated{" "}
-                        {new Date(item.lastUpdated).toLocaleDateString()}
+                        Updated {new Date(item.updatedAt).toLocaleDateString()}
                     </div>
                 </div>
             ),
@@ -53,26 +41,21 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
         {
             key: "status",
             header: "Status",
-            render: (item) => {
-                let variant: BadgeVariant = "neutral";
-                if (item.status === "PUBLISHED") variant = "success";
-                if (item.status === "EXPIRED") variant = "error";
-                if (item.status === "DRAFT") variant = "warning";
-
-                return (
-                    <div className="flex flex-col gap-1">
-                        <Badge variant={variant}>{item.status}</Badge>
-                        {item.propagationStatus &&
-                            item.propagationStatus !== "SYNCED" && (
-                                <span className="text-[10px] text-gray-400">
-                                    {item.propagationStatus === "PENDING"
-                                        ? "Syncing..."
-                                        : "Sync Failed"}
-                                </span>
-                            )}
-                    </div>
-                );
-            },
+            render: (item) => (
+                <div className="flex flex-col gap-1">
+                    {item.status && <JobStatusBadge status={item.status} />}
+                    {item.syncStatus &&
+                        item.syncStatus !== SYNC_STATUS.SYNCED && (
+                            <span className="text-[10px] text-gray-400">
+                                {item.syncStatus === SYNC_STATUS.PENDING
+                                    ? "Syncing..."
+                                    : item.syncStatus === SYNC_STATUS.UPDATING
+                                      ? "Updating..."
+                                      : "Sync Failed"}
+                            </span>
+                        )}
+                </div>
+            ),
         },
         {
             key: "employmentType",
@@ -80,35 +63,53 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
             render: (item) => (
                 <Tooltip content="Employment contract type">
                     <span className="cursor-help border-b border-dotted border-gray-400">
-                        {item.employmentType}
+                        {item.employmentType || "N/A"}
                     </span>
                 </Tooltip>
             ),
         },
         {
-            key: "salary",
+            key: "salaryMin",
             header: "Salary",
-            render: (item) => (
-                <Tooltip content="Estimated annual or hourly range">
-                    <span className="cursor-help border-b border-dotted border-gray-400">
-                        {item.salary}
-                    </span>
-                </Tooltip>
-            ),
+            render: (item) => {
+                let salaryDisplay = "Negotiable";
+                if (item.salaryType === "NEGOTIABLE") {
+                    salaryDisplay = "Negotiable";
+                } else if (item.salaryMin && item.salaryMax) {
+                    salaryDisplay = `$${item.salaryMin.toLocaleString()} - $${item.salaryMax.toLocaleString()}`;
+                } else if (item.salaryMin) {
+                    salaryDisplay = `From $${item.salaryMin.toLocaleString()}`;
+                } else if (item.salaryMax) {
+                    salaryDisplay = `Up to $${item.salaryMax.toLocaleString()}`;
+                }
+
+                return (
+                    <Tooltip
+                        content={
+                            item.salaryNote ||
+                            "Estimated annual or hourly range"
+                        }
+                    >
+                        <span className="cursor-help border-b border-dotted border-gray-400">
+                            {salaryDisplay}
+                        </span>
+                    </Tooltip>
+                );
+            },
         },
         {
             key: "applicationsCount",
             header: "Applications",
             render: (item) => (
                 <div className="text-center font-semibold text-gray-700">
-                    {item.applicationsCount}
+                    {item.applicationsCount || 0}
                 </div>
             ),
         },
         {
-            key: "expiryDate",
+            key: "expiryAt",
             header: "Expires",
-            render: (item) => new Date(item.expiryDate).toLocaleDateString(),
+            render: (item) => new Date(item.expiryAt).toLocaleDateString(),
         },
         {
             key: "id", // Using ID for actions column
