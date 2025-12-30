@@ -192,12 +192,10 @@ export const ApplicantDetailsModal: React.FC<ApplicantDetailsModalProps> = ({
           </div>
         </div>
       </div>
-
-      {/* TODO: Applicant details not finalized - attributes may change */}
+      {/* Footer */}
       <div className="px-6 py-4 border-t bg-gray-50 text-center">
         <p className="text-xs text-gray-400 italic">
-          Note: Applicant details are still being finalized. Some information
-          may change.
+          Contact information is shared with the applicant's consent.
         </p>
       </div>
     </HeadlessModal>

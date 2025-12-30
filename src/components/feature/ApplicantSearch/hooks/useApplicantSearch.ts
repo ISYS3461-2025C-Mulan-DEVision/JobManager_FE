@@ -12,8 +12,9 @@ const defaultSearchState: SearchState = {
     countryCode: undefined,
     employmentTypes: [],
     highestDegree: undefined,
-    minSalary: undefined,
-    maxSalary: undefined,
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // minSalary: undefined,
+    // maxSalary: undefined,
     skillIds: [],
     sortBy: "newest",
     page: 0,
@@ -36,6 +37,9 @@ interface UseApplicantSearchReturn {
     search: () => Promise<void>;
     goToPage: (page: number) => void;
 }
+
+// Toggle this to use mock data instead of API
+const USE_MOCK_DATA = false;
 
 export const useApplicantSearch = (): UseApplicantSearchReturn => {
     // Search state
@@ -76,23 +80,50 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
         }));
     }, []);
 
-    // Search function
-    const search = useCallback(async () => {
+    // Search function - real API call
+    const searchWithAPI = useCallback(async () => {
         setIsLoading(true);
         setError(null);
 
         try {
-            // TODO: Replace with actual API call when backend is ready
-            // const response = await ApplicantSearchService.searchApplicants(searchState);
-            // if (response.success && response.data) {
-            //     setApplicants(response.data.content);
-            //     setTotalElements(response.data.totalElements);
-            //     setTotalPages(response.data.totalPages);
-            // } else {
-            //     setError(response.message || "Search failed");
-            // }
+            const response = await ApplicantSearchService.searchApplicants(searchState);
+            if (response.success && response.data) {
+                // Map JA response to our Applicant type
+                const mappedApplicants: Applicant[] = response.data.content.map((a) => ({
+                    ...a,
+                    // Map objectiveSummary to bio
+                    bio: a.bio || (a as unknown as { objectiveSummary?: string }).objectiveSummary,
+                    // Map country.abbreviation to countryCode for backwards compatibility
+                    countryCode: a.countryCode || a.country?.abbreviation,
+                    // Provide defaults for fields not in JA response
+                    employmentTypes: a.employmentTypes || [],
+                    skills: a.skills || [],
+                    education: a.education || [],
+                    workExperience: a.workExperience || [],
+                    createdAt: a.createdAt || new Date().toISOString(),
+                    updatedAt: a.updatedAt || new Date().toISOString(),
+                }));
+                setApplicants(mappedApplicants);
+                setTotalElements(response.data.totalElements);
+                setTotalPages(response.data.totalPages);
+            } else {
+                setError(response.message || "Search failed");
+            }
+        } catch (err) {
+            setError("Failed to search applicants");
+            console.error("Search error:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [searchState]);
 
-            // Mock implementation for UI testing
+    // Search function - mock data for UI testing
+    const searchWithMock = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            // Simulate API delay
             await new Promise((resolve) => setTimeout(resolve, 300));
 
             // Apply filters to mock data
@@ -119,7 +150,7 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
                 );
             }
 
-            // Filter by employment types (now checks array intersection)
+            // Filter by employment types (OR semantics)
             if (searchState.employmentTypes.length > 0) {
                 filteredApplicants = filteredApplicants.filter(
                     (a) => a.employmentTypes.some(type => searchState.employmentTypes.includes(type))
@@ -129,50 +160,36 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
             // Sort applicants based on sortBy option
             switch (searchState.sortBy) {
                 case "newest":
-                    // Sort by createdAt descending (newest first)
                     filteredApplicants.sort((a, b) => 
                         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                     );
                     break;
-                case "salaryAsc":
-                    // Sort by desired salary ascending (lowest first)
-                    filteredApplicants.sort((a, b) => {
-                        const salaryA = a.desiredSalary ?? 0;
-                        const salaryB = b.desiredSalary ?? 0;
-                        return salaryA - salaryB;
-                    });
-                    break;
-                case "salaryDesc":
-                    // Sort by desired salary descending (highest first)
-                    filteredApplicants.sort((a, b) => {
-                        const salaryA = a.desiredSalary ?? 0;
-                        const salaryB = b.desiredSalary ?? 0;
-                        return salaryB - salaryA;
-                    });
-                    break;
+                // TODO: Salary sorting - uncomment when JA adds salary support
+                // case "salaryAsc":
+                //     filteredApplicants.sort((a, b) => (a.desiredSalary ?? 0) - (b.desiredSalary ?? 0));
+                //     break;
+                // case "salaryDesc":
+                //     filteredApplicants.sort((a, b) => (b.desiredSalary ?? 0) - (a.desiredSalary ?? 0));
+                //     break;
                 case "isFresher":
-                    // Sort by fresher status (FRESHER and INTERNSHIP first, then by newest)
                     filteredApplicants.sort((a, b) => {
                         const isFresherA = a.employmentTypes.includes("FRESHER") || a.employmentTypes.includes("INTERNSHIP") ? 1 : 0;
                         const isFresherB = b.employmentTypes.includes("FRESHER") || b.employmentTypes.includes("INTERNSHIP") ? 1 : 0;
-                        
                         if (isFresherA !== isFresherB) {
-                            return isFresherB - isFresherA; // Freshers first
+                            return isFresherB - isFresherA;
                         }
-                        // If both are freshers or both are not, sort by newest
                         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
                     });
                     break;
                 default:
-                    // Default to newest
                     filteredApplicants.sort((a, b) => 
                         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                     );
             }
 
             // Calculate pagination
-            const totalElements = filteredApplicants.length;
-            const totalPages = Math.ceil(totalElements / searchState.pageSize);
+            const total = filteredApplicants.length;
+            const pages = Math.ceil(total / searchState.pageSize);
             const startIndex = searchState.page * searchState.pageSize;
             const paginatedApplicants = filteredApplicants.slice(
                 startIndex,
@@ -180,8 +197,8 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
             );
 
             setApplicants(paginatedApplicants);
-            setTotalElements(totalElements);
-            setTotalPages(totalPages);
+            setTotalElements(total);
+            setTotalPages(pages);
         } catch (err) {
             setError("Failed to search applicants");
             console.error("Search error:", err);
@@ -189,6 +206,15 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
             setIsLoading(false);
         }
     }, [searchState]);
+
+    // Main search function - toggles between API and mock
+    const search = useCallback(async () => {
+        if (USE_MOCK_DATA) {
+            await searchWithMock();
+        } else {
+            await searchWithAPI();
+        }
+    }, [searchWithAPI, searchWithMock]);
 
     // Auto-search when page, sort, or filters change
     useEffect(() => {
@@ -199,8 +225,9 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
         searchState.countryCode,
         searchState.employmentTypes,
         searchState.highestDegree,
-        searchState.minSalary,
-        searchState.maxSalary,
+        // TODO: Salary filtering - uncomment when JA adds salary support
+        // searchState.minSalary,
+        // searchState.maxSalary,
         searchState.skillIds,
     ]);
 

@@ -8,7 +8,8 @@ import {
   User,
   GraduationCap,
   Clock,
-  CircleDollarSign,
+  // TODO: Uncomment when JA adds salary support
+  // CircleDollarSign,
   MapPin,
 } from "lucide-react";
 import type { Applicant } from "../types";
@@ -26,10 +27,11 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
   // const isFavorite = applicant.isFavorite;
   // const isWarning = applicant.isWarning;
 
-  const formatSalary = (salary?: number): string => {
-    if (!salary) return "Not specified";
-    return `$${salary.toLocaleString()}`;
-  };
+  // TODO: Salary display - uncomment when JA adds salary support
+  // const formatSalary = (salary?: number): string => {
+  //   if (!salary) return "Not specified";
+  //   return `$${salary.toLocaleString()}`;
+  // };
 
   return (
     <Card className="p-4 hover:shadow-md transition-shadow relative">
@@ -97,10 +99,11 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
                   .join(", ")}
               </span>
             )}
-            <span className="flex items-center gap-1">
+            {/* TODO: Salary display - uncomment when JA adds salary support */}
+            {/* <span className="flex items-center gap-1">
               <CircleDollarSign className="w-4 h-4" />
               {formatSalary(applicant.desiredSalary)}
-            </span>
+            </span> */}
             {applicant.countryCode && (
               <span className="flex items-center gap-1">
                 <MapPin className="w-4 h-4" />

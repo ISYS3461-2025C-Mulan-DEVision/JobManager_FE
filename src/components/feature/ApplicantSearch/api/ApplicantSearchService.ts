@@ -19,7 +19,7 @@ const getCompanyId = (): string => {
 };
 
 // Applicant Search API
-// TODO: Search endpoint not finalized - applicant attributes may change
+// Connects to JM backend which proxies to JA service
 
 export const searchApplicants = async (
     searchState: SearchState
@@ -41,12 +41,13 @@ export const searchApplicants = async (
     if (searchState.highestDegree) {
         params.append("highestDegree", searchState.highestDegree);
     }
-    if (searchState.minSalary !== undefined) {
-        params.append("minSalary", searchState.minSalary.toString());
-    }
-    if (searchState.maxSalary !== undefined) {
-        params.append("maxSalary", searchState.maxSalary.toString());
-    }
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // if (searchState.minSalary !== undefined) {
+    //     params.append("minSalary", searchState.minSalary.toString());
+    // }
+    // if (searchState.maxSalary !== undefined) {
+    //     params.append("maxSalary", searchState.maxSalary.toString());
+    // }
     if (searchState.skillIds.length > 0) {
         searchState.skillIds.forEach((id) => {
             params.append("skillIds", id);

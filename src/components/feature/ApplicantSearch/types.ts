@@ -20,8 +20,10 @@ export interface SearchState {
     countryCode?: string;
     employmentTypes: EmploymentType[];
     highestDegree?: EducationDegree;
-    minSalary?: number;
-    maxSalary?: number;
+    // TODO: Salary filtering - JA service does not have salary fields yet
+    // Uncomment when JA adds salary support to UserResponse
+    // minSalary?: number;
+    // maxSalary?: number;
     skillIds: string[];
     sortBy: ApplicantSortOption;
     page: number;
@@ -33,8 +35,9 @@ export const DEFAULT_SEARCH_STATE: SearchState = {
     countryCode: undefined,
     employmentTypes: [],
     highestDegree: undefined,
-    minSalary: undefined,
-    maxSalary: undefined,
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // minSalary: undefined,
+    // maxSalary: undefined,
     skillIds: [],
     sortBy: "newest",
     page: 0,
@@ -115,13 +118,13 @@ export interface ActiveSearchProfileResponse {
 
 // ============================================================
 // Applicant Types
-// TODO: Applicant attributes are not finalized yet
-// These fields may change when backend is finalized
+// Aligned with JA service's UserResponse
 // ============================================================
 
 export interface ApplicantSkill {
     id: string;
     name: string;
+    usageCount?: number;
 }
 
 export interface ApplicantEducation {
@@ -144,23 +147,45 @@ export interface ApplicantWorkExperience {
     description?: string;
 }
 
-// TODO: Applicant model - aligns with backend ApplicantProfileUpdatedEvent
+export interface ApplicantCountry {
+    id: string;
+    name: string;
+    abbreviation: string;
+}
+
+/**
+ * Applicant model - aligned with JA service's UserResponse.
+ * 
+ * Note: JA UserResponse uses 'objectiveSummary' which maps to 'bio' here.
+ * Note: JA does not have education, work experience, or employmentTypes in search response.
+ * These fields are populated from separate API calls or mock data.
+ */
 export interface Applicant {
     id: string;
-    fullName: string;
     email: string;
+    firstName?: string;
+    lastName?: string;
+    fullName: string;
     phone?: string;
     avatarUrl?: string;
+    /** Maps from JA's objectiveSummary */
     bio?: string;
+    /** Nested country object from JA */
+    country?: ApplicantCountry;
+    /** Derived from country.abbreviation for backwards compatibility */
     countryCode?: string;
+    premium?: boolean;
+    active?: boolean;
+    skills: ApplicantSkill[];
+    // TODO: JA search does not return these - need separate API or mock
     highestDegree?: EducationDegree;
     employmentTypes: EmploymentType[];
-    desiredSalary?: number;
-    skills: ApplicantSkill[];
     education: ApplicantEducation[];
     workExperience: ApplicantWorkExperience[];
     createdAt: string;
     updatedAt: string;
+    // TODO: Salary - JA service does not have salary fields yet
+    // desiredSalary?: number;
     // TODO: Mark as Warning/Favorite feature - not implemented yet
     // isFavorite?: boolean;
     // isWarning?: boolean;

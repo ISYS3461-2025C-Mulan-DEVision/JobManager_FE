@@ -1,8 +1,10 @@
 import type { Applicant } from "../types";
-
 /**
  * Mock applicant data for UI testing.
- * TODO: Remove when backend is ready.
+ * Aligned with JA service's UserResponse structure.
+ * 
+ * Note: This data is used as fallback when USE_MOCK_DATA is true in useApplicantSearch.
+ * TODO: Salary - JA does not have salary fields yet, desiredSalary is not included.
  */
 export const MOCK_APPLICANTS: Applicant[] = [
     {
@@ -15,7 +17,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "US",
         highestDegree: "BACHELOR",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 100000,
         skills: [
             { id: "skill-1", name: "React" },
             { id: "skill-2", name: "TypeScript" },
@@ -64,7 +65,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "GB",
         highestDegree: "DOCTORATE",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 125000,
         skills: [
             { id: "skill-6", name: "Python" },
             { id: "skill-7", name: "Machine Learning" },
@@ -117,7 +117,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "AU",
         highestDegree: "MASTER",
         employmentTypes: ["CONTRACT"],
-        desiredSalary: 85000,
         skills: [
             { id: "skill-12", name: "Figma" },
             { id: "skill-13", name: "UI Design" },
@@ -163,7 +162,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "CA",
         highestDegree: "BACHELOR",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 110000,
         skills: [
             { id: "skill-16", name: "Kubernetes" },
             { id: "skill-17", name: "Docker" },
@@ -215,7 +213,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "SG",
         highestDegree: "OTHER",
         employmentTypes: ["INTERNSHIP"],
-        desiredSalary: 50000,
         skills: [
             { id: "skill-23", name: "JavaScript" },
             { id: "skill-24", name: "React" },
@@ -247,7 +244,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "US",
         highestDegree: "MASTER",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 130000,
         skills: [
             { id: "skill-26", name: "Java" },
             { id: "skill-27", name: "Spring Boot" },
@@ -266,7 +262,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "US",
         highestDegree: "BACHELOR",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 110000,
         skills: [
             { id: "skill-29", name: "Product Management" },
             { id: "skill-30", name: "React" },
@@ -287,7 +282,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "CN",
         highestDegree: "BACHELOR",
         employmentTypes: ["CONTRACT"],
-        desiredSalary: 85000,
         skills: [
             { id: "skill-32", name: "React Native" },
             { id: "skill-33", name: "Flutter" },
@@ -307,7 +301,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "BR",
         highestDegree: "BACHELOR",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 67500,
         skills: [
             { id: "skill-36", name: "Selenium" },
             { id: "skill-37", name: "Cypress" },
@@ -328,7 +321,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "IE",
         highestDegree: "MASTER",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 120000,
         skills: [
             { id: "skill-39", name: "Security" },
             { id: "skill-40", name: "Penetration Testing" },
@@ -347,7 +339,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "GB",
         highestDegree: "BACHELOR",
         employmentTypes: ["PART_TIME"],
-        desiredSalary: 55000,
         skills: [
             { id: "skill-42", name: "Technical Writing" },
             { id: "skill-43", name: "Documentation" },
@@ -368,7 +359,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "ES",
         highestDegree: "BACHELOR",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 77500,
         skills: [
             { id: "skill-45", name: "PostgreSQL" },
             { id: "skill-46", name: "MongoDB" },
@@ -387,7 +377,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "PL",
         highestDegree: "MASTER",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 100000,
         skills: [
             { id: "skill-48", name: "Design Systems" },
             { id: "skill-49", name: "Storybook" },
@@ -408,7 +397,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "US",
         highestDegree: "BACHELOR",
         employmentTypes: ["CONTRACT"],
-        desiredSalary: 150000,
         skills: [
             { id: "skill-51", name: "Solidity" },
             { id: "skill-52", name: "Ethereum" },
@@ -427,7 +415,6 @@ export const MOCK_APPLICANTS: Applicant[] = [
         countryCode: "AU",
         highestDegree: "DOCTORATE",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 150000,
         skills: [
             { id: "skill-54", name: "NLP" },
             { id: "skill-55", name: "PyTorch" },

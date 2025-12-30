@@ -58,8 +58,11 @@ export const API_ENDPOINTS = {
 
     // Applicant Search
     APPLICANT_SEARCH: {
-        // TODO: Search endpoint - not finalized yet, applicant attributes may change
-        SEARCH: "/applicants/search",
+        // Search applicants via JM backend (proxies to JA service)
+        SEARCH: "/internal/applicants/search",
+        // Skills endpoints for filter dropdown
+        SKILLS: "/internal/applicants/skills",
+        SKILLS_SEARCH: "/internal/applicants/skills/search",
     },
 
     // Search Profiles (Premium Feature)
