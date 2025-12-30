@@ -2,6 +2,7 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ApplicationsView } from "@/components/feature/Applications";
 import { Application } from "@/types/application";
+import { ROUTES } from "@/utils/constants";
 import DashboardLayout from "@/layout/DashboardLayout";
 import { Button } from "@/components/ui/Button/Button";
 import { ArrowLeft } from "lucide-react";
@@ -97,8 +98,12 @@ const ApplicationsPage: React.FC = () => {
     const error = null;
 
     const handleViewApplication = (applicationId: string) => {
-        console.log("View application:", applicationId);
-        // TODO: Navigate to application details or open modal
+        navigate(
+            ROUTES.APPLICATION_DETAILS.replace(":jobPostId", jobPostId || "").replace(
+                ":applicationId",
+                applicationId
+            )
+        );
     };
 
     const handleArchiveApplication = (applicationId: string) => {
@@ -114,7 +119,9 @@ const ApplicationsPage: React.FC = () => {
     const handleDownloadCV = (applicationId: string) => {
         console.log("Download CV for application:", applicationId);
         // TODO: Trigger CV download
-        const application = applications.find((app) => app.id === applicationId);
+        const application = applications.find(
+            (app) => app.id === applicationId
+        );
         if (application?.cvUrl) {
             window.open(application.cvUrl, "_blank");
         }
@@ -123,7 +130,9 @@ const ApplicationsPage: React.FC = () => {
     const handleViewCoverLetter = (applicationId: string) => {
         console.log("View cover letter for application:", applicationId);
         // TODO: Open modal with cover letter content
-        const application = applications.find((app) => app.id === applicationId);
+        const application = applications.find(
+            (app) => app.id === applicationId
+        );
         if (application?.coverLetter) {
             alert(`Cover Letter:\n\n${application.coverLetter}`);
         }
@@ -136,7 +145,7 @@ const ApplicationsPage: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     leftIcon={<ArrowLeft className="w-4 h-4" />}
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate(ROUTES.JOB_POSTS)}
                 >
                     Back to Job Posts
                 </Button>

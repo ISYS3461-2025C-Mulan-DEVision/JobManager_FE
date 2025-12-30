@@ -3,15 +3,15 @@ import { Card } from "@/components/ui/Card/Card";
 import { Badge } from "@/components/ui/Badge/Badge";
 import { Button } from "@/components/ui/Button/Button";
 import { Application, APPLICATION_STATUS } from "@/types/application";
-import { 
-    Eye, 
-    Archive, 
-    ArchiveRestore, 
-    Download, 
+import {
+    Eye,
+    Archive,
+    ArchiveRestore,
+    Download,
     FileText,
     Clock,
     Mail,
-    Phone 
+    Phone,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -25,7 +25,7 @@ interface ApplicationCardProps {
 }
 
 const getStatusVariant = (
-    status: typeof APPLICATION_STATUS[keyof typeof APPLICATION_STATUS]
+    status: (typeof APPLICATION_STATUS)[keyof typeof APPLICATION_STATUS]
 ): "success" | "warning" | "error" | "info" | "neutral" => {
     switch (status) {
         case APPLICATION_STATUS.PENDING:
@@ -57,10 +57,12 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
     const submittedDate = new Date(application.submittedAt);
 
     return (
-        <Card className={clsx(
-            "p-4 transition-all hover:shadow-md",
-            isArchived && "opacity-75 bg-gray-50"
-        )}>
+        <Card
+            className={clsx(
+                "p-4 transition-all hover:shadow-md",
+                isArchived && "opacity-75 bg-gray-50"
+            )}
+        >
             <div className="flex flex-col gap-4">
                 {/* Header Row */}
                 <div className="flex items-start justify-between gap-4">
@@ -69,15 +71,18 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
                             <h3 className="text-lg font-semibold text-gray-900 truncate">
                                 {application.applicantName}
                             </h3>
-                            <Badge variant={getStatusVariant(application.status)}>
+                            <Badge
+                                variant={getStatusVariant(application.status)}
+                            >
                                 {application.status}
                             </Badge>
                         </div>
-                        
+
                         <div className="flex items-center gap-1 text-sm text-gray-500 mb-2">
                             <Clock className="w-4 h-4" />
                             <span>
-                                Submitted {submittedDate.toLocaleDateString()} at{" "}
+                                Submitted {submittedDate.toLocaleDateString()}{" "}
+                                at{" "}
                                 {submittedDate.toLocaleTimeString([], {
                                     hour: "2-digit",
                                     minute: "2-digit",
@@ -88,7 +93,9 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
                         <div className="space-y-1">
                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <Mail className="w-4 h-4" />
-                                <span className="truncate">{application.applicantEmail}</span>
+                                <span className="truncate">
+                                    {application.applicantEmail}
+                                </span>
                             </div>
                             {application.applicantPhone && (
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -110,7 +117,7 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
                     >
                         View Details
                     </Button>
-                    
+
                     {application.cvUrl && (
                         <Button
                             variant="outline"
@@ -121,7 +128,7 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
                             Download CV
                         </Button>
                     )}
-                    
+
                     {application.coverLetter && (
                         <Button
                             variant="outline"
@@ -132,13 +139,15 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
                             Cover Letter
                         </Button>
                     )}
-                    
+
                     <div className="ml-auto">
                         {isArchived ? (
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                leftIcon={<ArchiveRestore className="w-4 h-4" />}
+                                leftIcon={
+                                    <ArchiveRestore className="w-4 h-4" />
+                                }
                                 onClick={() => onRestore(application.id)}
                             >
                                 Restore

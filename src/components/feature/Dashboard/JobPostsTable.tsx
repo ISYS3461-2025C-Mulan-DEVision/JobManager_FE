@@ -120,7 +120,12 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            navigate(ROUTES.JOB_POST_APPLICATIONS.replace(":jobPostId", item.id));
+                            navigate(
+                                ROUTES.JOB_POST_APPLICATIONS.replace(
+                                    ":jobPostId",
+                                    item.id
+                                )
+                            );
                         }}
                         className="text-blue-600 hover:text-blue-800 text-xs font-medium"
                     >

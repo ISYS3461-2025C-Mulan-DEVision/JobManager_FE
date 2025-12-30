@@ -36,8 +36,10 @@ export const ApplicationsView: React.FC<ApplicationsViewProps> = ({
         () =>
             applications
                 .filter((app) => app.status !== APPLICATION_STATUS.ARCHIVED)
-                .sort((a, b) => 
-                    new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+                .sort(
+                    (a, b) =>
+                        new Date(b.submittedAt).getTime() -
+                        new Date(a.submittedAt).getTime()
                 ),
         [applications]
     );
@@ -46,8 +48,10 @@ export const ApplicationsView: React.FC<ApplicationsViewProps> = ({
         () =>
             applications
                 .filter((app) => app.status === APPLICATION_STATUS.ARCHIVED)
-                .sort((a, b) => 
-                    new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+                .sort(
+                    (a, b) =>
+                        new Date(b.submittedAt).getTime() -
+                        new Date(a.submittedAt).getTime()
                 ),
         [applications]
     );
@@ -100,7 +104,7 @@ export const ApplicationsView: React.FC<ApplicationsViewProps> = ({
                         Review and manage applicants for this job posting
                     </p>
                 </div>
-                
+
                 {/* Badge indicating data source - Important for interview discussion */}
                 <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
                     <Database className="w-4 h-4 text-blue-600" />
@@ -173,24 +177,34 @@ export const ApplicationsView: React.FC<ApplicationsViewProps> = ({
                                         {/* Results count */}
                                         <p className="text-sm text-gray-600">
                                             Showing {currentApplications.length}{" "}
-                                            {activeTab === "pending" ? "pending" : "archived"}{" "}
+                                            {activeTab === "pending"
+                                                ? "pending"
+                                                : "archived"}{" "}
                                             {currentApplications.length === 1
                                                 ? "application"
                                                 : "applications"}
                                         </p>
 
                                         {/* Application cards */}
-                                        {currentApplications.map((application) => (
-                                            <ApplicationCard
-                                                key={application.id}
-                                                application={application}
-                                                onView={onViewApplication}
-                                                onArchive={onArchiveApplication}
-                                                onRestore={onRestoreApplication}
-                                                onDownloadCV={onDownloadCV}
-                                                onViewCoverLetter={onViewCoverLetter}
-                                            />
-                                        ))}
+                                        {currentApplications.map(
+                                            (application) => (
+                                                <ApplicationCard
+                                                    key={application.id}
+                                                    application={application}
+                                                    onView={onViewApplication}
+                                                    onArchive={
+                                                        onArchiveApplication
+                                                    }
+                                                    onRestore={
+                                                        onRestoreApplication
+                                                    }
+                                                    onDownloadCV={onDownloadCV}
+                                                    onViewCoverLetter={
+                                                        onViewCoverLetter
+                                                    }
+                                                />
+                                            )
+                                        )}
                                     </div>
                                 )}
                             </div>
