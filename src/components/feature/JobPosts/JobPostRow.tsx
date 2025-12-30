@@ -32,10 +32,10 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
     const handleRowClick = (e: React.MouseEvent) => {
         // Don't navigate if clicking on action buttons
         const target = e.target as HTMLElement;
-        if (target.closest('button')) {
+        if (target.closest("button")) {
             return;
         }
-        navigate(ROUTES.JOB_POST_DETAIL.replace(':id', jobId));
+        navigate(ROUTES.JOB_POST_DETAIL.replace(":id", jobId));
     };
 
     return (

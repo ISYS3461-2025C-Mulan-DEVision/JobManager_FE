@@ -29,10 +29,10 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
     const handleRowClick = (id: string, e: React.MouseEvent) => {
         // Don't navigate if clicking on action buttons
         const target = e.target as HTMLElement;
-        if (target.closest('button')) {
+        if (target.closest("button")) {
             return;
         }
-        navigate(ROUTES.JOB_POST_DETAIL.replace(':id', id));
+        navigate(ROUTES.JOB_POST_DETAIL.replace(":id", id));
     };
 
     const columns: TableColumn<JobPost>[] = [
