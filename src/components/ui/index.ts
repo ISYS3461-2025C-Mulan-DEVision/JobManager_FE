@@ -20,3 +20,8 @@ export * from "./InfoCard";
 export * from "./PhoneInput";
 export * from "./PasswordRequirements";
 export * from "./Badge";
+export * from "./Pagination";
+export * from "./Checkbox";
+export * from "./RadioGroup";
+export * from "./RangeSlider";
+export * from "./TagInput";

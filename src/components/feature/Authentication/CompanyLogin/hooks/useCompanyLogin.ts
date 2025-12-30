@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AuthService, {
     LoginPayload,
 } from "@/components/feature/Authentication/api/AuthService";
-import CompanyService from "@/services/companyService";
+import CompanyProfileService from "@/components/feature/CompanyProfile/api/CompanyProfileService";
 import { storeAuthSession } from "@/services/authStorage";
 import { ROUTES } from "@/utils";
 
@@ -38,13 +38,10 @@ export const useCompanyLogin = () => {
                     "Fetching company profile for ID:",
                     response.data.companyId
                 );
-                const companyResponse = await CompanyService.getCompany(
-                    response.data.companyId
-                );
-                console.log("Company profile response:", companyResponse);
+                const company = await CompanyProfileService.getCompany();
+                console.log("Company profile response:", company);
 
-                if (companyResponse.success && companyResponse.data) {
-                    const company = companyResponse.data;
+                if (company) {
                     console.log("Company data:", company);
 
                     // Check if essential fields are missing
@@ -65,13 +62,6 @@ export const useCompanyLogin = () => {
                     // Profile is complete, navigate to dashboard
                     console.log("Profile is complete, navigating to dashboard");
                     navigate(ROUTES.DASHBOARD, { replace: true });
-                    return response.data;
-                } else {
-                    console.warn(
-                        "Company response not successful or data missing, redirecting to profile completion"
-                    );
-                    // If we can't get company data, assume profile is incomplete
-                    navigate("/complete-profile", { replace: true });
                     return response.data;
                 }
             } catch (profileError: any) {

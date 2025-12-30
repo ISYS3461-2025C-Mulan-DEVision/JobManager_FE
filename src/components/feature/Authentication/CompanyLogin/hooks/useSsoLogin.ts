@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { storeAuthSession } from "../../../../../services/authStorage";
-import CompanyService from "@/services/companyService";
+import CompanyProfileService from "@/components/feature/CompanyProfile/api/CompanyProfileService";
 
 interface SsoLoginResult {
     success: boolean;
@@ -86,15 +86,11 @@ export const useSsoLogin = (): UseSsoLoginReturn => {
                             "Fetching company profile for ID:",
                             companyId
                         );
-                        const companyResponse =
-                            await CompanyService.getCompany(companyId);
-                        console.log(
-                            "Company profile response:",
-                            companyResponse
-                        );
+                        const company =
+                            await CompanyProfileService.getCompany();
+                        console.log("Company profile response:", company);
 
-                        if (companyResponse.success && companyResponse.data) {
-                            const company = companyResponse.data;
+                        if (company) {
                             console.log("Company data:", company);
 
                             const isProfileIncomplete =
@@ -115,10 +111,6 @@ export const useSsoLogin = (): UseSsoLoginReturn => {
                                 });
                                 return;
                             }
-                        } else {
-                            console.warn(
-                                "Company response not successful or data missing"
-                            );
                         }
                     } catch (err) {
                         console.error("Failed to check profile:", err);
