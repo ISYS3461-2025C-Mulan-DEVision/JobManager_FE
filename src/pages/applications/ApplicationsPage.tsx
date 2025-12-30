@@ -99,10 +99,10 @@ const ApplicationsPage: React.FC = () => {
 
     const handleViewApplication = (applicationId: string) => {
         navigate(
-            ROUTES.APPLICATION_DETAILS.replace(":jobPostId", jobPostId || "").replace(
-                ":applicationId",
-                applicationId
-            )
+            ROUTES.APPLICATION_DETAILS.replace(
+                ":jobPostId",
+                jobPostId || ""
+            ).replace(":applicationId", applicationId)
         );
     };
 
