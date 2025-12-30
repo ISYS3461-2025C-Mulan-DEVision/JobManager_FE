@@ -1,6 +1,6 @@
 import { Routes } from "react-router-dom";
 import AppLayout from "@/layout/AppLayout";
-import { authRoutes, mainRoutes, jobRoutes, applicantRoutes } from "@/routes";
+import { authRoutes, mainRoutes, jobRoutes, applicantRoutes, applicationRoutes } from "@/routes";
 
 function App() {
     return (
@@ -10,6 +10,7 @@ function App() {
                 {authRoutes}
                 {jobRoutes}
                 {applicantRoutes}
+                {applicationRoutes}
             </Routes>
         </AppLayout>
     );

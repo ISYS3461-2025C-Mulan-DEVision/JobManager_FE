@@ -113,8 +113,19 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
             key: "applicationsCount",
             header: "Applications",
             render: (item) => (
-                <div className="text-center font-semibold text-gray-700">
-                    {item.applicationsCount || 0}
+                <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-700">
+                        {item.applicationsCount || 0}
+                    </span>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(ROUTES.JOB_POST_APPLICATIONS.replace(":jobPostId", item.id));
+                        }}
+                        className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                    >
+                        View →
+                    </button>
                 </div>
             ),
         },
