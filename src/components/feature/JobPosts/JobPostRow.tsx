@@ -1,6 +1,7 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { JobPost } from "@/types";
-import { SYNC_STATUS } from "@/utils/constants";
+import { SYNC_STATUS, ROUTES } from "@/utils/constants";
 import { formatExpiryDate, isExpiringSoon } from "@/utils/jobPostHelpers";
 import {
     JobStatusBadge,
@@ -24,13 +25,24 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
     onEdit,
     className,
 }) => {
+    const navigate = useNavigate();
     const isExpiring = isExpiringSoon(jobPost.expiryAt);
     const jobId = jobPost.id;
 
+    const handleRowClick = (e: React.MouseEvent) => {
+        // Don't navigate if clicking on action buttons
+        const target = e.target as HTMLElement;
+        if (target.closest('button')) {
+            return;
+        }
+        navigate(ROUTES.JOB_POST_DETAIL.replace(':id', jobId));
+    };
+
     return (
         <tr
+            onClick={handleRowClick}
             className={clsx(
-                "border-b border-gray-200 hover:bg-gray-50 transition-colors",
+                "border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer",
                 className
             )}
         >

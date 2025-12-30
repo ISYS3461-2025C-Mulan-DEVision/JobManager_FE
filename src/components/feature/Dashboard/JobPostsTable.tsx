@@ -1,11 +1,12 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { HeadlessTable } from "../../headless/Table/Table";
 import { TableColumn } from "../../headless/Table/useTable";
 import { Card } from "../../ui/Card/Card";
 import { Skeleton } from "../../ui/Skeleton/Skeleton";
 import { Tooltip } from "../../ui/Tooltip/Tooltip";
 import { JobPost } from "@/types";
-import { SYNC_STATUS } from "@/utils/constants";
+import { SYNC_STATUS, ROUTES } from "@/utils/constants";
 import { JobStatusBadge } from "../JobPosts/JobStatusBadge";
 
 interface JobPostsTableProps {
@@ -23,6 +24,17 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
     onArchive,
     isLoading = false,
 }) => {
+    const navigate = useNavigate();
+
+    const handleRowClick = (id: string, e: React.MouseEvent) => {
+        // Don't navigate if clicking on action buttons
+        const target = e.target as HTMLElement;
+        if (target.closest('button')) {
+            return;
+        }
+        navigate(ROUTES.JOB_POST_DETAIL.replace(':id', id));
+    };
+
     const columns: TableColumn<JobPost>[] = [
         {
             key: "title",
@@ -188,7 +200,8 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
                     renderRow={(item, cols) => (
                         <tr
                             key={item.id}
-                            className="bg-white hover:bg-gray-50 transition-colors"
+                            onClick={(e) => handleRowClick(item.id, e)}
+                            className="bg-white hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                             {cols.map((col) => (
                                 <td
