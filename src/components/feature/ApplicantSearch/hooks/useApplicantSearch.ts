@@ -81,6 +81,9 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
     }, []);
 
     // Search function - real API call
+    // TODO: Applicant Data Dependency
+    // The exact structure of applicant data is owned by the Job Applicant team.
+    // Field names may change when the JA service is updated.
     const searchWithAPI = useCallback(async () => {
         setIsLoading(true);
         setError(null);

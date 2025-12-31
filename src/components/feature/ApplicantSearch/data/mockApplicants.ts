@@ -5,6 +5,9 @@ import type { Applicant } from "../types";
  * 
  * Note: This data is used as fallback when USE_MOCK_DATA is true in useApplicantSearch.
  * TODO: Salary - JA does not have salary fields yet, desiredSalary is not included.
+ * Applicant Data Dependency
+ * The exact structure of applicant data is owned by the Job Applicant team.
+ * Field names may change when the JA service is updated.
  */
 export const MOCK_APPLICANTS: Applicant[] = [
     {
@@ -15,7 +18,7 @@ export const MOCK_APPLICANTS: Applicant[] = [
         avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
         bio: "Passionate full-stack developer with 5+ years of experience building scalable web applications. I specialize in React, Node.js, and cloud technologies. Always eager to learn new technologies and solve complex problems.",
         countryCode: "US",
-        highestDegree: "BACHELOR",
+        highestDegree: "BACHELOR",  
         employmentTypes: ["FULL_TIME"],
         skills: [
             { id: "skill-1", name: "React" },
