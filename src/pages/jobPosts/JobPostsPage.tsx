@@ -188,29 +188,22 @@ const JobPostsPage: React.FC = () => {
                                 Object.values(
                                     EMPLOYMENT_TYPES
                                 ) as EmploymentType[]
-                            )
-                                .filter(
-                                    (type) =>
-                                        type !== EMPLOYMENT_TYPES.FREELANCE
-                                )
-                                .map((type) => (
-                                    <button
-                                        key={type}
-                                        onClick={() =>
-                                            toggleEmploymentTypeFilter(type)
-                                        }
-                                        className={clsx(
-                                            "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                                            selectedEmploymentTypes.includes(
-                                                type
-                                            )
-                                                ? "bg-blue-100 text-blue-700 border-2 border-blue-400"
-                                                : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                                        )}
-                                    >
-                                        {EMPLOYMENT_TYPE_LABELS[type]}
-                                    </button>
-                                ))}
+                            ).map((type) => (
+                                <button
+                                    key={type}
+                                    onClick={() =>
+                                        toggleEmploymentTypeFilter(type)
+                                    }
+                                    className={clsx(
+                                        "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                                        selectedEmploymentTypes.includes(type)
+                                            ? "bg-blue-100 text-blue-700 border-2 border-blue-400"
+                                            : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
+                                    )}
+                                >
+                                    {EMPLOYMENT_TYPE_LABELS[type]}
+                                </button>
+                            ))}
                         </div>
                     </div>
 

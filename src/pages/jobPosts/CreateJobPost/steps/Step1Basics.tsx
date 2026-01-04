@@ -48,95 +48,84 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({
                         Object.keys(EMPLOYMENT_TYPES) as Array<
                             keyof typeof EMPLOYMENT_TYPES
                         >
-                    )
-                        .filter(
-                            (key) =>
-                                EMPLOYMENT_TYPES[key] !==
-                                EMPLOYMENT_TYPES.FREELANCE
-                        )
-                        .map((key) => {
-                            const type = EMPLOYMENT_TYPES[key];
-                            const isSelected =
-                                formData.employmentTypes.includes(type);
+                    ).map((key) => {
+                        const type = EMPLOYMENT_TYPES[key];
+                        const isSelected =
+                            formData.employmentTypes.includes(type);
 
-                            const isInternship =
-                                type === EMPLOYMENT_TYPES.INTERNSHIP;
-                            const isContract =
-                                type === EMPLOYMENT_TYPES.CONTRACT;
-                            const hasOtherTypes = formData.employmentTypes.some(
-                                (t) =>
-                                    t !== EMPLOYMENT_TYPES.INTERNSHIP &&
-                                    t !== EMPLOYMENT_TYPES.CONTRACT
-                            );
+                        const isInternship =
+                            type === EMPLOYMENT_TYPES.INTERNSHIP;
+                        const isContract = type === EMPLOYMENT_TYPES.CONTRACT;
+                        const hasOtherTypes = formData.employmentTypes.some(
+                            (t) =>
+                                t !== EMPLOYMENT_TYPES.INTERNSHIP &&
+                                t !== EMPLOYMENT_TYPES.CONTRACT
+                        );
 
-                            // Disable logic:
-                            // - If Internship/Contract is selected, disable Full-time/Part-time
-                            // - If Full-time/Part-time is selected, disable all others
-                            let isDisabled = false;
-                            if (isInternship || isContract) {
-                                // Disable if Full-time or Part-time is already selected
-                                isDisabled = hasOtherTypes;
-                            } else {
-                                // Disable Full-time/Part-time if:
-                                // 1. Any type is already selected, OR
-                                // 2. Internship or Contract is selected
-                                isDisabled =
-                                    formData.employmentTypes.length > 0 &&
-                                    !isSelected;
-                            }
+                        // Disable logic:
+                        // - If Internship/Contract is selected, disable Full-time/Part-time
+                        // - If Full-time/Part-time is selected, disable all others
+                        let isDisabled = false;
+                        if (isInternship || isContract) {
+                            // Disable if Full-time or Part-time is already selected
+                            isDisabled = hasOtherTypes;
+                        } else {
+                            // Disable Full-time/Part-time if:
+                            // 1. Any type is already selected, OR
+                            // 2. Internship or Contract is selected
+                            isDisabled =
+                                formData.employmentTypes.length > 0 &&
+                                !isSelected;
+                        }
 
-                            return (
-                                <label
-                                    key={type}
-                                    className={clsx(
-                                        "flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
-                                        isSelected
-                                            ? "border-blue-500 bg-blue-50"
-                                            : "border-gray-200 hover:border-gray-300",
-                                        isDisabled &&
-                                            "opacity-50 cursor-not-allowed"
+                        return (
+                            <label
+                                key={type}
+                                className={clsx(
+                                    "flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
+                                    isSelected
+                                        ? "border-blue-500 bg-blue-50"
+                                        : "border-gray-200 hover:border-gray-300",
+                                    isDisabled &&
+                                        "opacity-50 cursor-not-allowed"
+                                )}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => toggleEmploymentType(type)}
+                                    disabled={isDisabled}
+                                    className="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                />
+                                <div className="flex-1">
+                                    <span
+                                        className={clsx(
+                                            "font-medium",
+                                            isSelected
+                                                ? "text-blue-700"
+                                                : "text-gray-900"
+                                        )}
+                                    >
+                                        {EMPLOYMENT_TYPE_LABELS[type]}
+                                    </span>
+                                    {isDisabled && (
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Only Internship and Contract can be
+                                            combined together
+                                        </p>
                                     )}
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={isSelected}
-                                        onChange={() =>
-                                            toggleEmploymentType(type)
-                                        }
-                                        disabled={isDisabled}
-                                        className="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    <div className="flex-1">
-                                        <span
-                                            className={clsx(
-                                                "font-medium",
-                                                isSelected
-                                                    ? "text-blue-700"
-                                                    : "text-gray-900"
-                                            )}
-                                        >
-                                            {EMPLOYMENT_TYPE_LABELS[type]}
-                                        </span>
-                                        {isDisabled && (
+                                    {(type === EMPLOYMENT_TYPES.INTERNSHIP ||
+                                        type === EMPLOYMENT_TYPES.CONTRACT) &&
+                                        !hasOtherTypes && (
                                             <p className="text-xs text-gray-500 mt-1">
-                                                Only Internship and Contract can
-                                                be combined together
+                                                Can only be combined with each
+                                                other
                                             </p>
                                         )}
-                                        {(type ===
-                                            EMPLOYMENT_TYPES.INTERNSHIP ||
-                                            type ===
-                                                EMPLOYMENT_TYPES.CONTRACT) &&
-                                            !hasOtherTypes && (
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    Can only be combined with
-                                                    each other
-                                                </p>
-                                            )}
-                                    </div>
-                                </label>
-                            );
-                        })}
+                                </div>
+                            </label>
+                        );
+                    })}
                 </div>
                 {errors.employmentTypes && (
                     <p className="mt-2 text-sm text-red-600">

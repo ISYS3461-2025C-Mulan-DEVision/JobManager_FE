@@ -16,6 +16,7 @@ interface JobPostRowProps {
     jobPost: JobPost;
     onView?: (id: string) => void;
     onEdit?: (id: string) => void;
+    onArchive?: (id: string) => Promise<void>;
     className?: string;
 }
 
@@ -23,6 +24,7 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
     jobPost,
     onView,
     onEdit,
+    onArchive,
     className,
 }) => {
     const navigate = useNavigate();
