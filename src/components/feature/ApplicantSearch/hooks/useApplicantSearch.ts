@@ -6,12 +6,14 @@ import type {
     Applicant,
 } from "../types";
 
-// Default search state
+// Default search state - aligned with new JA API params
 const defaultSearchState: SearchState = {
-    keyword: "",
+    username: "",
     countryCode: undefined,
+    city: undefined,
     employmentTypes: [],
-    highestDegree: undefined,
+    education: undefined,
+    workExperience: undefined,
     // TODO: Salary filtering - uncomment when JA adds salary support
     // minSalary: undefined,
     // maxSalary: undefined,
@@ -132,16 +134,16 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
             // Apply filters to mock data
             let filteredApplicants = [...MOCK_APPLICANTS];
 
-            // Filter by keyword (search in name, email, bio, skills)
-            if (searchState.keyword) {
-                const keyword = searchState.keyword.toLowerCase();
+            // Filter by username (search in name, email, bio, skills)
+            if (searchState.username) {
+                const searchTerm = searchState.username.toLowerCase();
                 filteredApplicants = filteredApplicants.filter(
                     (a) =>
-                        a.fullName.toLowerCase().includes(keyword) ||
-                        a.email.toLowerCase().includes(keyword) ||
-                        a.bio?.toLowerCase().includes(keyword) ||
+                        a.fullName.toLowerCase().includes(searchTerm) ||
+                        a.email.toLowerCase().includes(searchTerm) ||
+                        a.bio?.toLowerCase().includes(searchTerm) ||
                         a.skills.some((s) =>
-                            s.name.toLowerCase().includes(keyword)
+                            s.name.toLowerCase().includes(searchTerm)
                         )
                 );
             }
@@ -226,8 +228,10 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
         searchState.page,
         searchState.sortBy,
         searchState.countryCode,
+        searchState.city,
         searchState.employmentTypes,
-        searchState.highestDegree,
+        searchState.education,
+        searchState.workExperience,
         // TODO: Salary filtering - uncomment when JA adds salary support
         // searchState.minSalary,
         // searchState.maxSalary,

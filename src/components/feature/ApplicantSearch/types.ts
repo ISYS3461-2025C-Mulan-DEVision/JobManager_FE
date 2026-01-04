@@ -16,12 +16,17 @@ export type ApplicantSortOption = typeof APPLICANT_SORT_OPTIONS[keyof typeof APP
 // ============================================================
 
 export interface SearchState {
-    keyword: string;
+    /** Username/name search (firstName, lastName). Maps to JA's 'username' param. */
+    username: string;
     countryCode?: string;
+    /** City filter. Maps to JA's 'city' param. */
+    city?: string;
     employmentTypes: EmploymentType[];
-    highestDegree?: EducationDegree;
+    /** Education level. Maps to JA's 'education' param. */
+    education?: EducationDegree;
+    /** Work experience keywords. Maps to JA's 'workExperience' param. */
+    workExperience?: string;
     // TODO: Salary filtering - JA service does not have salary fields yet
-    // Uncomment when JA adds salary support to UserResponse
     // minSalary?: number;
     // maxSalary?: number;
     skillIds: string[];
@@ -31,10 +36,12 @@ export interface SearchState {
 }
 
 export const DEFAULT_SEARCH_STATE: SearchState = {
-    keyword: "",
+    username: "",
     countryCode: undefined,
+    city: undefined,
     employmentTypes: [],
-    highestDegree: undefined,
+    education: undefined,
+    workExperience: undefined,
     // TODO: Salary filtering - uncomment when JA adds salary support
     // minSalary: undefined,
     // maxSalary: undefined,
@@ -62,24 +69,30 @@ export interface CreateSearchProfileRequest {
     companyId: string;
     profileName: string;
     countryCode?: string;
-    minSalary?: number;
-    maxSalary?: number;
-    highestDegree?: EducationDegree;
+    city?: string;
+    education?: EducationDegree;
+    workExperience?: string;
     employmentTypes?: EmploymentType[];
     skillIds?: string[];
     isActive?: boolean;
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // minSalary?: number;
+    // maxSalary?: number;
 }
 
 // Search Profile - Update Request
 export interface UpdateSearchProfileRequest {
     profileName?: string;
     countryCode?: string;
-    minSalary?: number;
-    maxSalary?: number;
-    highestDegree?: EducationDegree;
+    city?: string;
+    education?: EducationDegree;
+    workExperience?: string;
     employmentTypes?: EmploymentType[];
     skillIds?: string[];
     isActive?: boolean;
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // minSalary?: number;
+    // maxSalary?: number;
 }
 
 // Search Profile - Update Status Request
@@ -93,14 +106,17 @@ export interface SearchProfileResponse {
     companyId: string;
     profileName: string;
     countryCode?: string;
-    minSalary?: number;
-    maxSalary?: number;
-    highestDegree?: EducationDegree;
+    city?: string;
+    education?: EducationDegree;
+    workExperience?: string;
     employmentTypes: EmploymentType[];
     skillIds: string[];
     isActive: boolean;
     createdAt: string;
     updatedAt: string;
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // minSalary?: number;
+    // maxSalary?: number;
 }
 
 // Search Profile - Active Response (External, read-only)
@@ -109,11 +125,14 @@ export interface ActiveSearchProfileResponse {
     companyId: string;
     profileName: string;
     countryCode?: string;
-    minSalary?: number;
-    maxSalary?: number;
-    highestDegree?: EducationDegree;
+    city?: string;
+    education?: EducationDegree;
+    workExperience?: string;
     employmentTypes: EmploymentType[];
     skillIds: string[];
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // minSalary?: number;
+    // maxSalary?: number;
 }
 
 // ============================================================
@@ -156,9 +175,7 @@ export interface ApplicantCountry {
 /**
  * Applicant model - aligned with JA service's UserResponse.
  * 
- * Note: JA UserResponse uses 'objectiveSummary' which maps to 'bio' here.
- * Note: JA does not have education, work experience, or employmentTypes in search response.
- * These fields are populated from separate API calls or mock data.
+ * Updated 2026-01-04 to include new fields: address, city
  */
 export interface Applicant {
     id: string;
@@ -167,6 +184,10 @@ export interface Applicant {
     lastName?: string;
     fullName: string;
     phone?: string;
+    /** Street address */
+    address?: string;
+    /** City name */
+    city?: string;
     avatarUrl?: string;
     /** Maps from JA's objectiveSummary */
     bio?: string;
@@ -177,11 +198,10 @@ export interface Applicant {
     premium?: boolean;
     active?: boolean;
     skills: ApplicantSkill[];
-    // TODO: JA search does not return these - need separate API or mock
-    highestDegree?: EducationDegree;
-    employmentTypes: EmploymentType[];
+    // JA now returns these in search response
     education: ApplicantEducation[];
     workExperience: ApplicantWorkExperience[];
+    employmentTypes: EmploymentType[];
     createdAt: string;
     updatedAt: string;
     // TODO: Salary - JA service does not have salary fields yet

@@ -12,7 +12,7 @@ import {
   // CircleDollarSign,
   MapPin,
 } from "lucide-react";
-import type { Applicant } from "../types";
+import type { Applicant, EducationDegree } from "../types";
 
 interface ApplicantCardProps {
   applicant: Applicant;
@@ -85,10 +85,13 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
 
           {/* Details */}
           <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-600">
-            {applicant.highestDegree && (
+            {applicant.education && applicant.education.length > 0 && (
               <span className="flex items-center gap-1">
                 <GraduationCap className="w-4 h-4" />
-                {EDUCATION_DEGREE_LABELS[applicant.highestDegree]}
+                {applicant.education[0].degree &&
+                  EDUCATION_DEGREE_LABELS[
+                    applicant.education[0].degree as EducationDegree
+                  ]}
               </span>
             )}
             {applicant.employmentTypes.length > 0 && (

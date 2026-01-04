@@ -89,7 +89,7 @@ export const Filters: React.FC<FiltersProps> = ({
 
   const handleEmploymentTypeChange = (
     type: EmploymentType,
-    checked: boolean
+    checked: boolean,
   ) => {
     const newTypes = checked
       ? [...searchState.employmentTypes, type]
@@ -98,7 +98,7 @@ export const Filters: React.FC<FiltersProps> = ({
   };
 
   const handleDegreeChange = (value: string | undefined) => {
-    onFilterChange({ highestDegree: value as EducationDegree | undefined });
+    onFilterChange({ education: value as EducationDegree | undefined });
   };
 
   // TODO: Salary filtering - uncomment when JA adds salary support
@@ -130,7 +130,7 @@ export const Filters: React.FC<FiltersProps> = ({
   ];
 
   const educationDegreeOptions: RadioOption[] = Object.entries(
-    EDUCATION_DEGREES
+    EDUCATION_DEGREES,
   ).map(([, value]) => ({
     value: value,
     label: EDUCATION_DEGREE_LABELS[value],
@@ -183,12 +183,12 @@ export const Filters: React.FC<FiltersProps> = ({
               key={key}
               label={EMPLOYMENT_TYPE_LABELS[value]}
               checked={searchState.employmentTypes.includes(
-                value as EmploymentType
+                value as EmploymentType,
               )}
               onChange={(e) =>
                 handleEmploymentTypeChange(
                   value as EmploymentType,
-                  e.target.checked
+                  e.target.checked,
                 )
               }
               disabled={disabled}
@@ -205,7 +205,7 @@ export const Filters: React.FC<FiltersProps> = ({
         <RadioGroup
           name="education-degree"
           options={educationDegreeOptions}
-          value={searchState.highestDegree}
+          value={searchState.education}
           onChange={handleDegreeChange}
           disabled={disabled}
           allowDeselect

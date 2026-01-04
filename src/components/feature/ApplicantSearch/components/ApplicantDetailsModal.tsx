@@ -62,15 +62,17 @@ export const ApplicantDetailsModal: React.FC<ApplicantDetailsModalProps> = ({
               {applicant.fullName}
             </h1>
             <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-gray-600">
-              {applicant.highestDegree && (
+              {applicant.education && applicant.education.length > 0 && (
                 <span className="flex items-center gap-1">
                   <GraduationCap className="w-4 h-4" />
-                  {EDUCATION_DEGREE_LABELS[applicant.highestDegree]}
+                  {applicant.education[0].degree}
                 </span>
               )}
-              {applicant.highestDegree && applicant.countryCode && (
-                <span>•</span>
-              )}
+              {((applicant.education && applicant.education.length > 0) ||
+                applicant.city) &&
+                applicant.countryCode && <span>•</span>}
+              {applicant.city && <span>{applicant.city}</span>}
+              {applicant.city && applicant.countryCode && <span>,</span>}
               {applicant.countryCode && <span>{applicant.countryCode}</span>}
             </div>
 

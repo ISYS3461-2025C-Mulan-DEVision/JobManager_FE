@@ -20,6 +20,7 @@ const getCompanyId = (): string => {
 
 // Applicant Search API
 // Connects to JM backend which proxies to JA service
+// Updated 2026-01-04 to use new JA API params
 
 export const searchApplicants = async (
     searchState: SearchState
@@ -27,19 +28,30 @@ export const searchApplicants = async (
     // Build query params from search state
     const params = new URLSearchParams();
 
-    if (searchState.keyword) {
-        params.append("keyword", searchState.keyword);
+    if (searchState.username) {
+        params.append("username", searchState.username);
     }
     if (searchState.countryCode) {
         params.append("countryCode", searchState.countryCode);
+    }
+    if (searchState.city) {
+        params.append("city", searchState.city);
+    }
+    if (searchState.education) {
+        params.append("education", searchState.education);
+    }
+    if (searchState.workExperience) {
+        params.append("workExperience", searchState.workExperience);
     }
     if (searchState.employmentTypes.length > 0) {
         searchState.employmentTypes.forEach((type) => {
             params.append("employmentTypes", type);
         });
     }
-    if (searchState.highestDegree) {
-        params.append("highestDegree", searchState.highestDegree);
+    if (searchState.skillIds.length > 0) {
+        searchState.skillIds.forEach((id) => {
+            params.append("skills", id);
+        });
     }
     // TODO: Salary filtering - uncomment when JA adds salary support
     // if (searchState.minSalary !== undefined) {
@@ -48,11 +60,6 @@ export const searchApplicants = async (
     // if (searchState.maxSalary !== undefined) {
     //     params.append("maxSalary", searchState.maxSalary.toString());
     // }
-    if (searchState.skillIds.length > 0) {
-        searchState.skillIds.forEach((id) => {
-            params.append("skillIds", id);
-        });
-    }
     if (searchState.sortBy) {
         params.append("sortBy", searchState.sortBy);
     }

@@ -8,18 +8,19 @@ import { Search, Check } from "lucide-react";
 import type { ApplicantSortOption } from "../types";
 
 interface SearchBarProps {
-  keyword: string;
+  /** Search term (username/name search) */
+  searchTerm: string;
   sortBy: ApplicantSortOption;
-  onKeywordChange: (keyword: string) => void;
+  onSearchTermChange: (term: string) => void;
   onSortChange: (sortBy: ApplicantSortOption) => void;
   onSearch: () => void;
   disabled?: boolean;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
-  keyword,
+  searchTerm,
   sortBy,
-  onKeywordChange,
+  onSearchTermChange,
   onSortChange,
   onSearch,
   disabled = false,
@@ -28,7 +29,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     ([, value]) => ({
       value,
       label: APPLICANT_SORT_LABELS[value],
-    })
+    }),
   );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -43,10 +44,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       <div className="relative flex-1 w-full sm:max-w-md">
         <Input
           type="text"
-          value={keyword}
-          onChange={(e) => onKeywordChange(e.target.value)}
+          value={searchTerm}
+          onChange={(e) => onSearchTermChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Search by skills, experience, or summary..."
+          placeholder="Search by name..."
           disabled={disabled}
           fullWidth
           endAdornment={

@@ -25,11 +25,13 @@ import type {
   UpdateSearchProfileRequest,
 } from "@/components/feature/ApplicantSearch/types";
 
-// Filter fields to compare for dirty state (excludes keyword, sortBy, page, pageSize)
+// Filter fields to compare for dirty state (excludes username, sortBy, page, pageSize)
 const FILTER_KEYS: (keyof SearchState)[] = [
   "countryCode",
+  "city",
   "employmentTypes",
-  "highestDegree",
+  "education",
+  "workExperience",
   // TODO: Salary filtering - uncomment when JA adds salary support
   // "minSalary",
   // "maxSalary",
@@ -111,8 +113,10 @@ export const ApplicantSearchPage: React.FC = () => {
       const newState: SearchState = {
         ...searchState,
         countryCode: selectedProfile.countryCode,
+        city: selectedProfile.city,
         employmentTypes: selectedProfile.employmentTypes,
-        highestDegree: selectedProfile.highestDegree,
+        education: selectedProfile.education,
+        workExperience: selectedProfile.workExperience,
         // TODO: Salary filtering - uncomment when JA adds salary support
         // minSalary: selectedProfile.minSalary,
         // maxSalary: selectedProfile.maxSalary,
@@ -181,8 +185,10 @@ export const ApplicantSearchPage: React.FC = () => {
     const updates: UpdateSearchProfileRequest = {
       profileName: selectedProfile.profileName,
       countryCode: searchState.countryCode,
+      city: searchState.city,
       employmentTypes: searchState.employmentTypes,
-      highestDegree: searchState.highestDegree,
+      education: searchState.education,
+      workExperience: searchState.workExperience,
       // TODO: Salary filtering - uncomment when JA adds salary support
       // minSalary: searchState.minSalary,
       // maxSalary: searchState.maxSalary,
@@ -248,8 +254,10 @@ export const ApplicantSearchPage: React.FC = () => {
     const updates: UpdateSearchProfileRequest = {
       profileName: selectedProfile.profileName,
       countryCode: searchState.countryCode,
+      city: searchState.city,
       employmentTypes: searchState.employmentTypes,
-      highestDegree: searchState.highestDegree,
+      education: searchState.education,
+      workExperience: searchState.workExperience,
       // TODO: Salary filtering - uncomment when JA adds salary support
       // minSalary: searchState.minSalary,
       // maxSalary: searchState.maxSalary,
@@ -289,9 +297,9 @@ export const ApplicantSearchPage: React.FC = () => {
         {/* Search Bar */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
           <SearchBar
-            keyword={searchState.keyword}
+            searchTerm={searchState.username}
             sortBy={searchState.sortBy}
-            onKeywordChange={(keyword) => updateSearchState({ keyword })}
+            onSearchTermChange={(username) => updateSearchState({ username })}
             onSortChange={(sortBy) => updateSearchState({ sortBy })}
             onSearch={handleSearch}
             disabled={isSearching}
