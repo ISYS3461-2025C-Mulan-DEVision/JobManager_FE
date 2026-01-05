@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { ActivationState } from "../types.ts";
@@ -6,6 +6,7 @@ import { ActivationState } from "../types.ts";
 export const useAccountActivation = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const hasActivated = useRef(false);
 
     const [state, setState] = useState<ActivationState>({
         status: "loading",
@@ -15,6 +16,12 @@ export const useAccountActivation = () => {
     useEffect(() => {
         const activateAccount = async () => {
             const token = searchParams.get("token");
+
+            // Prevent duplicate activation calls (React 18 StrictMode runs effects twice)
+            if (hasActivated.current) {
+                return;
+            }
+            hasActivated.current = true;
 
             if (!token) {
                 setState({
