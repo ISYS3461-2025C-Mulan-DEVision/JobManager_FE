@@ -1,24 +1,51 @@
-import React from "react";
+import React, { useState } from "react";
 import { HeadlessModal } from "@/components/headless";
 import { Badge } from "@/components/ui";
 import { EDUCATION_DEGREE_LABELS } from "@/utils/constants";
-import { X, User, GraduationCap, Phone, Copy } from "lucide-react";
-import type { Applicant } from "../types";
+import {
+  X,
+  User,
+  GraduationCap,
+  Phone,
+  Copy,
+  Star,
+  AlertCircle,
+} from "lucide-react";
+import type { Applicant, ApplicantStatusType } from "../types";
 
 interface ApplicantDetailsModalProps {
   applicant: Applicant | null;
   isOpen: boolean;
   onClose: () => void;
+  onStatusChange?: (
+    applicantId: string,
+    status: ApplicantStatusType,
+  ) => Promise<void>;
 }
 
 export const ApplicantDetailsModal: React.FC<ApplicantDetailsModalProps> = ({
   applicant,
   isOpen,
   onClose,
+  onStatusChange,
 }) => {
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
   if (!applicant) return null;
 
-  // TODO: Mark as Warning/Favorite feature - not implemented yet
+  const handleStatusChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const newStatus = e.target.value as ApplicantStatusType;
+    if (onStatusChange && newStatus !== applicant.companyStatus) {
+      setIsUpdatingStatus(true);
+      try {
+        await onStatusChange(applicant.id, newStatus);
+      } finally {
+        setIsUpdatingStatus(false);
+      }
+    }
+  };
 
   return (
     <HeadlessModal
@@ -58,9 +85,17 @@ export const ApplicantDetailsModal: React.FC<ApplicantDetailsModalProps> = ({
 
           {/* Basic Info */}
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {applicant.fullName}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-gray-900">
+                {applicant.fullName}
+              </h1>
+              {applicant.companyStatus === "FAVORITE" && (
+                <Star className="w-5 h-5 text-yellow-500" fill="currentColor" />
+              )}
+              {applicant.companyStatus === "WARNING" && (
+                <AlertCircle className="w-5 h-5 text-red-500" />
+              )}
+            </div>
             <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-gray-600">
               {applicant.education && applicant.education.length > 0 && (
                 <span className="flex items-center gap-1">
@@ -76,14 +111,22 @@ export const ApplicantDetailsModal: React.FC<ApplicantDetailsModalProps> = ({
               {applicant.countryCode && <span>{applicant.countryCode}</span>}
             </div>
 
-            {/* TODO: Mark as dropdown - not implemented yet */}
-            {/* <div className="mt-3">
-                            <select className="px-3 py-1.5 border rounded-lg text-sm">
-                                <option>Mark as...</option>
-                                <option>Favorite</option>
-                                <option>Warning</option>
-                            </select>
-                        </div> */}
+            {/* Mark as dropdown */}
+            <div className="mt-3">
+              <select
+                value={applicant.companyStatus || "NONE"}
+                onChange={handleStatusChange}
+                disabled={isUpdatingStatus}
+                className="px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                <option value="NONE">No status</option>
+                <option value="FAVORITE">⭐ Favorite</option>
+                <option value="WARNING">⚠️ Warning</option>
+              </select>
+              {isUpdatingStatus && (
+                <span className="ml-2 text-sm text-gray-500">Updating...</span>
+              )}
+            </div>
           </div>
 
           {/* Contact Info */}

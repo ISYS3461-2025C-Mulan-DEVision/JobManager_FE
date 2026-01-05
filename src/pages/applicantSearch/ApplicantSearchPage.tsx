@@ -23,7 +23,9 @@ import type {
   Applicant,
   SearchState,
   UpdateSearchProfileRequest,
+  ApplicantStatusType,
 } from "@/components/feature/ApplicantSearch/types";
+import ApplicantSearchService from "@/components/feature/ApplicantSearch/api/ApplicantSearchService";
 
 // Filter fields to compare for dirty state (excludes username, sortBy, page, pageSize)
 const FILTER_KEYS: (keyof SearchState)[] = [
@@ -284,6 +286,25 @@ export const ApplicantSearchPage: React.FC = () => {
     setSelectedApplicant(null);
   }, []);
 
+  const handleApplicantStatusChange = useCallback(
+    async (applicantId: string, status: ApplicantStatusType) => {
+      try {
+        await ApplicantSearchService.setApplicantStatus(applicantId, {
+          status,
+        });
+        // Update the local applicant state to reflect the change
+        if (selectedApplicant && selectedApplicant.id === applicantId) {
+          setSelectedApplicant({ ...selectedApplicant, companyStatus: status });
+        }
+        // Refresh search results to show updated status
+        search();
+      } catch (err) {
+        console.error("Failed to update applicant status:", err);
+      }
+    },
+    [selectedApplicant, search],
+  );
+
   const handleProfileStatusChange = useCallback(
     async (isActive: boolean) => {
       if (!selectedProfile) return;
@@ -380,6 +401,7 @@ export const ApplicantSearchPage: React.FC = () => {
         applicant={selectedApplicant}
         isOpen={isDetailsModalOpen}
         onClose={handleCloseDetailsModal}
+        onStatusChange={handleApplicantStatusChange}
       />
 
       {/* Unsaved Changes Modal */}

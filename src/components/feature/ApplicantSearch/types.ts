@@ -11,6 +11,9 @@ export type EmploymentType = typeof EMPLOYMENT_TYPES[keyof typeof EMPLOYMENT_TYP
 // Sort options
 export type ApplicantSortOption = typeof APPLICANT_SORT_OPTIONS[keyof typeof APPLICANT_SORT_OPTIONS];
 
+// Applicant Status Type (for Warning/Favorite feature)
+export type ApplicantStatusType = 'NONE' | 'WARNING' | 'FAVORITE';
+
 // ============================================================
 // Search State (Frontend UI State)
 // ============================================================
@@ -206,9 +209,9 @@ export interface Applicant {
     updatedAt: string;
     // TODO: Salary - JA service does not have salary fields yet
     // desiredSalary?: number;
-    // TODO: Mark as Warning/Favorite feature - not implemented yet
-    // isFavorite?: boolean;
-    // isWarning?: boolean;
+    // Company-specific status (Warning/Favorite)
+    companyStatus?: ApplicantStatusType;
+    companyStatusNote?: string;
 }
 
 // Applicant Search Response (Paginated)

@@ -11,6 +11,8 @@ import {
   // TODO: Uncomment when JA adds salary support
   // CircleDollarSign,
   MapPin,
+  Star,
+  AlertCircle,
 } from "lucide-react";
 import type { Applicant, EducationDegree } from "../types";
 
@@ -23,9 +25,8 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
   applicant,
   onClick,
 }) => {
-  // TODO: Mark as Warning/Favorite feature - not implemented yet
-  // const isFavorite = applicant.isFavorite;
-  // const isWarning = applicant.isWarning;
+  const isFavorite = applicant.companyStatus === "FAVORITE";
+  const isWarning = applicant.companyStatus === "WARNING";
 
   // TODO: Salary display - uncomment when JA adds salary support
   // const formatSalary = (salary?: number): string => {
@@ -35,17 +36,19 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
 
   return (
     <Card className="p-4 hover:shadow-md transition-shadow relative">
-      {/* TODO: Warning/Favorite indicators */}
-      {/* {isFavorite && (
-                <span className="absolute top-2 right-2 text-yellow-500">
-                    <Star className="w-5 h-5" fill="currentColor" />
-                </span>
-            )}
-            {isWarning && (
-                <span className="absolute top-2 right-10 text-red-500">
-                    <AlertCircle className="w-5 h-5" />
-                </span>
-            )} */}
+      {/* Warning/Favorite indicators */}
+      {isFavorite && (
+        <span className="absolute top-2 right-2 text-yellow-500">
+          <Star className="w-5 h-5" fill="currentColor" />
+        </span>
+      )}
+      {isWarning && (
+        <span
+          className={`absolute top-2 ${isFavorite ? "right-9" : "right-2"} text-red-500`}
+        >
+          <AlertCircle className="w-5 h-5" />
+        </span>
+      )}
 
       <div className="flex items-start gap-4">
         {/* Avatar */}
