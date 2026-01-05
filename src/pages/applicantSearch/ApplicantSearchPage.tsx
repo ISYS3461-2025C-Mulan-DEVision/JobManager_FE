@@ -79,6 +79,7 @@ export const ApplicantSearchPage: React.FC = () => {
     createProfile,
     updateProfile,
     deleteProfile,
+    toggleProfileStatus,
   } = useSearchProfiles();
 
   const { isPremium } = useSubscription();
@@ -283,6 +284,14 @@ export const ApplicantSearchPage: React.FC = () => {
     setSelectedApplicant(null);
   }, []);
 
+  const handleProfileStatusChange = useCallback(
+    async (isActive: boolean) => {
+      if (!selectedProfile) return;
+      await toggleProfileStatus(selectedProfile.id, isActive);
+    },
+    [selectedProfile, toggleProfileStatus],
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -339,6 +348,10 @@ export const ApplicantSearchPage: React.FC = () => {
                 onFilterChange={handleFilterChange}
                 onSearch={handleSearch}
                 disabled={isSearching}
+                selectedProfileId={selectedProfile?.id}
+                isProfileActive={selectedProfile?.isActive ?? false}
+                onProfileStatusChange={handleProfileStatusChange}
+                isUpdatingStatus={isSaving}
               />
             </div>
           </aside>
