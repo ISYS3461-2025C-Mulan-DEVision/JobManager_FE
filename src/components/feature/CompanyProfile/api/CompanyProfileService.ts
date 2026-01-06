@@ -35,10 +35,9 @@ const getCompanyId = (): string => {
 
 // Helper to build full URL from endpoint
 const buildUrl = (endpoint: string): string => {
-    // API_BASE_URL ends with '/', endpoint starts without '/'
-    // Remove leading slash from endpoint if present
-    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-    return `${API_BASE_URL}${cleanEndpoint}`;
+    // API_BASE_URL no longer ends with '/', endpoint starts with '/'
+    // Just concatenate them directly
+    return `${API_BASE_URL}${endpoint}`;
 };
 
 // Company APIs (GET/PUT /companies/{companyId})

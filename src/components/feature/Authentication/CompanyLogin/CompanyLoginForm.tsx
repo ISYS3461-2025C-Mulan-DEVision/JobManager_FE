@@ -28,7 +28,7 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
     const [capsLockOn, setCapsLockOn] = React.useState(false);
     const [rememberMe, setRememberMe] = React.useState(true);
 
-    const apiBase = `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api/`;
+    const apiBase = `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api`;
 
     return (
         <div className="w-full">
@@ -154,7 +154,8 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                     type="button"
                     variant="secondary"
                     onClick={() => {
-                        const target = `${apiBase}/auth/oauth2/google`;
+                        sessionStorage.setItem("sso_flow", "login");
+                        const target = `${apiBase}/oauth2/authorization/google`;
                         window.location.href = target;
                     }}
                     className="w-full inline-flex items-center justify-center"

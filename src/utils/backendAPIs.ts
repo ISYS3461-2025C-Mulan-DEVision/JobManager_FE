@@ -18,7 +18,7 @@ export const API_ENDPOINTS = {
         UPDATE: (id: string) => `/job-posts/${id}`,
         DELETE: (id: string) => `/job-posts/${id}`,
         PUBLISH: (id: string) => `/job-posts/${id}/publish`,
-        ARCHIVE: (id: string) => `/job-posts/${id}/archive`,
+        UNPUBLISH: (id: string) => `/job-posts/${id}/unpublish`,
         STATS: (id: string) => `/job-posts/${id}/stats`,
         BY_COMPANY: (companyId: string) => `/job-posts/company/${companyId}`,
         BY_COMPANY_PUBLISHED: (companyId: string) =>
@@ -58,8 +58,9 @@ export const API_ENDPOINTS = {
 
     // Applicant Search
     APPLICANT_SEARCH: {
-        // TODO: Search endpoint - not finalized yet, applicant attributes may change
-        SEARCH: "/applicants/search",
+        SEARCH: "/internal/applicants/search",
+        SKILLS: "/internal/applicants/skills",
+        SKILLS_SEARCH: "/internal/applicants/skills/search",
     },
 
     // Search Profiles (Premium Feature)

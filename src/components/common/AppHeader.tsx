@@ -49,12 +49,12 @@ export default function AppHeader({ className }: AppHeaderProps) {
             if (user?.companyId) {
                 try {
                     const [profile, company, premiumStatus] = await Promise.all([
-                        getCompanyProfile(),
-                        getCompany(),
-                        checkIsPremium(),
+                        getCompanyProfile().catch(() => null),
+                        getCompany().catch(() => null),
+                        checkIsPremium().catch(() => ({ data: false })),
                     ]);
-                    setCompanyLogoUrl(profile.logoUrl || null);
-                    setCompanyName(company.name || null);
+                    setCompanyLogoUrl(profile?.logoUrl || null);
+                    setCompanyName(company?.name || null);
                     setIsPremium(premiumStatus.data ?? false);
                 } catch (error) {
                     console.error("Failed to fetch company data:", error);

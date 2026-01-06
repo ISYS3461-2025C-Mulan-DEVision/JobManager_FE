@@ -1,12 +1,20 @@
 import React from "react";
 import { LoginPayload } from "../../api/AuthService";
 
+interface SsoLoginResult {
+    success: boolean;
+    error: string | null;
+}
+
 interface LoginFormUIProps {
     formData: LoginPayload;
     handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleSubmit: (e: React.FormEvent) => void;
     isLoading: boolean;
     error: string | null;
+    ssoLoginResult?: SsoLoginResult | null;
+    isProcessingSso?: boolean;
+    clearSsoResult?: () => void;
 }
 
 export const LoginFormUI: React.FC<LoginFormUIProps> = ({
@@ -15,7 +23,31 @@ export const LoginFormUI: React.FC<LoginFormUIProps> = ({
     handleSubmit,
     isLoading,
     error,
+    ssoLoginResult,
+    isProcessingSso,
+    clearSsoResult,
 }) => {
+    // Show processing state when SSO is being handled
+    if (isProcessingSso) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen min-w-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+                <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+                    <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+                        <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+                            Signing you in...
+                        </h2>
+                        <div className="mt-6 flex justify-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                        </div>
+                        <p className="mt-4 text-center text-sm text-gray-600">
+                            Please wait while we complete your login
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen min-w-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -76,6 +108,33 @@ export const LoginFormUI: React.FC<LoginFormUIProps> = ({
                                 />
                             </div>
                         </div>
+                        {/* Display SSO error if present */}
+                        {ssoLoginResult && !ssoLoginResult.success && ssoLoginResult.error && (
+                            <div className="rounded-md bg-red-50 p-4">
+                                <div className="flex">
+                                    <div className="ml-3">
+                                        <h3 className="text-sm font-medium text-red-800">
+                                            SSO Login Failed
+                                        </h3>
+                                        <div className="mt-2 text-sm text-red-700">
+                                            <p>{ssoLoginResult.error}</p>
+                                        </div>
+                                        {clearSsoResult && (
+                                            <div className="mt-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={clearSsoResult}
+                                                    className="text-sm font-medium text-red-800 hover:text-red-600"
+                                                >
+                                                    Dismiss
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {/* Display regular error if present */}
                         {error && (
                             <div className="text-red-500 text-sm text-center">
                                 {error}

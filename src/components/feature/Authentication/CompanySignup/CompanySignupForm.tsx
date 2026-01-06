@@ -255,9 +255,9 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
         // Save that we're doing SSO registration, not login
         sessionStorage.setItem("sso_flow", "registration");
 
-        // Redirect to backend OAuth2 endpoint - let Spring Security handle it
+        // Redirect to backend OAuth2 endpoint through the API Gateway
         window.location.href =
-            "http://localhost:8081/oauth2/authorization/google";
+            `${apiBase}oauth2/authorization/google`;
     };
 
     const handleSsoFieldChange = React.useCallback(
