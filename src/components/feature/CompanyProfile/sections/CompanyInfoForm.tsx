@@ -36,6 +36,7 @@ import { useCompanyInfoForm } from "../hooks/useCompanyInfoForm";
 import { companyValidators, COMPANY_SIZE_OPTIONS } from "@/utils/validators";
 import type { CompanyProfileFormData } from "../types";
 import { checkIsPremium } from "@/components/feature/Subscription/api/SubscriptionService";
+import httpClient from "@/services/httpClient";
 
 // Banner with Logo Component
 interface BannerWithLogoProps {
@@ -209,6 +210,8 @@ interface EditCompanyModalProps {
     city: string;
     countryCode: string;
   };
+  countries: Array<{ code: string; displayName: string }>;
+  countriesLoading: boolean;
   onChange: (field: keyof CompanyProfileFormData, value: string) => void;
   onSave: () => Promise<void>;
   isSaving: boolean;
@@ -218,6 +221,8 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
   isOpen,
   onClose,
   formData,
+  countries,
+  countriesLoading,
   onChange,
   onSave,
   isSaving,
@@ -231,7 +236,7 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
       city: companyValidators.city(formData.city),
       countryCode: companyValidators.countryCode(formData.countryCode),
     }),
-    [formData]
+    [formData],
   );
 
   const hasErrors = Object.values(errors).some(Boolean);
@@ -297,15 +302,22 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
               helperText="Max 128 characters"
               fullWidth
             />
-            <Input
-              label="Country Code"
+            <Select
+              label="Country"
               value={formData.countryCode}
-              onChange={(e) =>
-                onChange("countryCode", e.target.value.toUpperCase())
-              }
+              onChange={(e) => onChange("countryCode", e.target.value)}
+              options={[
+                {
+                  value: "",
+                  label: countriesLoading ? "Loading..." : "Select a country",
+                },
+                ...countries.map((c) => ({
+                  value: c.code,
+                  label: c.displayName,
+                })),
+              ]}
               error={errors.countryCode}
-              placeholder="e.g., VN, US"
-              helperText="2-3 uppercase letters (ISO 3166-1)"
+              disabled={countriesLoading}
               fullWidth
             />
           </div>
@@ -369,7 +381,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       websiteUrl: companyValidators.websiteUrl(formData.websiteUrl),
       linkedinUrl: companyValidators.linkedinUrl(formData.linkedinUrl),
     }),
-    [formData]
+    [formData],
   );
 
   const hasErrors = Object.values(errors).some(Boolean);
@@ -496,7 +508,7 @@ const EditAboutModal: React.FC<EditAboutModalProps> = ({
       aboutUs: companyValidators.aboutUs(formData.aboutUs),
       whoWeSeek: companyValidators.whoWeSeek(formData.whoWeSeek),
     }),
-    [formData]
+    [formData],
   );
 
   const hasErrors = Object.values(errors).some(Boolean);
@@ -604,6 +616,12 @@ export const CompanyInfoForm: React.FC = () => {
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
 
+  // Country list for select dropdown
+  const [countries, setCountries] = useState<
+    Array<{ code: string; displayName: string }>
+  >([]);
+  const [countriesLoading, setCountriesLoading] = useState(true);
+
   // Modal handlers
   const openCompanyModal = useCallback(() => setIsCompanyModalOpen(true), []);
   const closeCompanyModal = useCallback(() => setIsCompanyModalOpen(false), []);
@@ -625,6 +643,27 @@ export const CompanyInfoForm: React.FC = () => {
     };
 
     fetchPremiumStatus();
+  }, []);
+
+  // Fetch countries on mount
+  useEffect(() => {
+    let isMounted = true;
+    httpClient
+      .get("/auth/countries")
+      .then((res) => {
+        if (isMounted) {
+          setCountries(res.data.data || []);
+          setCountriesLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setCountriesLoading(false);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (isLoading) {
@@ -651,7 +690,6 @@ export const CompanyInfoForm: React.FC = () => {
           {successMessage}
         </Alert>
       )}
-
       {/* Banner with Logo */}
       <BannerWithLogo
         bannerUrl={profile?.bannerUrl}
@@ -661,7 +699,6 @@ export const CompanyInfoForm: React.FC = () => {
         onBannerUpload={handleBannerUpload}
         onLogoUpload={handleLogoUpload}
       />
-
       {/* Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Left Sidebar: Metadata */}
@@ -807,7 +844,6 @@ export const CompanyInfoForm: React.FC = () => {
           </div>
         </div>
       </div>
-
       {/* Edit Modals */}
       <EditCompanyModal
         isOpen={isCompanyModalOpen}
@@ -819,6 +855,8 @@ export const CompanyInfoForm: React.FC = () => {
           city: formData.city,
           countryCode: formData.countryCode,
         }}
+        countries={countries}
+        countriesLoading={countriesLoading}
         onChange={handleChange}
         onSave={handleSubmitCompany}
         isSaving={isSaving}
@@ -838,7 +876,6 @@ export const CompanyInfoForm: React.FC = () => {
         onSave={handleSubmitProfile}
         isSaving={isSaving}
       />
-
       <EditAboutModal
         isOpen={isAboutModalOpen}
         onClose={closeAboutModal}
