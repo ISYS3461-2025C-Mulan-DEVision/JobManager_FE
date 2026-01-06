@@ -256,8 +256,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
         sessionStorage.setItem("sso_flow", "registration");
 
         // Redirect to backend OAuth2 endpoint through the API Gateway
-        window.location.href =
-            `${apiBase}oauth2/authorization/google`;
+        window.location.href = `${apiBase}oauth2/authorization/google`;
     };
 
     const handleSsoFieldChange = React.useCallback(

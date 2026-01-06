@@ -34,15 +34,19 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
             try {
                 const company = await getCompany();
-                
+
                 // Check if essential fields are missing
-                const incomplete = !company.name || !company.phone || !company.streetAddress;
-                
+                const incomplete =
+                    !company.name || !company.phone || !company.streetAddress;
+
                 setIsProfileIncomplete(incomplete);
             } catch (error) {
                 console.error("Failed to check company profile:", error);
                 // If 404 or company doesn't exist, consider profile incomplete
-                if (error instanceof Error && error.message.includes("Failed to fetch company")) {
+                if (
+                    error instanceof Error &&
+                    error.message.includes("Failed to fetch company")
+                ) {
                     setIsProfileIncomplete(true);
                 } else {
                     // For other errors, allow access (fail open)

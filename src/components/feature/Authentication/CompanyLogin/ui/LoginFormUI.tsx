@@ -109,31 +109,33 @@ export const LoginFormUI: React.FC<LoginFormUIProps> = ({
                             </div>
                         </div>
                         {/* Display SSO error if present */}
-                        {ssoLoginResult && !ssoLoginResult.success && ssoLoginResult.error && (
-                            <div className="rounded-md bg-red-50 p-4">
-                                <div className="flex">
-                                    <div className="ml-3">
-                                        <h3 className="text-sm font-medium text-red-800">
-                                            SSO Login Failed
-                                        </h3>
-                                        <div className="mt-2 text-sm text-red-700">
-                                            <p>{ssoLoginResult.error}</p>
-                                        </div>
-                                        {clearSsoResult && (
-                                            <div className="mt-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={clearSsoResult}
-                                                    className="text-sm font-medium text-red-800 hover:text-red-600"
-                                                >
-                                                    Dismiss
-                                                </button>
+                        {ssoLoginResult &&
+                            !ssoLoginResult.success &&
+                            ssoLoginResult.error && (
+                                <div className="rounded-md bg-red-50 p-4">
+                                    <div className="flex">
+                                        <div className="ml-3">
+                                            <h3 className="text-sm font-medium text-red-800">
+                                                SSO Login Failed
+                                            </h3>
+                                            <div className="mt-2 text-sm text-red-700">
+                                                <p>{ssoLoginResult.error}</p>
                                             </div>
-                                        )}
+                                            {clearSsoResult && (
+                                                <div className="mt-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={clearSsoResult}
+                                                        className="text-sm font-medium text-red-800 hover:text-red-600"
+                                                    >
+                                                        Dismiss
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
                         {/* Display regular error if present */}
                         {error && (
                             <div className="text-red-500 text-sm text-center">

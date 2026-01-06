@@ -35,18 +35,34 @@ const getCompanyId = (): string => {
 
 // Helper to build full URL from endpoint
 const buildUrl = (endpoint: string): string => {
-    // API_BASE_URL no longer ends with '/', endpoint starts with '/'
-    // Just concatenate them directly
-    return `${API_BASE_URL}${endpoint}`;
+    // Ensure API_BASE_URL exists
+    if (!API_BASE_URL) {
+        throw new Error("API_BASE_URL is not defined");
+    }
+
+    // Remove trailing slash from base URL if present
+    const baseUrl = API_BASE_URL.endsWith("/")
+        ? API_BASE_URL.slice(0, -1)
+        : API_BASE_URL;
+
+    // Ensure endpoint starts with slash
+    const normalizedEndpoint = endpoint.startsWith("/")
+        ? endpoint
+        : `/${endpoint}`;
+
+    return `${baseUrl}${normalizedEndpoint}`;
 };
 
 // Company APIs (GET/PUT /companies/{companyId})
 export const getCompany = async (): Promise<Company> => {
     const companyId = getCompanyId();
-    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.GET(companyId)), {
-        method: "GET",
-        headers: getAuthHeaders(),
-    });
+    const response = await fetch(
+        buildUrl(API_ENDPOINTS.COMPANIES.GET(companyId)),
+        {
+            method: "GET",
+            headers: getAuthHeaders(),
+        }
+    );
 
     if (!response.ok) {
         throw new Error("Failed to fetch company");
@@ -60,11 +76,14 @@ export const updateCompany = async (
     companyData: Partial<CompanyFormData>
 ): Promise<Company> => {
     const companyId = getCompanyId();
-    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.UPDATE(companyId)), {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(companyData),
-    });
+    const response = await fetch(
+        buildUrl(API_ENDPOINTS.COMPANIES.UPDATE(companyId)),
+        {
+            method: "PUT",
+            headers: getAuthHeaders(),
+            body: JSON.stringify(companyData),
+        }
+    );
 
     if (!response.ok) {
         throw new Error("Failed to update company");
@@ -77,10 +96,13 @@ export const updateCompany = async (
 // Profile APIs (GET/PUT /companies/{companyId}/profile)
 export const getCompanyProfile = async (): Promise<CompanyProfile> => {
     const companyId = getCompanyId();
-    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.PROFILE(companyId)), {
-        method: "GET",
-        headers: getAuthHeaders(),
-    });
+    const response = await fetch(
+        buildUrl(API_ENDPOINTS.COMPANIES.PROFILE(companyId)),
+        {
+            method: "GET",
+            headers: getAuthHeaders(),
+        }
+    );
 
     if (!response.ok) {
         throw new Error("Failed to fetch company profile");
@@ -101,11 +123,14 @@ export const updateCompanyProfile = async (
             ? parseInt(profileData.foundedYear, 10)
             : undefined,
     };
-    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.PROFILE(companyId)), {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(payload),
-    });
+    const response = await fetch(
+        buildUrl(API_ENDPOINTS.COMPANIES.PROFILE(companyId)),
+        {
+            method: "PUT",
+            headers: getAuthHeaders(),
+            body: JSON.stringify(payload),
+        }
+    );
 
     if (!response.ok) {
         throw new Error("Failed to update company profile");
@@ -171,11 +196,14 @@ export const uploadMedia = async (
     if (payload.description)
         formData.append("description", payload.description);
 
-    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.BASE(companyId)), {
-        method: "POST",
-        headers: getAuthHeadersFormData(),
-        body: formData,
-    });
+    const response = await fetch(
+        buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.BASE(companyId)),
+        {
+            method: "POST",
+            headers: getAuthHeadersFormData(),
+            body: formData,
+        }
+    );
 
     if (!response.ok) {
         throw new Error("Failed to upload media");
@@ -187,10 +215,13 @@ export const uploadMedia = async (
 
 export const getAllMedia = async (): Promise<CompanyMedia[]> => {
     const companyId = getCompanyId();
-    const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.BASE(companyId)), {
-        method: "GET",
-        headers: getAuthHeaders(),
-    });
+    const response = await fetch(
+        buildUrl(API_ENDPOINTS.COMPANIES.MEDIA.BASE(companyId)),
+        {
+            method: "GET",
+            headers: getAuthHeaders(),
+        }
+    );
 
     if (!response.ok) {
         throw new Error("Failed to fetch media");
