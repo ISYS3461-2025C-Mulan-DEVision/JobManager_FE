@@ -2,7 +2,7 @@
 
 // API Configuration
 // All requests should go through the gateway (port 8080), not individual services
-export const API_BASE_URL = `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api/`;
+export const API_BASE_URL = `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api`;
 export const API_TIMEOUT = 30000; // 30 seconds
 
 // Authentication

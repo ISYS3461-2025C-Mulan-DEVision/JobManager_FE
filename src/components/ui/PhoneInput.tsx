@@ -37,8 +37,17 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
                 setDialCodes(codes);
             } catch (error) {
                 console.error("Failed to fetch dial codes:", error);
-                // Fallback to default Vietnam dial code if fetch fails
-                setDialCodes([{ code: "84", name: "Vietnam" }]);
+                // Fallback to common dial codes if fetch fails
+                setDialCodes([
+                    { code: "84", name: "Vietnam (+84)" },
+                    { code: "1", name: "United States (+1)" },
+                    { code: "44", name: "United Kingdom (+44)" },
+                    { code: "61", name: "Australia (+61)" },
+                    { code: "86", name: "China (+86)" },
+                    { code: "81", name: "Japan (+81)" },
+                    { code: "82", name: "South Korea (+82)" },
+                    { code: "65", name: "Singapore (+65)" },
+                ]);
             } finally {
                 setIsLoadingDialCodes(false);
             }
