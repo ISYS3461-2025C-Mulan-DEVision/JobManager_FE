@@ -41,7 +41,7 @@ interface UseApplicantSearchReturn {
 }
 
 // Toggle this to use mock data instead of API
-const USE_MOCK_DATA = false;
+const USE_MOCK_DATA = true;
 
 export const useApplicantSearch = (): UseApplicantSearchReturn => {
     // Search state
@@ -167,6 +167,11 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
                 case "newest":
                     filteredApplicants.sort((a, b) => 
                         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                    );
+                    break;
+                case "oldest":
+                    filteredApplicants.sort((a, b) => 
+                        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
                     );
                     break;
                 // TODO: Salary sorting - uncomment when JA adds salary support

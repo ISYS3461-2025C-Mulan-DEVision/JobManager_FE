@@ -106,15 +106,19 @@ export const SUBSCRIPTION_STATUS = {
 // Sort options for applicant search
 export const APPLICANT_SORT_OPTIONS = {
     NEWEST: "newest",
-    SALARY_ASCENDING: "salaryAsc",
-    SALARY_DESCENDING: "salaryDesc",
+    OLDEST: "oldest",
+    // TODO: Salary sorting - uncomment when JA adds salary support
+    // SALARY_ASCENDING: "salaryAsc",
+    // SALARY_DESCENDING: "salaryDesc",
     IS_FRESHER: "isFresher",
 } as const;
 
 export const APPLICANT_SORT_LABELS: Record<string, string> = {
     newest: "Newest",
-    salaryAsc: "Salary ascending",
-    salaryDesc: "Salary descending",
+    oldest: "Oldest",
+    // TODO: Salary sorting - uncomment when JA adds salary support
+    // salaryAsc: "Salary ascending",
+    // salaryDesc: "Salary descending",
     isFresher: "Is fresher",
 };
 

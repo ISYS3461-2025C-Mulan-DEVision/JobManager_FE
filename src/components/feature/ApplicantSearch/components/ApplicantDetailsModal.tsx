@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { HeadlessModal } from "@/components/headless";
-import { Badge } from "@/components/ui";
+import { Badge, Select } from "@/components/ui";
 import { EDUCATION_DEGREE_LABELS } from "@/utils/constants";
 import {
   X,
@@ -33,9 +33,7 @@ export const ApplicantDetailsModal: React.FC<ApplicantDetailsModalProps> = ({
 
   if (!applicant) return null;
 
-  const handleStatusChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const handleStatusChange = async (e: { target: { value: string } }) => {
     const newStatus = e.target.value as ApplicantStatusType;
     if (onStatusChange && newStatus !== applicant.companyStatus) {
       setIsUpdatingStatus(true);
@@ -112,17 +110,17 @@ export const ApplicantDetailsModal: React.FC<ApplicantDetailsModalProps> = ({
             </div>
 
             {/* Mark as dropdown */}
-            <div className="mt-3">
-              <select
+            <div className="mt-3 max-w-fit">
+              <Select
                 value={applicant.companyStatus || "NONE"}
                 onChange={handleStatusChange}
                 disabled={isUpdatingStatus}
-                className="px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-              >
-                <option value="NONE">No status</option>
-                <option value="FAVORITE">⭐ Favorite</option>
-                <option value="WARNING">⚠️ Warning</option>
-              </select>
+                options={[
+                  { value: "NONE", label: "No status" },
+                  { value: "FAVORITE", label: "⭐ Favorite" },
+                  { value: "WARNING", label: "⚠️ Warning" },
+                ]}
+              />
               {isUpdatingStatus && (
                 <span className="ml-2 text-sm text-gray-500">Updating...</span>
               )}
