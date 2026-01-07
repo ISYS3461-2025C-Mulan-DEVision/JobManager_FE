@@ -32,6 +32,8 @@ export const ROUTES = {
     JOB_POST_EDIT: "/job-posts/:id/edit",
     JOB_POST_DETAIL: "/job-posts/:id",
     JOB_DETAIL: "/jobs/:id",
+    JOB_POST_APPLICATIONS: "/job-posts/:jobPostId/applications",
+    APPLICATION_DETAILS: "/job-posts/:jobPostId/applications/:applicationId",
     PROFILE: "/profile",
     SETTINGS: "/settings",
     APPLICANT_SEARCH: "/applicant-search",

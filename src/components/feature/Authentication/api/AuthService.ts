@@ -18,6 +18,16 @@ export interface ResetPasswordPayload {
     newPassword: string;
 }
 
+export interface ChangePasswordPayload {
+    currentPassword: string;
+    newPassword: string;
+}
+
+export interface ChangeEmailPayload {
+    newEmail: string;
+    currentPassword: string;
+}
+
 export interface ActivationPayload {
     token: string;
 }
@@ -296,6 +306,36 @@ const getCountries = async (): Promise<
     }
 };
 
+const changePasswordCompany = async (
+    payload: ChangePasswordPayload
+): Promise<NullableStringResponse> => {
+    try {
+        const response = await httpClient.post<NullableStringResponse>(
+            `${AUTH_BASE_PATH}/change-password`,
+            payload
+        );
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
+};
+
+const changeEmailCompany = async (
+    payload: ChangeEmailPayload
+): Promise<NullableStringResponse> => {
+    try {
+        const response = await httpClient.post<NullableStringResponse>(
+            `${AUTH_BASE_PATH}/change-email`,
+            payload
+        );
+        return response.data;
+    } catch (error) {
+        normalizeAxiosError(error);
+        throw error;
+    }
+};
+
 const AuthService = {
     loginCompany,
     signupCompany,
@@ -308,8 +348,10 @@ const AuthService = {
     logoutCompany,
     fetchHealth,
     getCountries,
+    changePasswordCompany,
+    changeEmailCompany,
 };
 
 export default AuthService;
 
-export type { SignupPayload };
+export type { SignupPayload, ChangePasswordPayload, ChangeEmailPayload };
