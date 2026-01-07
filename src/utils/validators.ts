@@ -70,72 +70,14 @@ export const validators = {
 
 // Company-specific validators
 
-// Country codes with names
-export interface CountryCode {
+// Dial code type (matches backend response)
+export interface DialCode {
     code: string;
     name: string;
-    flag?: string;
 }
 
-export const COUNTRY_DIALING_CODES: CountryCode[] = [
-    { code: "1", name: "USA/Canada" },
-    { code: "7", name: "Russia" },
-    { code: "20", name: "Egypt" },
-    { code: "27", name: "South Africa" },
-    { code: "30", name: "Greece" },
-    { code: "31", name: "Netherlands" },
-    { code: "32", name: "Belgium" },
-    { code: "33", name: "France" },
-    { code: "34", name: "Spain" },
-    { code: "36", name: "Hungary" },
-    { code: "39", name: "Italy" },
-    { code: "40", name: "Romania" },
-    { code: "41", name: "Switzerland" },
-    { code: "43", name: "Austria" },
-    { code: "44", name: "UK" },
-    { code: "45", name: "Denmark" },
-    { code: "46", name: "Sweden" },
-    { code: "47", name: "Norway" },
-    { code: "48", name: "Poland" },
-    { code: "49", name: "Germany" },
-    { code: "54", name: "Argentina" },
-    { code: "55", name: "Brazil" },
-    { code: "56", name: "Chile" },
-    { code: "57", name: "Colombia" },
-    { code: "58", name: "Venezuela" },
-    { code: "60", name: "Malaysia" },
-    { code: "61", name: "Australia" },
-    { code: "62", name: "Indonesia" },
-    { code: "63", name: "Philippines" },
-    { code: "65", name: "Singapore" },
-    { code: "66", name: "Thailand" },
-    { code: "81", name: "Japan" },
-    { code: "82", name: "South Korea" },
-    { code: "84", name: "Vietnam" },
-    { code: "86", name: "China" },
-    { code: "90", name: "Turkey" },
-    { code: "91", name: "India" },
-    { code: "92", name: "Pakistan" },
-    { code: "93", name: "Afghanistan" },
-    { code: "94", name: "Sri Lanka" },
-    { code: "95", name: "Myanmar" },
-    { code: "98", name: "Iran" },
-    { code: "234", name: "Nigeria" },
-    { code: "254", name: "Kenya" },
-    { code: "375", name: "Belarus" },
-    { code: "380", name: "Ukraine" },
-    { code: "852", name: "Hong Kong" },
-    { code: "853", name: "Macau" },
-    { code: "886", name: "Taiwan" },
-    { code: "966", name: "Saudi Arabia" },
-    { code: "971", name: "UAE" },
-    { code: "972", name: "Israel" },
-    { code: "973", name: "Bahrain" },
-    { code: "974", name: "Qatar" },
-];
-
-// Valid international dial codes (for backward compatibility)
-const VALID_DIAL_CODES = COUNTRY_DIALING_CODES.map((c) => c.code);
+// Re-export getDialCodes from CompanyProfileService for convenience
+export { getDialCodes } from '@/components/feature/CompanyProfile/api/CompanyProfileService';
 
 // Valid company size ranges
 const VALID_COMPANY_SIZES = [
@@ -164,8 +106,11 @@ export const companyValidators = {
     /**
      * Phone number: Must start with + followed by valid dial code and 4-12 more digits
      * Format: +[dial_code][4-12 digits] (7-15 total digits after +)
+     * 
+     * @param value - The phone number to validate
+     * @param validDialCodes - Array of valid dial code strings (fetched from API via getDialCodes())
      */
-    phone: (value: string): string | undefined => {
+    phone: (value: string, validDialCodes?: string[]): string | undefined => {
         if (!value) return undefined;
 
         // Must match pattern: + followed by 7-15 digits
@@ -173,10 +118,16 @@ export const companyValidators = {
             return "Phone number must start with + followed by 7-15 digits";
         }
 
+        // If no dial codes provided, skip dial code validation
+        // (validation will be handled by PhoneInput component after fetching codes)
+        if (!validDialCodes || validDialCodes.length === 0) {
+            return undefined;
+        }
+
         const digitsAfterPlus = value.slice(1);
 
         // Check for valid dial code
-        const hasValidDialCode = VALID_DIAL_CODES.some((code) =>
+        const hasValidDialCode = validDialCodes.some((code) =>
             digitsAfterPlus.startsWith(code)
         );
 
@@ -185,7 +136,7 @@ export const companyValidators = {
         }
 
         // Find the dial code and check digits after it
-        const matchedDialCode = VALID_DIAL_CODES.find((code) =>
+        const matchedDialCode = validDialCodes.find((code) =>
             digitsAfterPlus.startsWith(code)
         );
 
@@ -319,19 +270,20 @@ export const companyValidators = {
     },
 
     /**
-     * Founded year: between 1800 and 2100
+     * Founded year: between 1800 and current year
      */
     foundedYear: (value: string): string | undefined => {
         if (!value) return undefined;
         const year = parseInt(value, 10);
+        const currentYear = new Date().getFullYear();
         if (isNaN(year)) {
             return "Founded year must be a valid number";
         }
         if (year < 1800) {
             return "Founded year must be at least 1800";
         }
-        if (year > 2100) {
-            return "Founded year must be at most 2100";
+        if (year > currentYear) {
+            return `Founded year must be at most ${currentYear}`;
         }
         return undefined;
     },

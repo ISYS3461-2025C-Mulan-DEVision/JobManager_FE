@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import {
   Select,
   Checkbox,
-  RangeSlider,
+  // TODO: Uncomment when JA adds salary support
+  // RangeSlider,
   TagInput,
   RadioGroup,
+  Toggle,
 } from "@/components/ui";
 import type { RadioOption } from "@/components/ui";
 import type { Tag } from "@/components/ui/TagInput";
@@ -27,10 +29,16 @@ interface FiltersProps {
   onFilterChange: (updates: Partial<SearchState>) => void;
   onSearch?: () => void;
   disabled?: boolean;
+  // Search profile props
+  selectedProfileId?: string;
+  isProfileActive?: boolean;
+  onProfileStatusChange?: (isActive: boolean) => void;
+  isUpdatingStatus?: boolean;
 }
 
 // TODO: Skills list should come from backend API
-// For now, using mock data
+// Using JA's /api/v1/skills endpoint via JM backend
+// For now, using mock data as fallback
 const MOCK_SKILLS: Tag[] = [
   { id: "1", name: "MongoDB" },
   { id: "2", name: "Kafka" },
@@ -49,6 +57,10 @@ export const Filters: React.FC<FiltersProps> = ({
   onFilterChange,
   // onSearch prop is available for future use if needed
   disabled = false,
+  selectedProfileId,
+  isProfileActive = false,
+  onProfileStatusChange,
+  isUpdatingStatus = false,
 }) => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [isLoadingCountries, setIsLoadingCountries] = useState(true);
@@ -77,7 +89,7 @@ export const Filters: React.FC<FiltersProps> = ({
 
   const handleEmploymentTypeChange = (
     type: EmploymentType,
-    checked: boolean
+    checked: boolean,
   ) => {
     const newTypes = checked
       ? [...searchState.employmentTypes, type]
@@ -86,16 +98,17 @@ export const Filters: React.FC<FiltersProps> = ({
   };
 
   const handleDegreeChange = (value: string | undefined) => {
-    onFilterChange({ highestDegree: value as EducationDegree | undefined });
+    onFilterChange({ education: value as EducationDegree | undefined });
   };
 
-  const handleSalaryMinChange = (value: number) => {
-    onFilterChange({ minSalary: value });
-  };
-
-  const handleSalaryMaxChange = (value: number) => {
-    onFilterChange({ maxSalary: value });
-  };
+  // TODO: Salary filtering - uncomment when JA adds salary support
+  // const handleSalaryMinChange = (value: number) => {
+  //   onFilterChange({ minSalary: value });
+  // };
+  //
+  // const handleSalaryMaxChange = (value: number) => {
+  //   onFilterChange({ maxSalary: value });
+  // };
 
   const handleSkillAdd = (skillId: string) => {
     onFilterChange({ skillIds: [...searchState.skillIds, skillId] });
@@ -107,13 +120,17 @@ export const Filters: React.FC<FiltersProps> = ({
     });
   };
 
+  const handleProfileStatusToggle = (checked: boolean) => {
+    onProfileStatusChange?.(checked);
+  };
+
   const countryOptions = [
     { value: "", label: "All countries" },
     ...countries.map((c) => ({ value: c.code, label: c.displayName })),
   ];
 
   const educationDegreeOptions: RadioOption[] = Object.entries(
-    EDUCATION_DEGREES
+    EDUCATION_DEGREES,
   ).map(([, value]) => ({
     value: value,
     label: EDUCATION_DEGREE_LABELS[value],
@@ -121,6 +138,28 @@ export const Filters: React.FC<FiltersProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Search Profile Status Toggle - only show when a profile is selected */}
+      {selectedProfileId && (
+        <div className="pb-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">
+                Profile Status
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                {isProfileActive ? "Active" : "Inactive"}
+              </p>
+            </div>
+            <Toggle
+              checked={isProfileActive}
+              onChange={handleProfileStatusToggle}
+              disabled={disabled || isUpdatingStatus}
+              size="md"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Location */}
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Location</h3>
@@ -144,12 +183,12 @@ export const Filters: React.FC<FiltersProps> = ({
               key={key}
               label={EMPLOYMENT_TYPE_LABELS[value]}
               checked={searchState.employmentTypes.includes(
-                value as EmploymentType
+                value as EmploymentType,
               )}
               onChange={(e) =>
                 handleEmploymentTypeChange(
                   value as EmploymentType,
-                  e.target.checked
+                  e.target.checked,
                 )
               }
               disabled={disabled}
@@ -166,14 +205,16 @@ export const Filters: React.FC<FiltersProps> = ({
         <RadioGroup
           name="education-degree"
           options={educationDegreeOptions}
-          value={searchState.highestDegree}
+          value={searchState.education}
           onChange={handleDegreeChange}
           disabled={disabled}
           allowDeselect
         />
       </div>
 
-      {/* Salary Range */}
+      {/* TODO: Salary Range - JA does not have salary fields yet */}
+      {/* Uncomment when JA adds salary support to UserResponse */}
+      {/*
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Salary</h3>
         <RangeSlider
@@ -188,6 +229,7 @@ export const Filters: React.FC<FiltersProps> = ({
           formatValue={(v) => v.toLocaleString()}
         />
       </div>
+      */}
 
       {/* Skill Tags */}
       <div>

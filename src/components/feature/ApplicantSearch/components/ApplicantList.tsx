@@ -63,11 +63,6 @@ export const ApplicantList: React.FC<ApplicantListProps> = ({
           Try adjusting your search filters or search terms to find more
           applicants.
         </p>
-        {/* TODO: Applicant search backend not fully implemented yet */}
-        <p className="text-sm text-gray-400 mt-4 italic">
-          Note: Applicant data is still being finalized. Results will appear
-          once the backend is fully implemented.
-        </p>
       </div>
     );
   }

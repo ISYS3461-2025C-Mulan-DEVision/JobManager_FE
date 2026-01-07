@@ -1,8 +1,17 @@
 import type { Applicant } from "../types";
-
 /**
  * Mock applicant data for UI testing.
- * TODO: Remove when backend is ready.
+ * Aligned with JA service's UserResponse structure as of 2026-01-04.
+ * 
+ * Note: This data is used as fallback when USE_MOCK_DATA is true in useApplicantSearch.
+ * 
+ * Fields aligned with Applicant interface:
+ * - address, city: New location fields
+ * - education[]: Array of education records (degree derived from first entry)
+ * - workExperience[]: Array of work history
+ * - skills[]: Array of skills
+ * 
+ * TODO: Salary - JA does not have salary fields yet, desiredSalary is not included.
  */
 export const MOCK_APPLICANTS: Applicant[] = [
     {
@@ -10,12 +19,12 @@ export const MOCK_APPLICANTS: Applicant[] = [
         fullName: "Alice Johnson",
         email: "alice.johnson@email.com",
         phone: "+1 (555) 123-4567",
+        address: "123 Tech Street",
+        city: "San Francisco",
         avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
         bio: "Passionate full-stack developer with 5+ years of experience building scalable web applications. I specialize in React, Node.js, and cloud technologies. Always eager to learn new technologies and solve complex problems.",
         countryCode: "US",
-        highestDegree: "BACHELOR",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 100000,
         skills: [
             { id: "skill-1", name: "React" },
             { id: "skill-2", name: "TypeScript" },
@@ -60,11 +69,11 @@ export const MOCK_APPLICANTS: Applicant[] = [
         fullName: "Bob Martinez",
         email: "bob.martinez@email.com",
         phone: "+44 20 7946 0958",
+        address: "45 Oxford Road",
+        city: "London",
         bio: "Data scientist with expertise in machine learning and AI. PhD in Statistics with focus on predictive modeling. Looking for challenging opportunities in the field of artificial intelligence.",
         countryCode: "GB",
-        highestDegree: "DOCTORATE",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 125000,
         skills: [
             { id: "skill-6", name: "Python" },
             { id: "skill-7", name: "Machine Learning" },
@@ -112,12 +121,11 @@ export const MOCK_APPLICANTS: Applicant[] = [
         fullName: "Carla Nguyen",
         email: "carla.nguyen@email.com",
         phone: "+61 2 9876 5432",
+        city: "Sydney",
         avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Carla",
         bio: "UX/UI Designer with a passion for creating intuitive and beautiful user experiences. Strong background in user research and design systems.",
         countryCode: "AU",
-        highestDegree: "MASTER",
         employmentTypes: ["CONTRACT"],
-        desiredSalary: 85000,
         skills: [
             { id: "skill-12", name: "Figma" },
             { id: "skill-13", name: "UI Design" },
@@ -159,11 +167,10 @@ export const MOCK_APPLICANTS: Applicant[] = [
         id: "mock-4",
         fullName: "David Kim",
         email: "david.kim@email.com",
+        city: "Toronto",
         bio: "DevOps engineer specializing in cloud infrastructure and CI/CD pipelines. Kubernetes certified with experience in multi-cloud environments.",
         countryCode: "CA",
-        highestDegree: "BACHELOR",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 110000,
         skills: [
             { id: "skill-16", name: "Kubernetes" },
             { id: "skill-17", name: "Docker" },
@@ -210,12 +217,11 @@ export const MOCK_APPLICANTS: Applicant[] = [
         fullName: "Emily Chen",
         email: "emily.chen@email.com",
         phone: "+65 9123 4567",
+        city: "Singapore",
         avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emily",
         bio: "Junior developer fresh out of bootcamp, eager to learn and grow. Strong foundation in JavaScript and React. Looking for mentorship opportunities.",
         countryCode: "SG",
-        highestDegree: "OTHER",
         employmentTypes: ["INTERNSHIP"],
-        desiredSalary: 50000,
         skills: [
             { id: "skill-23", name: "JavaScript" },
             { id: "skill-24", name: "React" },
@@ -242,12 +248,11 @@ export const MOCK_APPLICANTS: Applicant[] = [
         fullName: "Frank Wilson",
         email: "frank.wilson@email.com",
         phone: "+1 (555) 234-5678",
+        city: "Palo Alto",
         avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Frank",
         bio: "Backend engineer with expertise in microservices architecture and distributed systems.",
         countryCode: "US",
-        highestDegree: "MASTER",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 130000,
         skills: [
             { id: "skill-26", name: "Java" },
             { id: "skill-27", name: "Spring Boot" },
@@ -262,11 +267,10 @@ export const MOCK_APPLICANTS: Applicant[] = [
         id: "mock-7",
         fullName: "Grace Lee",
         email: "grace.lee@email.com",
+        city: "San Francisco",
         bio: "Product manager turned full-stack developer. Bringing business acumen to technical solutions.",
         countryCode: "US",
-        highestDegree: "BACHELOR",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 110000,
         skills: [
             { id: "skill-29", name: "Product Management" },
             { id: "skill-30", name: "React" },
@@ -282,12 +286,11 @@ export const MOCK_APPLICANTS: Applicant[] = [
         fullName: "Henry Zhang",
         email: "henry.zhang@email.com",
         phone: "+86 138 1234 5678",
+        city: "Beijing",
         avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Henry",
         bio: "Mobile developer specializing in cross-platform development with React Native and Flutter.",
         countryCode: "CN",
-        highestDegree: "BACHELOR",
         employmentTypes: ["CONTRACT"],
-        desiredSalary: 85000,
         skills: [
             { id: "skill-32", name: "React Native" },
             { id: "skill-33", name: "Flutter" },
@@ -303,11 +306,10 @@ export const MOCK_APPLICANTS: Applicant[] = [
         id: "mock-9",
         fullName: "Isabella Santos",
         email: "isabella.santos@email.com",
+        city: "São Paulo",
         bio: "QA Engineer with automation expertise. Passionate about delivering bug-free software.",
         countryCode: "BR",
-        highestDegree: "BACHELOR",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 67500,
         skills: [
             { id: "skill-36", name: "Selenium" },
             { id: "skill-37", name: "Cypress" },
@@ -323,12 +325,11 @@ export const MOCK_APPLICANTS: Applicant[] = [
         fullName: "James O'Brien",
         email: "james.obrien@email.com",
         phone: "+353 1 234 5678",
+        city: "Dublin",
         avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=James",
         bio: "Security engineer focused on application security and penetration testing.",
         countryCode: "IE",
-        highestDegree: "MASTER",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 120000,
         skills: [
             { id: "skill-39", name: "Security" },
             { id: "skill-40", name: "Penetration Testing" },
@@ -343,11 +344,10 @@ export const MOCK_APPLICANTS: Applicant[] = [
         id: "mock-11",
         fullName: "Kate Williams",
         email: "kate.williams@email.com",
+        city: "Edinburgh",
         bio: "Technical writer with development background. Making complex topics accessible.",
         countryCode: "GB",
-        highestDegree: "BACHELOR",
         employmentTypes: ["PART_TIME"],
-        desiredSalary: 55000,
         skills: [
             { id: "skill-42", name: "Technical Writing" },
             { id: "skill-43", name: "Documentation" },
@@ -363,12 +363,11 @@ export const MOCK_APPLICANTS: Applicant[] = [
         fullName: "Luis Garcia",
         email: "luis.garcia@email.com",
         phone: "+34 612 345 678",
+        city: "Barcelona",
         avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Luis",
         bio: "Database administrator with expertise in PostgreSQL and MongoDB optimization.",
         countryCode: "ES",
-        highestDegree: "BACHELOR",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 77500,
         skills: [
             { id: "skill-45", name: "PostgreSQL" },
             { id: "skill-46", name: "MongoDB" },
@@ -383,11 +382,10 @@ export const MOCK_APPLICANTS: Applicant[] = [
         id: "mock-13",
         fullName: "Maria Kowalski",
         email: "maria.kowalski@email.com",
+        city: "Warsaw",
         bio: "Frontend architect specializing in design systems and component libraries.",
         countryCode: "PL",
-        highestDegree: "MASTER",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 100000,
         skills: [
             { id: "skill-48", name: "Design Systems" },
             { id: "skill-49", name: "Storybook" },
@@ -403,12 +401,11 @@ export const MOCK_APPLICANTS: Applicant[] = [
         fullName: "Nathan Brown",
         email: "nathan.brown@email.com",
         phone: "+1 (555) 345-6789",
+        city: "Austin",
         avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Nathan",
         bio: "Blockchain developer with experience in smart contracts and DeFi protocols.",
         countryCode: "US",
-        highestDegree: "BACHELOR",
         employmentTypes: ["CONTRACT"],
-        desiredSalary: 150000,
         skills: [
             { id: "skill-51", name: "Solidity" },
             { id: "skill-52", name: "Ethereum" },
@@ -423,11 +420,10 @@ export const MOCK_APPLICANTS: Applicant[] = [
         id: "mock-15",
         fullName: "Olivia Taylor",
         email: "olivia.taylor@email.com",
+        city: "Melbourne",
         bio: "AI/ML engineer specializing in natural language processing and chatbots.",
         countryCode: "AU",
-        highestDegree: "DOCTORATE",
         employmentTypes: ["FULL_TIME"],
-        desiredSalary: 150000,
         skills: [
             { id: "skill-54", name: "NLP" },
             { id: "skill-55", name: "PyTorch" },

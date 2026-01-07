@@ -11,34 +11,53 @@ export type EmploymentType = typeof EMPLOYMENT_TYPES[keyof typeof EMPLOYMENT_TYP
 // Sort options
 export type ApplicantSortOption = typeof APPLICANT_SORT_OPTIONS[keyof typeof APPLICANT_SORT_OPTIONS];
 
+// Applicant Status Type (for Warning/Favorite feature)
+export type ApplicantStatusType = 'NONE' | 'WARNING' | 'FAVORITE';
+
+// Status Filter Type (for filtering search results)
+export type StatusFilterType = 'ALL' | 'FAVORITE' | 'WARNING' | 'MARKED';
+
 // ============================================================
 // Search State (Frontend UI State)
 // ============================================================
 
 export interface SearchState {
-    keyword: string;
+    /** Username/name search (firstName, lastName). Maps to JA's 'username' param. */
+    username: string;
     countryCode?: string;
+    /** City filter. Maps to JA's 'city' param. */
+    city?: string;
     employmentTypes: EmploymentType[];
-    highestDegree?: EducationDegree;
-    minSalary?: number;
-    maxSalary?: number;
+    /** Education level. Maps to JA's 'education' param. */
+    education?: EducationDegree;
+    /** Work experience keywords. Maps to JA's 'workExperience' param. */
+    workExperience?: string;
+    // TODO: Salary filtering - JA service does not have salary fields yet
+    // minSalary?: number;
+    // maxSalary?: number;
     skillIds: string[];
     sortBy: ApplicantSortOption;
     page: number;
     pageSize: number;
+    /** Filter by company-specific status (ALL, FAVORITE, WARNING, MARKED) */
+    statusFilter?: StatusFilterType;
 }
 
 export const DEFAULT_SEARCH_STATE: SearchState = {
-    keyword: "",
+    username: "",
     countryCode: undefined,
+    city: undefined,
     employmentTypes: [],
-    highestDegree: undefined,
-    minSalary: undefined,
-    maxSalary: undefined,
+    education: undefined,
+    workExperience: undefined,
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // minSalary: undefined,
+    // maxSalary: undefined,
     skillIds: [],
     sortBy: "newest",
     page: 0,
     pageSize: 10,
+    statusFilter: 'ALL',
 };
 
 // ============================================================
@@ -59,24 +78,30 @@ export interface CreateSearchProfileRequest {
     companyId: string;
     profileName: string;
     countryCode?: string;
-    minSalary?: number;
-    maxSalary?: number;
-    highestDegree?: EducationDegree;
+    city?: string;
+    education?: EducationDegree;
+    workExperience?: string;
     employmentTypes?: EmploymentType[];
     skillIds?: string[];
     isActive?: boolean;
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // minSalary?: number;
+    // maxSalary?: number;
 }
 
 // Search Profile - Update Request
 export interface UpdateSearchProfileRequest {
     profileName?: string;
     countryCode?: string;
-    minSalary?: number;
-    maxSalary?: number;
-    highestDegree?: EducationDegree;
+    city?: string;
+    education?: EducationDegree;
+    workExperience?: string;
     employmentTypes?: EmploymentType[];
     skillIds?: string[];
     isActive?: boolean;
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // minSalary?: number;
+    // maxSalary?: number;
 }
 
 // Search Profile - Update Status Request
@@ -90,14 +115,17 @@ export interface SearchProfileResponse {
     companyId: string;
     profileName: string;
     countryCode?: string;
-    minSalary?: number;
-    maxSalary?: number;
-    highestDegree?: EducationDegree;
+    city?: string;
+    education?: EducationDegree;
+    workExperience?: string;
     employmentTypes: EmploymentType[];
     skillIds: string[];
     isActive: boolean;
     createdAt: string;
     updatedAt: string;
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // minSalary?: number;
+    // maxSalary?: number;
 }
 
 // Search Profile - Active Response (External, read-only)
@@ -106,22 +134,25 @@ export interface ActiveSearchProfileResponse {
     companyId: string;
     profileName: string;
     countryCode?: string;
-    minSalary?: number;
-    maxSalary?: number;
-    highestDegree?: EducationDegree;
+    city?: string;
+    education?: EducationDegree;
+    workExperience?: string;
     employmentTypes: EmploymentType[];
     skillIds: string[];
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // minSalary?: number;
+    // maxSalary?: number;
 }
 
 // ============================================================
 // Applicant Types
-// TODO: Applicant attributes are not finalized yet
-// These fields may change when backend is finalized
+// Aligned with JA service's UserResponse
 // ============================================================
 
 export interface ApplicantSkill {
     id: string;
     name: string;
+    usageCount?: number;
 }
 
 export interface ApplicantEducation {
@@ -144,26 +175,49 @@ export interface ApplicantWorkExperience {
     description?: string;
 }
 
-// TODO: Applicant model - aligns with backend ApplicantProfileUpdatedEvent
+export interface ApplicantCountry {
+    id: string;
+    name: string;
+    abbreviation: string;
+}
+
+/**
+ * Applicant model - aligned with JA service's UserResponse.
+ * 
+ * Updated 2026-01-04 to include new fields: address, city
+ */
 export interface Applicant {
     id: string;
-    fullName: string;
     email: string;
+    firstName?: string;
+    lastName?: string;
+    fullName: string;
     phone?: string;
+    /** Street address */
+    address?: string;
+    /** City name */
+    city?: string;
     avatarUrl?: string;
+    /** Maps from JA's objectiveSummary */
     bio?: string;
+    /** Nested country object from JA */
+    country?: ApplicantCountry;
+    /** Derived from country.abbreviation for backwards compatibility */
     countryCode?: string;
-    highestDegree?: EducationDegree;
-    employmentTypes: EmploymentType[];
-    desiredSalary?: number;
+    premium?: boolean;
+    active?: boolean;
     skills: ApplicantSkill[];
+    // JA now returns these in search response
     education: ApplicantEducation[];
     workExperience: ApplicantWorkExperience[];
+    employmentTypes: EmploymentType[];
     createdAt: string;
     updatedAt: string;
-    // TODO: Mark as Warning/Favorite feature - not implemented yet
-    // isFavorite?: boolean;
-    // isWarning?: boolean;
+    // TODO: Salary - JA service does not have salary fields yet
+    // desiredSalary?: number;
+    // Company-specific status (Warning/Favorite)
+    companyStatus?: ApplicantStatusType;
+    companyStatusNote?: string;
 }
 
 // Applicant Search Response (Paginated)

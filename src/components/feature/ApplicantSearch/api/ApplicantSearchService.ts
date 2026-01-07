@@ -19,7 +19,8 @@ const getCompanyId = (): string => {
 };
 
 // Applicant Search API
-// TODO: Search endpoint not finalized - applicant attributes may change
+// Connects to JM backend which proxies to JA service
+// Updated 2026-01-04 to use new JA API params
 
 export const searchApplicants = async (
     searchState: SearchState
@@ -27,39 +28,51 @@ export const searchApplicants = async (
     // Build query params from search state
     const params = new URLSearchParams();
 
-    if (searchState.keyword) {
-        params.append("keyword", searchState.keyword);
+    if (searchState.username) {
+        params.append("username", searchState.username);
     }
     if (searchState.countryCode) {
         params.append("countryCode", searchState.countryCode);
+    }
+    if (searchState.city) {
+        params.append("city", searchState.city);
+    }
+    if (searchState.education) {
+        params.append("education", searchState.education);
+    }
+    if (searchState.workExperience) {
+        params.append("workExperience", searchState.workExperience);
     }
     if (searchState.employmentTypes.length > 0) {
         searchState.employmentTypes.forEach((type) => {
             params.append("employmentTypes", type);
         });
     }
-    if (searchState.highestDegree) {
-        params.append("highestDegree", searchState.highestDegree);
-    }
-    if (searchState.minSalary !== undefined) {
-        params.append("minSalary", searchState.minSalary.toString());
-    }
-    if (searchState.maxSalary !== undefined) {
-        params.append("maxSalary", searchState.maxSalary.toString());
-    }
     if (searchState.skillIds.length > 0) {
         searchState.skillIds.forEach((id) => {
-            params.append("skillIds", id);
+            params.append("skills", id);
         });
     }
+    // TODO: Salary filtering - uncomment when JA adds salary support
+    // if (searchState.minSalary !== undefined) {
+    //     params.append("minSalary", searchState.minSalary.toString());
+    // }
+    // if (searchState.maxSalary !== undefined) {
+    //     params.append("maxSalary", searchState.maxSalary.toString());
+    // }
     if (searchState.sortBy) {
         params.append("sortBy", searchState.sortBy);
+    }
+    if (searchState.statusFilter && searchState.statusFilter !== 'ALL') {
+        params.append("statusFilter", searchState.statusFilter);
     }
     params.append("page", searchState.page.toString());
     params.append("size", searchState.pageSize.toString());
 
+    const companyId = getCompanyId();
     const response = await httpClient.get<ApiResponse<ApplicantSearchResponse>>(
-        `${API_ENDPOINTS.APPLICANT_SEARCH.SEARCH}?${params.toString()}`
+        `${API_ENDPOINTS.APPLICANT_SEARCH.SEARCH}?${params.toString()}`,
+        companyId ? { headers: { 'X-Company-Id': companyId } } : undefined
     );
     return response.data;
 };
@@ -148,6 +161,57 @@ export const getCountries = async (): Promise<ApiResponse<Country[]>> => {
     return response.data;
 };
 
+// Applicant Status APIs (Warning/Favorite feature)
+export interface SetApplicantStatusRequest {
+    status: 'NONE' | 'WARNING' | 'FAVORITE';
+    note?: string;
+}
+
+export interface ApplicantStatusResponse {
+    id: string;
+    companyId: string;
+    applicantId: string;
+    status: 'NONE' | 'WARNING' | 'FAVORITE';
+    note?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export const setApplicantStatus = async (
+    applicantId: string,
+    request: SetApplicantStatusRequest
+): Promise<ApiResponse<ApplicantStatusResponse | null>> => {
+    const companyId = getCompanyId();
+    const response = await httpClient.put<ApiResponse<ApplicantStatusResponse | null>>(
+        `${API_ENDPOINTS.APPLICANT_SEARCH.SEARCH.replace('/search', '')}/${applicantId}/status`,
+        request,
+        { headers: { 'X-Company-Id': companyId } }
+    );
+    return response.data;
+};
+
+export const getApplicantStatus = async (
+    applicantId: string
+): Promise<ApiResponse<ApplicantStatusResponse | null>> => {
+    const companyId = getCompanyId();
+    const response = await httpClient.get<ApiResponse<ApplicantStatusResponse | null>>(
+        `${API_ENDPOINTS.APPLICANT_SEARCH.SEARCH.replace('/search', '')}/${applicantId}/status`,
+        { headers: { 'X-Company-Id': companyId } }
+    );
+    return response.data;
+};
+
+export const clearApplicantStatus = async (
+    applicantId: string
+): Promise<ApiResponse<void>> => {
+    const companyId = getCompanyId();
+    const response = await httpClient.delete<ApiResponse<void>>(
+        `${API_ENDPOINTS.APPLICANT_SEARCH.SEARCH.replace('/search', '')}/${applicantId}/status`,
+        { headers: { 'X-Company-Id': companyId } }
+    );
+    return response.data;
+};
+
 // Export as service object
 const ApplicantSearchService = {
     // Search
@@ -162,6 +226,11 @@ const ApplicantSearchService = {
     updateSearchProfileStatus,
     // Countries
     getCountries,
+    // Applicant Status
+    setApplicantStatus,
+    getApplicantStatus,
+    clearApplicantStatus,
 };
 
 export default ApplicantSearchService;
+

@@ -322,12 +322,9 @@ export const deleteMedia = async (mediaId: string): Promise<void> => {
 export const getDialCodes = async (): Promise<
     Array<{ code: string; name: string }>
 > => {
-    // Don't require authentication for dial codes - it's public data
     const response = await fetch(buildUrl(API_ENDPOINTS.COMPANIES.DIAL_CODES), {
         method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
     });
 
     if (!response.ok) {

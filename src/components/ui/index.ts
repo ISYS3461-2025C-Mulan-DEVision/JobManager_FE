@@ -25,3 +25,4 @@ export * from "./Checkbox";
 export * from "./RadioGroup";
 export * from "./RangeSlider";
 export * from "./TagInput";
+export * from "./Toggle";

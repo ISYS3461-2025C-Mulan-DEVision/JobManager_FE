@@ -82,12 +82,15 @@ export const useSearchProfiles = (): UseSearchProfilesReturn => {
                 const request: Omit<CreateSearchProfileRequest, "companyId"> = {
                     profileName: name,
                     countryCode: searchState.countryCode,
-                    minSalary: searchState.minSalary,
-                    maxSalary: searchState.maxSalary,
-                    highestDegree: searchState.highestDegree,
+                    city: searchState.city,
+                    education: searchState.education,
+                    workExperience: searchState.workExperience,
                     employmentTypes: searchState.employmentTypes,
                     skillIds: searchState.skillIds,
                     isActive: true,
+                    // TODO: Salary filtering - uncomment when JA adds salary support
+                    // minSalary: searchState.minSalary,
+                    // maxSalary: searchState.maxSalary,
                 };
 
                 const response = await ApplicantSearchService.createSearchProfile(request);

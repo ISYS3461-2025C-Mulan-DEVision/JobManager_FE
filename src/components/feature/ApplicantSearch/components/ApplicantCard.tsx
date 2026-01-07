@@ -8,10 +8,13 @@ import {
   User,
   GraduationCap,
   Clock,
-  CircleDollarSign,
+  // TODO: Uncomment when JA adds salary support
+  // CircleDollarSign,
   MapPin,
+  Star,
+  AlertCircle,
 } from "lucide-react";
-import type { Applicant } from "../types";
+import type { Applicant, EducationDegree } from "../types";
 
 interface ApplicantCardProps {
   applicant: Applicant;
@@ -22,30 +25,32 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
   applicant,
   onClick,
 }) => {
-  // TODO: Mark as Warning/Favorite feature - not implemented yet
-  // const isFavorite = applicant.isFavorite;
-  // const isWarning = applicant.isWarning;
+  const isFavorite = applicant.companyStatus === "FAVORITE";
+  const isWarning = applicant.companyStatus === "WARNING";
 
-  const formatSalary = (salary?: number): string => {
-    if (!salary) return "Not specified";
-    return `$${salary.toLocaleString()}`;
-  };
+  // TODO: Salary display - uncomment when JA adds salary support
+  // const formatSalary = (salary?: number): string => {
+  //   if (!salary) return "Not specified";
+  //   return `$${salary.toLocaleString()}`;
+  // };
 
   return (
     <Card className="p-4 hover:shadow-md transition-shadow relative">
-      {/* TODO: Warning/Favorite indicators */}
-      {/* {isFavorite && (
-                <span className="absolute top-2 right-2 text-yellow-500">
-                    <Star className="w-5 h-5" fill="currentColor" />
-                </span>
-            )}
-            {isWarning && (
-                <span className="absolute top-2 right-10 text-red-500">
-                    <AlertCircle className="w-5 h-5" />
-                </span>
-            )} */}
+      {/* Warning/Favorite indicators */}
+      {isFavorite && (
+        <span className="absolute top-2 right-2 text-yellow-500">
+          <Star className="w-5 h-5" fill="currentColor" />
+        </span>
+      )}
+      {isWarning && (
+        <span
+          className={`absolute top-2 ${isFavorite ? "right-9" : "right-2"} text-red-500`}
+        >
+          <AlertCircle className="w-5 h-5" />
+        </span>
+      )}
 
-      <div className="flex items-start gap-4">
+      <div className="flex flex-col sm:flex-row items-start gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
           {applicant.avatarUrl ? (
@@ -82,11 +87,14 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
           <p className="text-sm text-gray-500 truncate">{applicant.email}</p>
 
           {/* Details */}
-          <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-600">
-            {applicant.highestDegree && (
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-2 text-sm text-gray-600">
+            {applicant.education && applicant.education.length > 0 && (
               <span className="flex items-center gap-1">
                 <GraduationCap className="w-4 h-4" />
-                {EDUCATION_DEGREE_LABELS[applicant.highestDegree]}
+                {applicant.education[0].degree &&
+                  EDUCATION_DEGREE_LABELS[
+                    applicant.education[0].degree as EducationDegree
+                  ]}
               </span>
             )}
             {applicant.employmentTypes.length > 0 && (
@@ -97,10 +105,11 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
                   .join(", ")}
               </span>
             )}
-            <span className="flex items-center gap-1">
+            {/* TODO: Salary display - uncomment when JA adds salary support */}
+            {/* <span className="flex items-center gap-1">
               <CircleDollarSign className="w-4 h-4" />
               {formatSalary(applicant.desiredSalary)}
-            </span>
+            </span> */}
             {applicant.countryCode && (
               <span className="flex items-center gap-1">
                 <MapPin className="w-4 h-4" />
@@ -111,9 +120,15 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
         </div>
 
         {/* Action Button */}
-        <div className="flex-shrink-0">
-          <Button variant="primary" size="sm" onClick={onClick}>
-            Applicant Details
+        <div className="flex-shrink-0 w-full sm:w-auto">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={onClick}
+            fullWidth
+            className="sm:w-auto"
+          >
+            View Details
           </Button>
         </div>
       </div>

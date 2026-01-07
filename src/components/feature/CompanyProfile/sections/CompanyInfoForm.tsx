@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useEffect,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Input,
@@ -31,11 +32,14 @@ import {
   MapPin,
   Phone,
   Building2,
+  AlertTriangle,
 } from "lucide-react";
 import { useCompanyInfoForm } from "../hooks/useCompanyInfoForm";
 import { companyValidators, COMPANY_SIZE_OPTIONS } from "@/utils/validators";
 import type { CompanyProfileFormData } from "../types";
 import { checkIsPremium } from "@/components/feature/Subscription/api/SubscriptionService";
+import { clearAuthSession } from "@/services/authStorage";
+import httpClient from "@/services/httpClient";
 
 // Banner with Logo Component
 interface BannerWithLogoProps {
@@ -209,8 +213,12 @@ interface EditCompanyModalProps {
     city: string;
     countryCode: string;
   };
+  originalCountryCode: string;
+  countries: Array<{ code: string; displayName: string }>;
+  countriesLoading: boolean;
   onChange: (field: keyof CompanyProfileFormData, value: string) => void;
   onSave: () => Promise<void>;
+  onCountryChanged: () => void;
   isSaving: boolean;
 }
 
@@ -218,10 +226,20 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
   isOpen,
   onClose,
   formData,
+  originalCountryCode,
+  countries,
+  countriesLoading,
   onChange,
   onSave,
+  onCountryChanged,
   isSaving,
 }) => {
+  // Check if country is being changed
+  const isCountryChanging =
+    originalCountryCode &&
+    formData.countryCode &&
+    originalCountryCode !== formData.countryCode;
+
   // Validation errors state
   const errors = useMemo(
     () => ({
@@ -231,15 +249,20 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
       city: companyValidators.city(formData.city),
       countryCode: companyValidators.countryCode(formData.countryCode),
     }),
-    [formData]
+    [formData],
   );
 
   const hasErrors = Object.values(errors).some(Boolean);
 
   const handleSave = async () => {
     if (hasErrors) return;
+    const wasCountryChanging = isCountryChanging;
     await onSave();
     onClose();
+    // If country was changed, trigger logout
+    if (wasCountryChanging) {
+      onCountryChanged();
+    }
   };
 
   return (
@@ -262,6 +285,22 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Country change warning */}
+        {isCountryChanging && (
+          <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg mb-4">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-amber-800">
+                Country Change Notice
+              </p>
+              <p className="text-amber-700 mt-1">
+                Changing your country will require you to log in again. Your
+                session will be invalidated after this change is saved.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           <Input
@@ -297,15 +336,24 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
               helperText="Max 128 characters"
               fullWidth
             />
-            <Input
-              label="Country Code"
+            <Select
+              label="Country"
               value={formData.countryCode}
-              onChange={(e) =>
-                onChange("countryCode", e.target.value.toUpperCase())
-              }
+              onChange={(e) => onChange("countryCode", e.target.value)}
+              options={[
+                {
+                  value: "",
+                  label: countriesLoading ? "Loading..." : "Select a country",
+                },
+                ...[...countries]
+                  .sort((a, b) => a.displayName.localeCompare(b.displayName))
+                  .map((c) => ({
+                    value: c.code,
+                    label: c.displayName,
+                  })),
+              ]}
               error={errors.countryCode}
-              placeholder="e.g., VN, US"
-              helperText="2-3 uppercase letters (ISO 3166-1)"
+              disabled={countriesLoading}
               fullWidth
             />
           </div>
@@ -369,7 +417,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       websiteUrl: companyValidators.websiteUrl(formData.websiteUrl),
       linkedinUrl: companyValidators.linkedinUrl(formData.linkedinUrl),
     }),
-    [formData]
+    [formData],
   );
 
   const hasErrors = Object.values(errors).some(Boolean);
@@ -418,6 +466,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               onChange={(e) => onChange("companySize", e.target.value)}
               options={companySizeOptions}
               error={errors.companySize}
+              searchable={false}
               fullWidth
             />
             <Input
@@ -427,9 +476,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               onChange={(e) => onChange("foundedYear", e.target.value)}
               error={errors.foundedYear}
               placeholder="e.g., 2020"
-              helperText="1800 - 2100"
               min={1800}
-              max={2100}
+              max={new Date().getFullYear()}
               fullWidth
             />
           </div>
@@ -496,7 +544,7 @@ const EditAboutModal: React.FC<EditAboutModalProps> = ({
       aboutUs: companyValidators.aboutUs(formData.aboutUs),
       whoWeSeek: companyValidators.whoWeSeek(formData.whoWeSeek),
     }),
-    [formData]
+    [formData],
   );
 
   const hasErrors = Object.values(errors).some(Boolean);
@@ -584,8 +632,10 @@ const EditAboutModal: React.FC<EditAboutModalProps> = ({
 
 // Main Component
 export const CompanyInfoForm: React.FC = () => {
+  const navigate = useNavigate();
   const {
     formData,
+    company,
     profile,
     isLoading,
     isSaving,
@@ -604,6 +654,12 @@ export const CompanyInfoForm: React.FC = () => {
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
 
+  // Country list for select dropdown
+  const [countries, setCountries] = useState<
+    Array<{ code: string; displayName: string }>
+  >([]);
+  const [countriesLoading, setCountriesLoading] = useState(true);
+
   // Modal handlers
   const openCompanyModal = useCallback(() => setIsCompanyModalOpen(true), []);
   const closeCompanyModal = useCallback(() => setIsCompanyModalOpen(false), []);
@@ -611,6 +667,14 @@ export const CompanyInfoForm: React.FC = () => {
   const closeProfileModal = useCallback(() => setIsProfileModalOpen(false), []);
   const openAboutModal = useCallback(() => setIsAboutModalOpen(true), []);
   const closeAboutModal = useCallback(() => setIsAboutModalOpen(false), []);
+
+  // Handle country change - logout and redirect to login
+  const handleCountryChanged = useCallback(() => {
+    clearAuthSession();
+    navigate("/login", {
+      state: { message: "Your country has been updated. Please log in again." },
+    });
+  }, [navigate]);
 
   // Fetch premium status
   useEffect(() => {
@@ -625,6 +689,27 @@ export const CompanyInfoForm: React.FC = () => {
     };
 
     fetchPremiumStatus();
+  }, []);
+
+  // Fetch countries on mount
+  useEffect(() => {
+    let isMounted = true;
+    httpClient
+      .get("/auth/countries")
+      .then((res) => {
+        if (isMounted) {
+          setCountries(res.data.data || []);
+          setCountriesLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setCountriesLoading(false);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (isLoading) {
@@ -651,7 +736,6 @@ export const CompanyInfoForm: React.FC = () => {
           {successMessage}
         </Alert>
       )}
-
       {/* Banner with Logo */}
       <BannerWithLogo
         bannerUrl={profile?.bannerUrl}
@@ -661,7 +745,6 @@ export const CompanyInfoForm: React.FC = () => {
         onBannerUpload={handleBannerUpload}
         onLogoUpload={handleLogoUpload}
       />
-
       {/* Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Left Sidebar: Metadata */}
@@ -807,7 +890,6 @@ export const CompanyInfoForm: React.FC = () => {
           </div>
         </div>
       </div>
-
       {/* Edit Modals */}
       <EditCompanyModal
         isOpen={isCompanyModalOpen}
@@ -819,8 +901,12 @@ export const CompanyInfoForm: React.FC = () => {
           city: formData.city,
           countryCode: formData.countryCode,
         }}
+        originalCountryCode={company?.countryCode || ""}
+        countries={countries}
+        countriesLoading={countriesLoading}
         onChange={handleChange}
         onSave={handleSubmitCompany}
+        onCountryChanged={handleCountryChanged}
         isSaving={isSaving}
       />
 
@@ -838,7 +924,6 @@ export const CompanyInfoForm: React.FC = () => {
         onSave={handleSubmitProfile}
         isSaving={isSaving}
       />
-
       <EditAboutModal
         isOpen={isAboutModalOpen}
         onClose={closeAboutModal}
