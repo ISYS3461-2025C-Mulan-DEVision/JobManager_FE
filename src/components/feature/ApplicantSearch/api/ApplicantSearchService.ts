@@ -161,6 +161,20 @@ export const getCountries = async (): Promise<ApiResponse<Country[]>> => {
     return response.data;
 };
 
+// Skills API (from JA service via JM backend)
+export interface Skill {
+    id: string;
+    name: string;
+    usageCount?: number;
+}
+
+export const getSkills = async (): Promise<ApiResponse<Skill[]>> => {
+    const response = await httpClient.get<ApiResponse<Skill[]>>(
+        API_ENDPOINTS.APPLICANT_SEARCH.SKILLS
+    );
+    return response.data;
+};
+
 // Applicant Status APIs (Warning/Favorite feature)
 export interface SetApplicantStatusRequest {
     status: 'NONE' | 'WARNING' | 'FAVORITE';
@@ -226,6 +240,8 @@ const ApplicantSearchService = {
     updateSearchProfileStatus,
     // Countries
     getCountries,
+    // Skills
+    getSkills,
     // Applicant Status
     setApplicantStatus,
     getApplicantStatus,

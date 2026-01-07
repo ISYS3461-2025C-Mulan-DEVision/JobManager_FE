@@ -34,7 +34,9 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
             try {
                 setIsLoadingDialCodes(true);
                 const codes = await getDialCodes();
-                setDialCodes(codes);
+                // Sort dial codes alphabetically by country name
+                const sortedCodes = codes.sort((a, b) => a.name.localeCompare(b.name));
+                setDialCodes(sortedCodes);
             } catch (error) {
                 console.error("Failed to fetch dial codes:", error);
                 // Fallback to default Vietnam dial code if fetch fails

@@ -36,22 +36,6 @@ interface FiltersProps {
   isUpdatingStatus?: boolean;
 }
 
-// TODO: Skills list should come from backend API
-// Using JA's /api/v1/skills endpoint via JM backend
-// For now, using mock data as fallback
-const MOCK_SKILLS: Tag[] = [
-  { id: "1", name: "MongoDB" },
-  { id: "2", name: "Kafka" },
-  { id: "3", name: "Full Stack" },
-  { id: "4", name: "Backend" },
-  { id: "5", name: "Frontend" },
-  { id: "6", name: "React" },
-  { id: "7", name: "Node.js" },
-  { id: "8", name: "Python" },
-  { id: "9", name: "Java" },
-  { id: "10", name: "TypeScript" },
-];
-
 export const Filters: React.FC<FiltersProps> = ({
   searchState,
   onFilterChange,
@@ -64,6 +48,8 @@ export const Filters: React.FC<FiltersProps> = ({
 }) => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [isLoadingCountries, setIsLoadingCountries] = useState(true);
+  const [skills, setSkills] = useState<Tag[]>([]);
+  const [isLoadingSkills, setIsLoadingSkills] = useState(true);
 
   // Load countries on mount
   useEffect(() => {
@@ -82,7 +68,29 @@ export const Filters: React.FC<FiltersProps> = ({
     loadCountries();
   }, []);
 
-  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // Load skills on mount
+  useEffect(() => {
+    const loadSkills = async () => {
+      try {
+        const response = await ApplicantSearchService.getSkills();
+        if (response.success && response.data) {
+          // Map API response to Tag format expected by TagInput
+          const mappedSkills: Tag[] = response.data.map((skill) => ({
+            id: skill.id,
+            name: skill.name,
+          }));
+          setSkills(mappedSkills);
+        }
+      } catch (err) {
+        console.error("Failed to load skills:", err);
+      } finally {
+        setIsLoadingSkills(false);
+      }
+    };
+    loadSkills();
+  }, []);
+
+  const handleCountryChange = (e: { target: { value: string } }) => {
     const value = e.target.value;
     onFilterChange({ countryCode: value || undefined });
   };
@@ -126,7 +134,9 @@ export const Filters: React.FC<FiltersProps> = ({
 
   const countryOptions = [
     { value: "", label: "All countries" },
-    ...countries.map((c) => ({ value: c.code, label: c.displayName })),
+    ...countries
+      .sort((a, b) => a.displayName.localeCompare(b.displayName))
+      .map((c) => ({ value: c.code, label: c.displayName })),
   ];
 
   const educationDegreeOptions: RadioOption[] = Object.entries(
@@ -235,12 +245,12 @@ export const Filters: React.FC<FiltersProps> = ({
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Skill Tags</h3>
         <TagInput
-          tags={MOCK_SKILLS}
+          tags={skills}
           selectedTags={searchState.skillIds}
           onTagAdd={handleSkillAdd}
           onTagRemove={handleSkillRemove}
           placeholder="Search for skills"
-          disabled={disabled}
+          disabled={disabled || isLoadingSkills}
         />
       </div>
     </div>
