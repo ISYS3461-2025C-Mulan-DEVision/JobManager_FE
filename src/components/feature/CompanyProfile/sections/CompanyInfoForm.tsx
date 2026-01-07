@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useEffect,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Input,
@@ -31,11 +32,13 @@ import {
   MapPin,
   Phone,
   Building2,
+  AlertTriangle,
 } from "lucide-react";
 import { useCompanyInfoForm } from "../hooks/useCompanyInfoForm";
 import { companyValidators, COMPANY_SIZE_OPTIONS } from "@/utils/validators";
 import type { CompanyProfileFormData } from "../types";
 import { checkIsPremium } from "@/components/feature/Subscription/api/SubscriptionService";
+import { clearAuthSession } from "@/services/authStorage";
 import httpClient from "@/services/httpClient";
 
 // Banner with Logo Component
@@ -210,10 +213,12 @@ interface EditCompanyModalProps {
     city: string;
     countryCode: string;
   };
+  originalCountryCode: string;
   countries: Array<{ code: string; displayName: string }>;
   countriesLoading: boolean;
   onChange: (field: keyof CompanyProfileFormData, value: string) => void;
   onSave: () => Promise<void>;
+  onCountryChanged: () => void;
   isSaving: boolean;
 }
 
@@ -221,12 +226,20 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
   isOpen,
   onClose,
   formData,
+  originalCountryCode,
   countries,
   countriesLoading,
   onChange,
   onSave,
+  onCountryChanged,
   isSaving,
 }) => {
+  // Check if country is being changed
+  const isCountryChanging =
+    originalCountryCode &&
+    formData.countryCode &&
+    originalCountryCode !== formData.countryCode;
+
   // Validation errors state
   const errors = useMemo(
     () => ({
@@ -243,8 +256,13 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
 
   const handleSave = async () => {
     if (hasErrors) return;
+    const wasCountryChanging = isCountryChanging;
     await onSave();
     onClose();
+    // If country was changed, trigger logout
+    if (wasCountryChanging) {
+      onCountryChanged();
+    }
   };
 
   return (
@@ -267,6 +285,22 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Country change warning */}
+        {isCountryChanging && (
+          <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg mb-4">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-amber-800">
+                Country Change Notice
+              </p>
+              <p className="text-amber-700 mt-1">
+                Changing your country will require you to log in again. Your
+                session will be invalidated after this change is saved.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           <Input
@@ -598,8 +632,10 @@ const EditAboutModal: React.FC<EditAboutModalProps> = ({
 
 // Main Component
 export const CompanyInfoForm: React.FC = () => {
+  const navigate = useNavigate();
   const {
     formData,
+    company,
     profile,
     isLoading,
     isSaving,
@@ -631,6 +667,14 @@ export const CompanyInfoForm: React.FC = () => {
   const closeProfileModal = useCallback(() => setIsProfileModalOpen(false), []);
   const openAboutModal = useCallback(() => setIsAboutModalOpen(true), []);
   const closeAboutModal = useCallback(() => setIsAboutModalOpen(false), []);
+
+  // Handle country change - logout and redirect to login
+  const handleCountryChanged = useCallback(() => {
+    clearAuthSession();
+    navigate("/login", {
+      state: { message: "Your country has been updated. Please log in again." },
+    });
+  }, [navigate]);
 
   // Fetch premium status
   useEffect(() => {
@@ -857,10 +901,12 @@ export const CompanyInfoForm: React.FC = () => {
           city: formData.city,
           countryCode: formData.countryCode,
         }}
+        originalCountryCode={company?.countryCode || ""}
         countries={countries}
         countriesLoading={countriesLoading}
         onChange={handleChange}
         onSave={handleSubmitCompany}
+        onCountryChanged={handleCountryChanged}
         isSaving={isSaving}
       />
 

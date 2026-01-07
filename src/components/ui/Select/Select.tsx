@@ -86,7 +86,12 @@ export const Select: React.FC<SelectProps> = ({
       className={clsx("flex flex-col gap-1", fullWidth && "w-full")}
       ref={dropdownRef}
     >
+    <div
+      className={clsx("flex flex-col gap-1", fullWidth && "w-full")}
+      ref={dropdownRef}
+    >
       {label && (
+        <label htmlFor={selectId} className="text-sm font-medium text-gray-700">
         <label htmlFor={selectId} className="text-sm font-medium text-gray-700">
           {label}
         </label>
