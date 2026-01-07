@@ -48,13 +48,15 @@ export default function AppHeader({ className }: AppHeaderProps) {
         const fetchCompanyData = async () => {
             if (user?.companyId) {
                 try {
-                    const [profile, company, premiumStatus] = await Promise.all([
-                        getCompanyProfile(),
-                        getCompany(),
-                        checkIsPremium(),
-                    ]);
-                    setCompanyLogoUrl(profile.logoUrl || null);
-                    setCompanyName(company.name || null);
+                    const [profile, company, premiumStatus] = await Promise.all(
+                        [
+                            getCompanyProfile().catch(() => null),
+                            getCompany().catch(() => null),
+                            checkIsPremium().catch(() => ({ data: false })),
+                        ]
+                    );
+                    setCompanyLogoUrl(profile?.logoUrl || null);
+                    setCompanyName(company?.name || null);
                     setIsPremium(premiumStatus.data ?? false);
                 } catch (error) {
                     console.error("Failed to fetch company data:", error);
@@ -149,7 +151,13 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                     }
                                 >
                                     <div className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover: transition-all duration-200 hover:scale-105">
-                                        <div className={isPremium ? "p-0.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600" : ""}>
+                                        <div
+                                            className={
+                                                isPremium
+                                                    ? "p-0.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600"
+                                                    : ""
+                                            }
+                                        >
                                             {companyLogoUrl ? (
                                                 <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200">
                                                     <img
@@ -177,7 +185,9 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                                             user.email}
                                                     </p>
                                                     <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
-                                                        <span className={`inline-block w-2 h-2 rounded-full ${isPremium ? "bg-gradient-to-r from-blue-600 to-purple-600" : "bg-gray-400"}`}></span>
+                                                        <span
+                                                            className={`inline-block w-2 h-2 rounded-full ${isPremium ? "bg-gradient-to-r from-blue-600 to-purple-600" : "bg-gray-400"}`}
+                                                        ></span>
                                                         {isPremium ? (
                                                             <span className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                                                 Premium

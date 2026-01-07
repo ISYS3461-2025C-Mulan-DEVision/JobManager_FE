@@ -28,25 +28,21 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   const [dialCodes, setDialCodes] = useState<DialCode[]>([]);
   const [isLoadingDialCodes, setIsLoadingDialCodes] = useState(true);
 
-  // Fetch dial codes from backend
-  useEffect(() => {
-    const fetchDialCodes = async () => {
-      try {
-        setIsLoadingDialCodes(true);
-        const codes = await getDialCodes();
-        // Sort alphabetically by country name
-        const sortedCodes = [...codes].sort((a, b) =>
-          a.name.localeCompare(b.name),
-        );
-        setDialCodes(sortedCodes);
-      } catch (error) {
-        console.error("Failed to fetch dial codes:", error);
-        // Fallback to default Vietnam dial code if fetch fails
-        setDialCodes([{ code: "84", name: "Vietnam" }]);
-      } finally {
-        setIsLoadingDialCodes(false);
-      }
-    };
+    // Fetch dial codes from backend
+    useEffect(() => {
+        const fetchDialCodes = async () => {
+            try {
+                setIsLoadingDialCodes(true);
+                const codes = await getDialCodes();
+                setDialCodes(codes);
+            } catch (error) {
+                console.error("Failed to fetch dial codes:", error);
+                // Fallback to default Vietnam dial code if fetch fails
+                setDialCodes([{ code: "84", name: "Vietnam" }]);
+            } finally {
+                setIsLoadingDialCodes(false);
+            }
+        };
 
     fetchDialCodes();
   }, []);

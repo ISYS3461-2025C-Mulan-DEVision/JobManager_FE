@@ -18,7 +18,7 @@ export const API_ENDPOINTS = {
         UPDATE: (id: string) => `/job-posts/${id}`,
         DELETE: (id: string) => `/job-posts/${id}`,
         PUBLISH: (id: string) => `/job-posts/${id}/publish`,
-        ARCHIVE: (id: string) => `/job-posts/${id}/archive`,
+        UNPUBLISH: (id: string) => `/job-posts/${id}/unpublish`,
         STATS: (id: string) => `/job-posts/${id}/stats`,
         BY_COMPANY: (companyId: string) => `/job-posts/company/${companyId}`,
         BY_COMPANY_PUBLISHED: (companyId: string) =>
@@ -49,7 +49,8 @@ export const API_ENDPOINTS = {
             BASE: (id: string) => `/companies/${id}/media`,
             LOGO: (id: string) => `/companies/${id}/media/logo`,
             BANNER: (id: string) => `/companies/${id}/media/banner`,
-            GET: (companyId: string, mediaId: string) => `/companies/${companyId}/media/${mediaId}`,
+            GET: (companyId: string, mediaId: string) =>
+                `/companies/${companyId}/media/${mediaId}`,
             REORDER: (id: string) => `/companies/${id}/media/reorder`,
         },
         // Dial codes
@@ -75,8 +76,10 @@ export const API_ENDPOINTS = {
         GET: (id: string) => `/internal/search-profiles/${id}`,
         UPDATE: (id: string) => `/internal/search-profiles/${id}`,
         DELETE: (id: string) => `/internal/search-profiles/${id}`,
-        BY_COMPANY: (companyId: string) => `/internal/search-profiles/company/${companyId}`,
-        ACTIVE_BY_COMPANY: (companyId: string) => `/internal/search-profiles/company/${companyId}/active`,
+        BY_COMPANY: (companyId: string) =>
+            `/internal/search-profiles/company/${companyId}`,
+        ACTIVE_BY_COMPANY: (companyId: string) =>
+            `/internal/search-profiles/company/${companyId}/active`,
         UPDATE_STATUS: (id: string) => `/internal/search-profiles/${id}/status`,
     },
 
@@ -84,6 +87,7 @@ export const API_ENDPOINTS = {
     SUBSCRIPTIONS: {
         // External endpoints
         STATUS: (companyId: string) => `/subscriptions/company/${companyId}`,
-        IS_PREMIUM: (companyId: string) => `/subscriptions/company/${companyId}/is-premium`,
+        IS_PREMIUM: (companyId: string) =>
+            `/subscriptions/company/${companyId}/is-premium`,
     },
 } as const;

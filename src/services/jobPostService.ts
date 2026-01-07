@@ -107,15 +107,21 @@ export const publishJobPost = async (id: string): Promise<JobPost> => {
 };
 
 /**
- * Archive a job post
+ * Unpublish a job post (formerly archive)
  */
-export const archiveJobPost = async (id: string): Promise<JobPost> => {
+export const unpublishJobPost = async (id: string): Promise<JobPost> => {
     const response = await httpClient.post<ApiResponse<JobPost>>(
-        API_ENDPOINTS.JOB_POSTS.ARCHIVE(id)
+        API_ENDPOINTS.JOB_POSTS.UNPUBLISH(id)
     );
 
     return transformJobPost(response.data.data);
 };
+
+/**
+ * Archive a job post - alias for unpublishJobPost for backward compatibility
+ * @deprecated Use unpublishJobPost instead
+ */
+export const archiveJobPost = unpublishJobPost;
 
 /**
  * Get job post statistics
