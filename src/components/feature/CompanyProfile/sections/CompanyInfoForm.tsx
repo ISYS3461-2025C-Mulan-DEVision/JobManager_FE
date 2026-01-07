@@ -311,10 +311,12 @@ const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
                   value: "",
                   label: countriesLoading ? "Loading..." : "Select a country",
                 },
-                ...countries.map((c) => ({
-                  value: c.code,
-                  label: c.displayName,
-                })),
+                ...[...countries]
+                  .sort((a, b) => a.displayName.localeCompare(b.displayName))
+                  .map((c) => ({
+                    value: c.code,
+                    label: c.displayName,
+                  })),
               ]}
               error={errors.countryCode}
               disabled={countriesLoading}
@@ -430,6 +432,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               onChange={(e) => onChange("companySize", e.target.value)}
               options={companySizeOptions}
               error={errors.companySize}
+              searchable={false}
               fullWidth
             />
             <Input
@@ -439,9 +442,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               onChange={(e) => onChange("foundedYear", e.target.value)}
               error={errors.foundedYear}
               placeholder="e.g., 2020"
-              helperText="1800 - 2100"
               min={1800}
-              max={2100}
+              max={new Date().getFullYear()}
               fullWidth
             />
           </div>

@@ -137,7 +137,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
               error
                 ? "border-red-500 focus:ring-red-500"
                 : "border-gray-300 focus:ring-blue-500"
-            } ${disabled || isLoadingDialCodes ? "bg-gray-100 cursor-not-allowed" : "bg-white hover:border-gray-400"}`}
+            } ${disabled || isLoadingDialCodes ? "bg-gray-100 cursor-not-allowed" : "bg-white hover:border-gray-400 cursor-pointer"}`}
           >
             <span className="text-sm font-medium">
               {isLoadingDialCodes ? "..." : `+${countryCode}`}

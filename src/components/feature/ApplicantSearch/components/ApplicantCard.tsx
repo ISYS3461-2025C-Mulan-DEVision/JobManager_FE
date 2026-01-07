@@ -50,7 +50,7 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
         </span>
       )}
 
-      <div className="flex items-start gap-4">
+      <div className="flex flex-col sm:flex-row items-start gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
           {applicant.avatarUrl ? (
@@ -87,7 +87,7 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
           <p className="text-sm text-gray-500 truncate">{applicant.email}</p>
 
           {/* Details */}
-          <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-600">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-2 text-sm text-gray-600">
             {applicant.education && applicant.education.length > 0 && (
               <span className="flex items-center gap-1">
                 <GraduationCap className="w-4 h-4" />
@@ -120,9 +120,15 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
         </div>
 
         {/* Action Button */}
-        <div className="flex-shrink-0">
-          <Button variant="primary" size="sm" onClick={onClick}>
-            Applicant Details
+        <div className="flex-shrink-0 w-full sm:w-auto">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={onClick}
+            fullWidth
+            className="sm:w-auto"
+          >
+            View Details
           </Button>
         </div>
       </div>
