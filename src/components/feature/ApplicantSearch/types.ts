@@ -14,6 +14,9 @@ export type ApplicantSortOption = typeof APPLICANT_SORT_OPTIONS[keyof typeof APP
 // Applicant Status Type (for Warning/Favorite feature)
 export type ApplicantStatusType = 'NONE' | 'WARNING' | 'FAVORITE';
 
+// Status Filter Type (for filtering search results)
+export type StatusFilterType = 'ALL' | 'FAVORITE' | 'WARNING' | 'MARKED';
+
 // ============================================================
 // Search State (Frontend UI State)
 // ============================================================
@@ -36,6 +39,8 @@ export interface SearchState {
     sortBy: ApplicantSortOption;
     page: number;
     pageSize: number;
+    /** Filter by company-specific status (ALL, FAVORITE, WARNING, MARKED) */
+    statusFilter?: StatusFilterType;
 }
 
 export const DEFAULT_SEARCH_STATE: SearchState = {
@@ -52,6 +57,7 @@ export const DEFAULT_SEARCH_STATE: SearchState = {
     sortBy: "newest",
     page: 0,
     pageSize: 10,
+    statusFilter: 'ALL',
 };
 
 // ============================================================

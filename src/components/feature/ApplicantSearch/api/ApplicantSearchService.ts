@@ -63,6 +63,9 @@ export const searchApplicants = async (
     if (searchState.sortBy) {
         params.append("sortBy", searchState.sortBy);
     }
+    if (searchState.statusFilter && searchState.statusFilter !== 'ALL') {
+        params.append("statusFilter", searchState.statusFilter);
+    }
     params.append("page", searchState.page.toString());
     params.append("size", searchState.pageSize.toString());
 

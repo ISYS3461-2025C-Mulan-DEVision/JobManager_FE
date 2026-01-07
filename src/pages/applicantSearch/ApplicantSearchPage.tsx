@@ -24,8 +24,10 @@ import type {
   SearchState,
   UpdateSearchProfileRequest,
   ApplicantStatusType,
+  StatusFilterType,
 } from "@/components/feature/ApplicantSearch/types";
 import ApplicantSearchService from "@/components/feature/ApplicantSearch/api/ApplicantSearchService";
+import { Star, AlertCircle, Users } from "lucide-react";
 
 // Filter fields to compare for dirty state (excludes username, sortBy, page, pageSize)
 const FILTER_KEYS: (keyof SearchState)[] = [
@@ -379,18 +381,67 @@ export const ApplicantSearchPage: React.FC = () => {
 
           {/* Right Content - Applicant List */}
           <main className="flex-1">
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <ApplicantList
-                applicants={applicants}
-                isLoading={isSearching}
-                error={searchError}
-                currentPage={searchState.page}
-                totalPages={totalPages}
-                totalElements={totalElements}
-                pageSize={searchState.pageSize}
-                onPageChange={goToPage}
-                onApplicantClick={handleApplicantClick}
-              />
+            <div className="bg-white rounded-lg shadow-sm">
+              {/* Status Tabs */}
+              <div className="border-b border-gray-200 px-4">
+                <nav className="-mb-px flex space-x-8">
+                  {[
+                    {
+                      id: "ALL" as StatusFilterType,
+                      label: "All Applicants",
+                      icon: Users,
+                    },
+                    {
+                      id: "FAVORITE" as StatusFilterType,
+                      label: "Favorites",
+                      icon: Star,
+                    },
+                    {
+                      id: "WARNING" as StatusFilterType,
+                      label: "Warnings",
+                      icon: AlertCircle,
+                    },
+                  ].map((tab) => {
+                    const isActive =
+                      (searchState.statusFilter || "ALL") === tab.id;
+                    const Icon = tab.icon;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          updateSearchState({ statusFilter: tab.id, page: 0 });
+                          search();
+                        }}
+                        className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
+                          isActive
+                            ? "border-blue-500 text-blue-600"
+                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        }`}
+                      >
+                        <Icon
+                          className={`w-4 h-4 ${tab.id === "FAVORITE" && isActive ? "fill-current" : ""}`}
+                        />
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              {/* Applicant List */}
+              <div className="p-4">
+                <ApplicantList
+                  applicants={applicants}
+                  isLoading={isSearching}
+                  error={searchError}
+                  currentPage={searchState.page}
+                  totalPages={totalPages}
+                  totalElements={totalElements}
+                  pageSize={searchState.pageSize}
+                  onPageChange={goToPage}
+                  onApplicantClick={handleApplicantClick}
+                />
+              </div>
             </div>
           </main>
         </div>

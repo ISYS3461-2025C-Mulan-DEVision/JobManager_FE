@@ -41,7 +41,7 @@ interface UseApplicantSearchReturn {
 }
 
 // Toggle this to use mock data instead of API
-const USE_MOCK_DATA = false;
+const USE_MOCK_DATA = true;
 
 export const useApplicantSearch = (): UseApplicantSearchReturn => {
     // Search state
