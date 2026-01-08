@@ -18,6 +18,7 @@ import {
   Select,
   PhoneInput,
   Badge,
+  ImageCropper,
 } from "@/components/ui";
 import { HeadlessModal } from "@/components/headless";
 import {
@@ -37,9 +38,33 @@ import {
 import { useCompanyInfoForm } from "../hooks/useCompanyInfoForm";
 import { companyValidators, COMPANY_SIZE_OPTIONS } from "@/utils/validators";
 import type { CompanyProfileFormData } from "../types";
+
+// Image validation constants
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const LOGO_ASPECT_RATIO = 1; // 1:1 square
+const BANNER_ASPECT_RATIO = 4; // 4:1 wide
+const LOGO_DIMENSION_HINT = "Recommended: 200×200px (square)";
+const BANNER_DIMENSION_HINT = "Recommended: 1200×300px (4:1 ratio)";
 import { checkIsPremium } from "@/components/feature/Subscription/api/SubscriptionService";
 import { clearAuthSession } from "@/services/authStorage";
 import httpClient from "@/services/httpClient";
+
+// File validation helper
+function validateImageFile(file: File): string | null {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return "Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image.";
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    return "File is too large. Maximum size is 5MB.";
+  }
+  return null;
+}
 
 // Banner with Logo Component
 interface BannerWithLogoProps {
@@ -64,6 +89,13 @@ const BannerWithLogo: React.FC<BannerWithLogoProps> = ({
   const [bannerLoaded, setBannerLoaded] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
 
+  // Cropping modal state
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [cropType, setCropType] = useState<"logo" | "banner">("logo");
+  const [isCropping, setIsCropping] = useState(false);
+  const [cropError, setCropError] = useState<string | null>(null);
+
   // Preload critical images for faster perceived loading
   useEffect(() => {
     if (logoUrl) {
@@ -87,12 +119,76 @@ const BannerWithLogo: React.FC<BannerWithLogoProps> = ({
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onBannerUpload(file);
+    if (file) {
+      const error = validateImageFile(file);
+      if (error) {
+        setCropError(error);
+        return;
+      }
+      // Read file and open cropping modal
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCropImageSrc(reader.result as string);
+        setCropType("banner");
+        setCropModalOpen(true);
+        setCropError(null);
+      };
+      reader.readAsDataURL(file);
+    }
+    // Reset input so same file can be selected again
+    e.target.value = "";
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onLogoUpload(file);
+    if (file) {
+      const error = validateImageFile(file);
+      if (error) {
+        setCropError(error);
+        return;
+      }
+      // Read file and open cropping modal
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCropImageSrc(reader.result as string);
+        setCropType("logo");
+        setCropModalOpen(true);
+        setCropError(null);
+      };
+      reader.readAsDataURL(file);
+    }
+    // Reset input so same file can be selected again
+    e.target.value = "";
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    setIsCropping(true);
+    try {
+      // Convert blob to file
+      const fileName = cropType === "logo" ? "logo.jpg" : "banner.jpg";
+      const croppedFile = new File([croppedBlob], fileName, {
+        type: "image/jpeg",
+      });
+
+      if (cropType === "logo") {
+        await onLogoUpload(croppedFile);
+      } else {
+        await onBannerUpload(croppedFile);
+      }
+
+      setCropModalOpen(false);
+      setCropImageSrc(null);
+    } catch (error) {
+      setCropError("Failed to upload image. Please try again.");
+    } finally {
+      setIsCropping(false);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setCropModalOpen(false);
+    setCropImageSrc(null);
+    setCropError(null);
   };
 
   return (
@@ -198,6 +294,38 @@ const BannerWithLogo: React.FC<BannerWithLogoProps> = ({
           </div>
         )}
       </div>
+
+      {/* Error Alert */}
+      {cropError && (
+        <div className="absolute top-4 left-4 right-4 z-10">
+          <Alert type="error" onClose={() => setCropError(null)}>
+            {cropError}
+          </Alert>
+        </div>
+      )}
+
+      {/* Image Cropping Modal */}
+      <HeadlessModal
+        isOpen={cropModalOpen}
+        onClose={handleCropCancel}
+        overlayClassName="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+        className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 overflow-hidden"
+      >
+        {cropImageSrc && (
+          <ImageCropper
+            imageSrc={cropImageSrc}
+            aspect={
+              cropType === "logo" ? LOGO_ASPECT_RATIO : BANNER_ASPECT_RATIO
+            }
+            onCropComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+            isProcessing={isCropping}
+            dimensionHint={
+              cropType === "logo" ? LOGO_DIMENSION_HINT : BANNER_DIMENSION_HINT
+            }
+          />
+        )}
+      </HeadlessModal>
     </div>
   );
 };
