@@ -78,9 +78,9 @@ export const Button: React.FC<ButtonProps> = ({
                     Loading...
                 </span>
             ) : (
-                <span className="flex items-center justify-center gap-2">
+                <span className="flex items-center justify-center gap-2 flex-nowrap">
                     {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
-                    {children && <span>{children}</span>}
+                    {children && <span className="whitespace-nowrap">{children}</span>}
                     {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
                     {badge && <span className="ml-0.5">{badge}</span>}
                 </span>
