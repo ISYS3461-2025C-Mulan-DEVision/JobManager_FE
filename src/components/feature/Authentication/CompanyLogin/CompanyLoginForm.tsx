@@ -158,9 +158,9 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                         const target = `${apiBase}/oauth2/authorization/google`;
                         window.location.href = target;
                     }}
-                    className="w-full inline-flex items-center justify-center"
+                    leftIcon={<GoogleLogo />}
+                    fullWidth
                 >
-                    <GoogleLogo className="mr-2" />
                     Continue with Google
                 </Button>
 

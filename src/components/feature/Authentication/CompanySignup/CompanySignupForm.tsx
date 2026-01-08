@@ -613,10 +613,10 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                             type="button"
                             variant="secondary"
                             onClick={handleGoogleSignup}
-                            className="flex w-full items-center justify-center"
+                            leftIcon={<GoogleLogo />}
+                            fullWidth
                             disabled={isLoading}
                         >
-                            <GoogleLogo className="mr-2" />
                             Continue with Google
                         </Button>
 
