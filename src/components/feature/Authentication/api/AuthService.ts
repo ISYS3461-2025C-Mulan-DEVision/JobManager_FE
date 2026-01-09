@@ -307,12 +307,16 @@ const getCountries = async (): Promise<
 };
 
 const changePasswordCompany = async (
+    companyId: string,
     payload: ChangePasswordPayload
 ): Promise<NullableStringResponse> => {
     try {
         const response = await httpClient.post<NullableStringResponse>(
             `${AUTH_BASE_PATH}/change-password`,
-            payload
+            payload,
+            {
+                params: { companyId }
+            }
         );
         return response.data;
     } catch (error) {
@@ -321,13 +325,18 @@ const changePasswordCompany = async (
     }
 };
 
+
 const changeEmailCompany = async (
+    companyId: string,
     payload: ChangeEmailPayload
 ): Promise<NullableStringResponse> => {
     try {
         const response = await httpClient.post<NullableStringResponse>(
             `${AUTH_BASE_PATH}/change-email`,
-            payload
+            payload,
+            {
+                params: { companyId }
+            }
         );
         return response.data;
     } catch (error) {
