@@ -70,3 +70,18 @@ export const getCompanyId = (): string | null => {
     const user = getStoredUser();
     return user?.companyId || null;
 };
+
+export const updateStoredUserEmail = (newEmail: string): void => {
+    if (!isBrowser) return;
+
+    const user = getStoredUser();
+    if (!user) return;
+
+    const updatedUser: StoredUser = {
+        ...user,
+        email: newEmail,
+    };
+
+    localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+    window.dispatchEvent(new Event("auth-change"));
+};
