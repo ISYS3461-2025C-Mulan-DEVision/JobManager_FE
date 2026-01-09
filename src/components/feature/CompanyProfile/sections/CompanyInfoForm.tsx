@@ -383,8 +383,6 @@ interface EditProfileModalProps {
     industry: string;
     companySize: string;
     foundedYear: string;
-    websiteUrl: string;
-    linkedinUrl: string;
   };
   onChange: (field: keyof CompanyProfileFormData, value: string) => void;
   onSave: () => Promise<void>;
@@ -414,8 +412,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       industry: companyValidators.industry(formData.industry),
       companySize: companyValidators.companySize(formData.companySize),
       foundedYear: companyValidators.foundedYear(formData.foundedYear),
-      websiteUrl: companyValidators.websiteUrl(formData.websiteUrl),
-      linkedinUrl: companyValidators.linkedinUrl(formData.linkedinUrl),
     }),
     [formData],
   );
@@ -438,7 +434,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-900">
-            Edit Profile Details
+            Edit At a Glance
           </h3>
           <button
             onClick={onClose}
@@ -481,24 +477,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               fullWidth
             />
           </div>
-          <Input
-            label="Website URL"
-            value={formData.websiteUrl}
-            onChange={(e) => onChange("websiteUrl", e.target.value)}
-            error={errors.websiteUrl}
-            placeholder="https://example.com"
-            helperText="Max 512 characters"
-            fullWidth
-          />
-          <Input
-            label="LinkedIn URL"
-            value={formData.linkedinUrl}
-            onChange={(e) => onChange("linkedinUrl", e.target.value)}
-            error={errors.linkedinUrl}
-            placeholder="https://linkedin.com/company/your-company"
-            helperText="Must be a valid LinkedIn company or profile URL"
-            fullWidth
-          />
         </div>
 
         <div className="flex gap-3 justify-end mt-6">
@@ -630,6 +608,102 @@ const EditAboutModal: React.FC<EditAboutModalProps> = ({
   );
 };
 
+interface EditConnectModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  formData: {
+    websiteUrl: string;
+    linkedinUrl: string;
+  };
+  onChange: (field: keyof CompanyProfileFormData, value: string) => void;
+  onSave: () => Promise<void>;
+  isSaving: boolean;
+}
+
+const EditConnectModal: React.FC<EditConnectModalProps> = ({
+  isOpen,
+  onClose,
+  formData,
+  onChange,
+  onSave,
+  isSaving,
+}) => {
+  // Validation errors state
+  const errors = useMemo(
+    () => ({
+      websiteUrl: companyValidators.websiteUrl(formData.websiteUrl),
+      linkedinUrl: companyValidators.linkedinUrl(formData.linkedinUrl),
+    }),
+    [formData],
+  );
+
+  const hasErrors = Object.values(errors).some(Boolean);
+
+  const handleSave = async () => {
+    if (hasErrors) return;
+    await onSave();
+    onClose();
+  };
+
+  return (
+    <HeadlessModal
+      isOpen={isOpen}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4"
+    >
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Edit Connect Links
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full cursor-pointer transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <Input
+            label="Website URL"
+            value={formData.websiteUrl}
+            onChange={(e) => onChange("websiteUrl", e.target.value)}
+            error={errors.websiteUrl}
+            placeholder="https://example.com"
+            helperText="Max 512 characters"
+            fullWidth
+          />
+          <Input
+            label="LinkedIn URL"
+            value={formData.linkedinUrl}
+            onChange={(e) => onChange("linkedinUrl", e.target.value)}
+            error={errors.linkedinUrl}
+            placeholder="https://linkedin.com/company/your-company"
+            helperText="Must be a valid LinkedIn company or profile URL"
+            fullWidth
+          />
+        </div>
+
+        <div className="flex gap-3 justify-end mt-6">
+          <Button variant="outline" onClick={onClose} disabled={isSaving}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            isLoading={isSaving}
+            disabled={hasErrors}
+          >
+            Save Changes
+          </Button>
+        </div>
+      </div>
+    </HeadlessModal>
+  );
+};
+
 // Main Component
 export const CompanyInfoForm: React.FC = () => {
   const navigate = useNavigate();
@@ -652,6 +726,7 @@ export const CompanyInfoForm: React.FC = () => {
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
 
   // Country list for select dropdown
@@ -667,6 +742,8 @@ export const CompanyInfoForm: React.FC = () => {
   const closeProfileModal = useCallback(() => setIsProfileModalOpen(false), []);
   const openAboutModal = useCallback(() => setIsAboutModalOpen(true), []);
   const closeAboutModal = useCallback(() => setIsAboutModalOpen(false), []);
+  const openConnectModal = useCallback(() => setIsConnectModalOpen(true), []);
+  const closeConnectModal = useCallback(() => setIsConnectModalOpen(false), []);
 
   // Handle country change - logout and redirect to login
   const handleCountryChanged = useCallback(() => {
@@ -782,7 +859,14 @@ export const CompanyInfoForm: React.FC = () => {
           </InfoCard>
 
           {/* Connect Card */}
-          <InfoCard title="Connect">
+          <InfoCard
+            title="Connect"
+            action={
+              <Button variant="ghost" size="sm" onClick={openConnectModal}>
+                <Pencil className="w-4 h-4" />
+              </Button>
+            }
+          >
             {hasLinks && (
               <div className="flex gap-3 mb-4">
                 {formData.websiteUrl && (
@@ -807,7 +891,11 @@ export const CompanyInfoForm: React.FC = () => {
                 <div>
                   {formData.streetAddress && <p>{formData.streetAddress}</p>}
                   <p>
-                    {[formData.city, formData.countryCode]
+                    {[
+                      formData.city,
+                      countries.find((c) => c.code === formData.countryCode)
+                        ?.displayName || formData.countryCode,
+                    ]
                       .filter(Boolean)
                       .join(", ")}
                   </p>
@@ -841,14 +929,14 @@ export const CompanyInfoForm: React.FC = () => {
 
         {/* Right Content */}
         <div className="lg:col-span-3 space-y-8">
-          <div className="relative group">
+          <div className="relative">
             {/* Edit button for About section */}
             <Button
               variant="ghost"
               size="sm"
               onClick={openAboutModal}
               leftIcon={<Pencil className="w-4 h-4" />}
-              className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity rounded-full z-10 p-2"
+              className="absolute -right-2 -top-2 text-gray-400 hover:text-gray-600 rounded-full z-10 p-2"
             />
 
             {/* About Us Section */}
@@ -917,8 +1005,6 @@ export const CompanyInfoForm: React.FC = () => {
           industry: formData.industry,
           companySize: formData.companySize,
           foundedYear: formData.foundedYear,
-          websiteUrl: formData.websiteUrl,
-          linkedinUrl: formData.linkedinUrl,
         }}
         onChange={handleChange}
         onSave={handleSubmitProfile}
@@ -930,6 +1016,17 @@ export const CompanyInfoForm: React.FC = () => {
         formData={{
           aboutUs: formData.aboutUs,
           whoWeSeek: formData.whoWeSeek,
+        }}
+        onChange={handleChange}
+        onSave={handleSubmitProfile}
+        isSaving={isSaving}
+      />
+      <EditConnectModal
+        isOpen={isConnectModalOpen}
+        onClose={closeConnectModal}
+        formData={{
+          websiteUrl: formData.websiteUrl,
+          linkedinUrl: formData.linkedinUrl,
         }}
         onChange={handleChange}
         onSave={handleSubmitProfile}
