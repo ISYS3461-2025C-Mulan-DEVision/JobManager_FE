@@ -6,6 +6,7 @@ import {
     jobRoutes,
     applicantRoutes,
     applicationRoutes,
+    subscriptionRoutes,
 } from "@/routes";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
                 {jobRoutes}
                 {applicantRoutes}
                 {applicationRoutes}
+                {subscriptionRoutes}
             </Routes>
         </AppLayout>
     );

@@ -37,6 +37,7 @@ export const ROUTES = {
     PROFILE: "/profile",
     SETTINGS: "/settings",
     APPLICANT_SEARCH: "/applicant-search",
+    SUBSCRIPTION: "/subscription",
 } as const;
 
 // Status
