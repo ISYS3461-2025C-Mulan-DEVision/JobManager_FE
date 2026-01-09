@@ -392,10 +392,9 @@ export const AccountSecurityPanel: React.FC = () => {
         // Update the email in localStorage and UI
         updateStoredUserEmail(data.newEmail);
         setCurrentEmail(data.newEmail);
-        
+
         setSuccessMessage(
-          response.message ||
-            "Your email has been successfully changed.",
+          response.message || "Your email has been successfully changed.",
         );
       } else {
         throw new Error(response.message || "Failed to change email");
