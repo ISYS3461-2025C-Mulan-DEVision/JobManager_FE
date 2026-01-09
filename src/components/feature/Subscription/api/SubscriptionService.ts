@@ -4,6 +4,7 @@ import { getCompanyId } from "@/services/authStorage";
 import type {
     ApiResponse,
     SubscriptionStatusResponse,
+    SubscriptionResponse,
     SubscriptionPlan,
     CreatePaymentIntentRequest,
     PaymentIntentResponse,
@@ -103,6 +104,22 @@ export const getSubscriptionHistory = async (): Promise<
     return response.data;
 };
 
+/**
+ * Get subscription by company ID (internal endpoint)
+ */
+export const getSubscriptionByCompanyId = async (): Promise<
+    ApiResponse<SubscriptionResponse>
+> => {
+    const companyId = getCompanyId();
+    if (!companyId) {
+        throw new Error("No company ID found");
+    }
+    const response = await httpClient.get<ApiResponse<SubscriptionResponse>>(
+        API_ENDPOINTS.SUBSCRIPTIONS.GET_BY_COMPANY(companyId)
+    );
+    return response.data;
+};
+
 export const cancelSubscription = async (): Promise<
     ApiResponse<SubscriptionStatusResponse>
 > => {
@@ -110,8 +127,18 @@ export const cancelSubscription = async (): Promise<
     if (!companyId) {
         throw new Error("No company ID found");
     }
-    const response = await httpClient.post<ApiResponse<SubscriptionStatusResponse>>(
-        API_ENDPOINTS.SUBSCRIPTIONS.CANCEL(companyId)
+    
+    // First, get the subscription to retrieve its ID
+    const subscriptionResponse = await getSubscriptionByCompanyId();
+    if (!subscriptionResponse.success || !subscriptionResponse.data?.id) {
+        throw new Error("No active subscription found for this company");
+    }
+    
+    const subscriptionId = subscriptionResponse.data.id;
+    
+    // Cancel using the subscription ID (PATCH request)
+    const response = await httpClient.patch<ApiResponse<SubscriptionStatusResponse>>(
+        API_ENDPOINTS.SUBSCRIPTIONS.CANCEL(subscriptionId)
     );
     return response.data;
 };
@@ -138,6 +165,7 @@ const SubscriptionService = {
     createPaymentIntent,
     purchaseSubscription,
     getSubscriptionHistory,
+    getSubscriptionByCompanyId,
     cancelSubscription,
     renewSubscription,
 };
