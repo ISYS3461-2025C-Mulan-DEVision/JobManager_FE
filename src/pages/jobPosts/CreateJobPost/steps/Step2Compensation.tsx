@@ -81,8 +81,8 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                             type="number"
                             placeholder="50000"
                             value={formData.salaryMin}
-                            onChange={(e) =>
-                                onChange("salaryMin", e.target.value)
+                            onChange={(value) =>
+                                onChange("salaryMin", value)
                             }
                             error={errors.salaryMin}
                             fullWidth
@@ -92,8 +92,8 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                             type="number"
                             placeholder="80000"
                             value={formData.salaryMax}
-                            onChange={(e) =>
-                                onChange("salaryMax", e.target.value)
+                            onChange={(value) =>
+                                onChange("salaryMax", value)
                             }
                             error={errors.salaryMax}
                             fullWidth
@@ -108,7 +108,7 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                         type="number"
                         placeholder="60000"
                         value={formData.salaryMin}
-                        onChange={(e) => onChange("salaryMin", e.target.value)}
+                        onChange={(value) => onChange("salaryMin", value)}
                         error={errors.salaryMin}
                         helperText="An approximate salary amount"
                         fullWidth
@@ -122,7 +122,7 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                         type="number"
                         placeholder="100000"
                         value={formData.salaryMax}
-                        onChange={(e) => onChange("salaryMax", e.target.value)}
+                        onChange={(value) => onChange("salaryMax", value)}
                         error={errors.salaryMax}
                         helperText="The highest salary offered"
                         fullWidth
@@ -136,7 +136,7 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                         type="number"
                         placeholder="50000"
                         value={formData.salaryMin}
-                        onChange={(e) => onChange("salaryMin", e.target.value)}
+                        onChange={(value) => onChange("salaryMin", value)}
                         error={errors.salaryMin}
                         helperText="Minimum salary, with potential for more"
                         fullWidth
@@ -192,8 +192,8 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                             type="text"
                             placeholder="e.g., Plus performance bonuses, equity options"
                             value={formData.salaryNote}
-                            onChange={(e) =>
-                                onChange("salaryNote", e.target.value)
+                            onChange={(value) =>
+                                onChange("salaryNote", value)
                             }
                             helperText="Additional compensation details"
                             fullWidth
@@ -230,8 +230,8 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                         type="text"
                         placeholder="e.g., Ho Chi Minh City"
                         value={formData.locationCity}
-                        onChange={(e) =>
-                            onChange("locationCity", e.target.value)
+                        onChange={(value) =>
+                            onChange("locationCity", value)
                         }
                         error={errors.locationCity}
                         fullWidth

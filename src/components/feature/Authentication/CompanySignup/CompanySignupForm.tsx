@@ -381,7 +381,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                 required
                 placeholder="name@company.com"
                 value={values.email}
-                onChange={handleFieldChange}
+                onChange={(value, event) => handleFieldChange(event)}
                 onBlur={() => handleBlur("email")}
                 error={getFieldError("email")}
                 helperText="We will send account updates to this address."
@@ -400,7 +400,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                             required
                             placeholder="Create a strong password"
                             value={values.password}
-                            onChange={handleFieldChange}
+                            onChange={(value, event) => handleFieldChange(event)}
                             onBlur={() => handleBlur("password")}
                             onKeyUp={(event) =>
                                 setCapsLockOn(
@@ -448,7 +448,7 @@ export const CompanySignupForm: React.FC<CompanySignupFormProps> = (props) => {
                         required
                         placeholder="Re-enter your password"
                         value={values.confirmPassword}
-                        onChange={handleFieldChange}
+                        onChange={(value, event) => handleFieldChange(event)}
                         onBlur={() => handleBlur("confirmPassword")}
                         error={getFieldError("confirmPassword")}
                         endAdornment={

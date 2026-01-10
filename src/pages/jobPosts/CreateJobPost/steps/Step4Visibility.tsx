@@ -125,7 +125,7 @@ export const Step4Visibility: React.FC<Step4VisibilityProps> = ({
                     label="Expiry Date (Optional)"
                     type="date"
                     value={formData.expiryAt}
-                    onChange={(e) => onChange("expiryAt", e.target.value)}
+                    onChange={(value) => onChange("expiryAt", value)}
                     error={errors.expiryAt}
                     min={getMinDate()}
                     helperText="Job post will automatically close after this date"

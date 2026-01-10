@@ -158,7 +158,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = (
                         required
                         placeholder="What should applicants see?"
                         value={values.companyName}
-                        onChange={handleChange}
+                        onChange={(value, event) => handleChange(event)}
                         onBlur={() => handleBlur("companyName")}
                         error={
                             touched.companyName ? errors.companyName : undefined

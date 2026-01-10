@@ -11,11 +11,7 @@ interface Step1BasicsProps {
     onChange: (field: keyof JobPostFormData, value: any) => void;
 }
 
-export const Step1Basics: React.FC<Step1BasicsProps> = ({
-    formData,
-    errors,
-    onChange,
-}) => {
+export const Step1Basics: React.FC<Step1BasicsProps> = ({ formData, errors, onChange }) => {
     const toggleEmploymentType = (type: EmploymentType) => {
         const current = formData.employmentTypes;
         const updated = current.includes(type)
@@ -33,7 +29,7 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({
                 type="text"
                 placeholder="e.g., Senior Full-Stack Developer"
                 value={formData.title}
-                onChange={(e) => onChange("title", e.target.value)}
+                onChange={(value) => onChange("title", value)}
                 error={errors.title}
                 fullWidth
             />
@@ -44,25 +40,14 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({
                     Employment Type *
                 </label>
                 <div className="space-y-3">
-                    {(
-                        Object.keys(EMPLOYMENT_TYPES) as Array<
-                            keyof typeof EMPLOYMENT_TYPES
-                        >
-                    )
-                        .filter(
-                            (key) =>
-                                EMPLOYMENT_TYPES[key] !==
-                                EMPLOYMENT_TYPES.FREELANCE
-                        )
+                    {(Object.keys(EMPLOYMENT_TYPES) as Array<keyof typeof EMPLOYMENT_TYPES>)
+                        .filter((key) => EMPLOYMENT_TYPES[key] !== EMPLOYMENT_TYPES.FRESHER)
                         .map((key) => {
                             const type = EMPLOYMENT_TYPES[key];
-                            const isSelected =
-                                formData.employmentTypes.includes(type);
+                            const isSelected = formData.employmentTypes.includes(type);
 
-                            const isInternship =
-                                type === EMPLOYMENT_TYPES.INTERNSHIP;
-                            const isContract =
-                                type === EMPLOYMENT_TYPES.CONTRACT;
+                            const isInternship = type === EMPLOYMENT_TYPES.INTERNSHIP;
+                            const isContract = type === EMPLOYMENT_TYPES.CONTRACT;
                             const hasOtherTypes = formData.employmentTypes.some(
                                 (t) =>
                                     t !== EMPLOYMENT_TYPES.INTERNSHIP &&
@@ -80,9 +65,7 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({
                                 // Disable Full-time/Part-time if:
                                 // 1. Any type is already selected, OR
                                 // 2. Internship or Contract is selected
-                                isDisabled =
-                                    formData.employmentTypes.length > 0 &&
-                                    !isSelected;
+                                isDisabled = formData.employmentTypes.length > 0 && !isSelected;
                             }
 
                             return (
@@ -93,16 +76,13 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({
                                         isSelected
                                             ? "border-blue-500 bg-blue-50"
                                             : "border-gray-200 hover:border-gray-300",
-                                        isDisabled &&
-                                            "opacity-50 cursor-not-allowed"
+                                        isDisabled && "opacity-50 cursor-not-allowed"
                                     )}
                                 >
                                     <input
                                         type="checkbox"
                                         checked={isSelected}
-                                        onChange={() =>
-                                            toggleEmploymentType(type)
-                                        }
+                                        onChange={() => toggleEmploymentType(type)}
                                         disabled={isDisabled}
                                         className="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                                     />
@@ -110,27 +90,22 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({
                                         <span
                                             className={clsx(
                                                 "font-medium",
-                                                isSelected
-                                                    ? "text-blue-700"
-                                                    : "text-gray-900"
+                                                isSelected ? "text-blue-700" : "text-gray-900"
                                             )}
                                         >
                                             {EMPLOYMENT_TYPE_LABELS[type]}
                                         </span>
                                         {isDisabled && (
                                             <p className="text-xs text-gray-500 mt-1">
-                                                Only Internship and Contract can
-                                                be combined together
+                                                Only Internship and Contract can be combined
+                                                together
                                             </p>
                                         )}
-                                        {(type ===
-                                            EMPLOYMENT_TYPES.INTERNSHIP ||
-                                            type ===
-                                                EMPLOYMENT_TYPES.CONTRACT) &&
+                                        {(type === EMPLOYMENT_TYPES.INTERNSHIP ||
+                                            type === EMPLOYMENT_TYPES.CONTRACT) &&
                                             !hasOtherTypes && (
                                                 <p className="text-xs text-gray-500 mt-1">
-                                                    Can only be combined with
-                                                    each other
+                                                    Can only be combined with each other
                                                 </p>
                                             )}
                                     </div>
@@ -139,9 +114,7 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({
                         })}
                 </div>
                 {errors.employmentTypes && (
-                    <p className="mt-2 text-sm text-red-600">
-                        {errors.employmentTypes}
-                    </p>
+                    <p className="mt-2 text-sm text-red-600">{errors.employmentTypes}</p>
                 )}
             </div>
 
@@ -155,12 +128,9 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({
                     className="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <label htmlFor="isFresher" className="flex-1 cursor-pointer">
-                    <span className="font-medium text-gray-900">
-                        Fresher Friendly
-                    </span>
+                    <span className="font-medium text-gray-900">Fresher Friendly</span>
                     <p className="text-sm text-gray-600 mt-1">
-                        This position is suitable for candidates with little to
-                        no work experience
+                        This position is suitable for candidates with little to no work experience
                     </p>
                 </label>
             </div>
