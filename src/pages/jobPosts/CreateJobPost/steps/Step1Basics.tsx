@@ -23,10 +23,7 @@ interface EmploymentTypeCardProps {
     onToggle: () => void;
 }
 
-const EmploymentTypeCard: React.FC<EmploymentTypeCardProps> = ({
-    option,
-    onToggle,
-}) => (
+const EmploymentTypeCard: React.FC<EmploymentTypeCardProps> = ({ option, onToggle }) => (
     <label
         className={clsx(
             "flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
@@ -53,14 +50,10 @@ const EmploymentTypeCard: React.FC<EmploymentTypeCardProps> = ({
                 {option.label}
             </span>
             {option.disabledReason && (
-                <p className="text-xs text-gray-500 mt-1">
-                    {option.disabledReason}
-                </p>
+                <p className="text-xs text-gray-500 mt-1">{option.disabledReason}</p>
             )}
             {option.canCombine && !option.isDisabled && (
-                <p className="text-xs text-gray-500 mt-1">
-                    Can only be combined with each other
-                </p>
+                <p className="text-xs text-gray-500 mt-1">Can only be combined with each other</p>
             )}
         </div>
     </label>

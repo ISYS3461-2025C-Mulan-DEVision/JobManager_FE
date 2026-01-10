@@ -137,9 +137,10 @@ export const useVisibilityStep = ({
             },
             {
                 label: "Employment Types",
-                value: formData.employmentTypes.length > 0 
-                    ? `${formData.employmentTypes.length} selected` 
-                    : "None",
+                value:
+                    formData.employmentTypes.length > 0
+                        ? `${formData.employmentTypes.length} selected`
+                        : "None",
             },
             {
                 label: "Location",
@@ -154,7 +155,13 @@ export const useVisibilityStep = ({
                 value: formData.isPrivate ? "🔒 Private" : "🌐 Public",
             },
         ],
-        [formData.title, formData.employmentTypes, formData.locationCity, formData.technicalSkills, formData.isPrivate]
+        [
+            formData.title,
+            formData.employmentTypes,
+            formData.locationCity,
+            formData.technicalSkills,
+            formData.isPrivate,
+        ]
     );
 
     const isFormComplete = useMemo(() => {

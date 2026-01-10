@@ -2,8 +2,10 @@ import React from "react";
 import clsx from "clsx";
 import { useCheckbox } from "@/components/headless";
 
-export interface CheckboxProps
-    extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "onChange"> {
+export interface CheckboxProps extends Omit<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    "type" | "onChange"
+> {
     label?: string;
     error?: string;
     helperText?: string;
@@ -58,14 +60,10 @@ export const Checkbox: React.FC<CheckboxProps> = ({
                     )}
                     {...props}
                 />
-                {label && (
-                    <span className="text-sm text-gray-700">{label}</span>
-                )}
+                {label && <span className="text-sm text-gray-700">{label}</span>}
             </label>
             {error && <span className="text-sm text-red-600">{error}</span>}
-            {helperText && !error && (
-                <span className="text-sm text-gray-500">{helperText}</span>
-            )}
+            {helperText && !error && <span className="text-sm text-gray-500">{helperText}</span>}
         </div>
     );
 };

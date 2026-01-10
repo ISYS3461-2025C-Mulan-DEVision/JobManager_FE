@@ -116,7 +116,7 @@ export const useDescriptionStep = ({
 
     const filteredSuggestions = useMemo(() => {
         if (!skillInput.trim()) return [];
-        
+
         return COMMON_SKILLS.filter(
             (skill) =>
                 skill.toLowerCase().includes(skillInput.toLowerCase()) &&
@@ -124,10 +124,7 @@ export const useDescriptionStep = ({
         );
     }, [skillInput, formData.technicalSkills]);
 
-    const popularSkills = useMemo(
-        () => COMMON_SKILLS.slice(0, POPULAR_SKILLS_COUNT),
-        []
-    );
+    const popularSkills = useMemo(() => COMMON_SKILLS.slice(0, POPULAR_SKILLS_COUNT), []);
 
     // -------------------------------------------------------------------------
     // Callbacks

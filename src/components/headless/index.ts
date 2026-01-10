@@ -13,7 +13,13 @@ export { useInput } from "./Input";
 export type { UseInputProps, UseInputReturn } from "./Input";
 
 export { useSelect, useCustomSelect } from "./Select";
-export type { UseSelectProps, UseSelectReturn, UseCustomSelectProps, UseCustomSelectReturn, SelectOption } from "./Select";
+export type {
+    UseSelectProps,
+    UseSelectReturn,
+    UseCustomSelectProps,
+    UseCustomSelectReturn,
+    SelectOption,
+} from "./Select";
 
 export { useCheckbox } from "./Checkbox";
 export type { UseCheckboxProps, UseCheckboxReturn } from "./Checkbox";
@@ -24,9 +30,4 @@ export type { UseCardProps, UseCardReturn } from "./Card";
 // Types
 export * from "./types";
 export type { TableColumn } from "./Table/useTable";
-export type {
-    TabItem,
-    UseTabsProps,
-    UseTabsReturn,
-    HeadlessTabsProps,
-} from "./Tabs";
+export type { TabItem, UseTabsProps, UseTabsReturn, HeadlessTabsProps } from "./Tabs";

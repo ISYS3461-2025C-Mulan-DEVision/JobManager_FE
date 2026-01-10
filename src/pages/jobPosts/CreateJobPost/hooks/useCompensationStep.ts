@@ -164,7 +164,9 @@ export const useCompensationStep = ({
     // -------------------------------------------------------------------------
 
     const [showSalaryNote, setShowSalaryNote] = useState(false);
-    const [countryList, setCountryList] = useState<Array<{ code: string; displayName: string }>>([]);
+    const [countryList, setCountryList] = useState<Array<{ code: string; displayName: string }>>(
+        []
+    );
     const [countryLoading, setCountryLoading] = useState(true);
     const [countryError, setCountryError] = useState<string | null>(null);
 

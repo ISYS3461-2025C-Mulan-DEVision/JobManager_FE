@@ -135,9 +135,7 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = (props) => {
 
             {/* Location */}
             <div className="border-t pt-6 mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Location
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Location</h3>
 
                 <div className="space-y-4">
                     <Select
@@ -158,9 +156,7 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = (props) => {
                     />
 
                     {location.country.isLoading && (
-                        <p className="text-sm text-gray-500">
-                            Loading countries...
-                        </p>
+                        <p className="text-sm text-gray-500">Loading countries...</p>
                     )}
                 </div>
             </div>

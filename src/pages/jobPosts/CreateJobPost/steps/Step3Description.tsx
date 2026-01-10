@@ -26,11 +26,7 @@ interface SkillChipProps {
 const SkillChip: React.FC<SkillChipProps> = ({ skill, onRemove }) => (
     <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
         {skill}
-        <button
-            type="button"
-            onClick={onRemove}
-            className="hover:text-blue-900 focus:outline-none"
-        >
+        <button type="button" onClick={onRemove} className="hover:text-blue-900 focus:outline-none">
             ×
         </button>
     </span>
@@ -175,20 +171,16 @@ export const Step3Description: React.FC<Step3DescriptionProps> = (props) => {
                     )}
                 </div>
 
-                {skills.error && (
-                    <p className="mt-2 text-sm text-red-600">{skills.error}</p>
-                )}
+                {skills.error && <p className="mt-2 text-sm text-red-600">{skills.error}</p>}
 
                 <p className="mt-2 text-xs text-gray-500">
-                    Press Enter to add a skill, or select from suggestions. Free-text skills are allowed.
+                    Press Enter to add a skill, or select from suggestions. Free-text skills are
+                    allowed.
                 </p>
 
                 {/* Quick Add Popular Skills */}
                 {skills.items.length === 0 && (
-                    <PopularSkills
-                        skills={skills.popularSkills}
-                        onSelect={skills.add}
-                    />
+                    <PopularSkills skills={skills.popularSkills} onSelect={skills.add} />
                 )}
             </div>
         </div>

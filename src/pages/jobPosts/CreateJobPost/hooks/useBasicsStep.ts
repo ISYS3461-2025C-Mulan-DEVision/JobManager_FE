@@ -90,19 +90,19 @@ export const useBasicsStep = ({
 
     const employmentTypeOptions = useMemo<EmploymentTypeOption[]>(() => {
         const keys = Object.keys(EMPLOYMENT_TYPES) as Array<keyof typeof EMPLOYMENT_TYPES>;
-        
+
         return keys
             .filter((key) => EMPLOYMENT_TYPES[key] !== EMPLOYMENT_TYPES.FRESHER)
             .map((key) => {
                 const type = EMPLOYMENT_TYPES[key];
                 const isSelected = formData.employmentTypes.includes(type);
                 const isCombinable = COMBINABLE_TYPES.includes(type);
-                
+
                 // Check if other non-combinable types are selected
                 const hasNonCombinableSelected = formData.employmentTypes.some(
                     (t) => !COMBINABLE_TYPES.includes(t)
                 );
-                
+
                 // Check if any type is already selected
                 const hasAnySelected = formData.employmentTypes.length > 0;
 

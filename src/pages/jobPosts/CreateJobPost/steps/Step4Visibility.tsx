@@ -36,9 +36,7 @@ const VisibilityOptionCard: React.FC<VisibilityOptionCardProps> = ({
     <label
         className={clsx(
             "flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
-            isSelected
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+            isSelected ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
         )}
     >
         <input
@@ -51,10 +49,7 @@ const VisibilityOptionCard: React.FC<VisibilityOptionCardProps> = ({
         <div className="flex-1">
             <div className="flex items-center gap-2">
                 <span
-                    className={clsx(
-                        "font-medium",
-                        isSelected ? "text-blue-700" : "text-gray-900"
-                    )}
+                    className={clsx("font-medium", isSelected ? "text-blue-700" : "text-gray-900")}
                 >
                     {option.icon} {option.label}
                 </span>
@@ -81,9 +76,7 @@ export const Step4Visibility: React.FC<Step4VisibilityProps> = (props) => {
         <div className="space-y-6">
             {/* Visibility Toggle */}
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Visibility
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Visibility</label>
                 <div className="space-y-3" role="radiogroup" aria-label="Visibility options">
                     {visibility.options.map((option) => {
                         const optionProps = visibility.getOptionProps(option);
@@ -133,9 +126,7 @@ export const Step4Visibility: React.FC<Step4VisibilityProps> = (props) => {
                         {summary.items.map((item) => (
                             <div key={item.label} className="flex justify-between">
                                 <span className="text-gray-600">{item.label}:</span>
-                                <span className="font-medium text-gray-900">
-                                    {item.value}
-                                </span>
+                                <span className="font-medium text-gray-900">{item.value}</span>
                             </div>
                         ))}
                     </div>

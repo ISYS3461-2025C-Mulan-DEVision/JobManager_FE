@@ -23,7 +23,4 @@ export type {
 } from "./useCompensationStep";
 
 export { useDescriptionStep } from "./useDescriptionStep";
-export type {
-    UseDescriptionStepProps,
-    UseDescriptionStepReturn,
-} from "./useDescriptionStep";
+export type { UseDescriptionStepProps, UseDescriptionStepReturn } from "./useDescriptionStep";

@@ -78,8 +78,7 @@ export const useCustomSelect = ({
     const filteredOptions = options.filter((option) => {
         if (!searchable || !searchTerm) return true;
         const searchText =
-            option.searchLabel ||
-            (typeof option.label === "string" ? option.label : "");
+            option.searchLabel || (typeof option.label === "string" ? option.label : "");
         return searchText.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
@@ -120,10 +119,7 @@ export const useCustomSelect = ({
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target as Node)
-            ) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 close();
             }
         };
@@ -150,8 +146,7 @@ export const useCustomSelect = ({
     const getSearchInputProps = useCallback(
         () => ({
             value: searchTerm,
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                setSearchTerm(e.target.value),
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value),
             autoFocus: true,
         }),
         [searchTerm]
