@@ -4,7 +4,6 @@ import {
     checkIsPremium,
     createPaymentIntent,
     getPaymentHistory,
-    createSubscription,
     cancelSubscription,
     getPaymentStatus,
 } from "../api/PaymentApiService";
@@ -238,8 +237,11 @@ export const usePaymentFlow = () => {
 
             try {
                 if (success) {
-                    // Create subscription after successful payment
-                    await createSubscription(1);
+                    // Note: Subscription creation/renewal is handled automatically via Kafka
+                    // when the payment service publishes the payment.completed event.
+                    // The subscription service's PaymentEventConsumer will either:
+                    // - Create a new subscription if none exists, or
+                    // - Renew (extend) an existing subscription
 
                     // Wait for subscription to be activated in the backend
                     const isActivated = await waitForSubscriptionActivation(10, 2000);
@@ -363,6 +365,12 @@ export const usePaymentFlow = () => {
      */
     const goToStep = useCallback((newStep: PaymentStep) => {
         setStep(newStep);
+        // Clear payment intent when going back to pricing or confirmation
+        if (newStep === "pricing" || newStep === "confirm") {
+            setPaymentIntentId(null);
+            setClientSecret(null);
+            setPaymentId(null);
+        }
     }, []);
 
     /**

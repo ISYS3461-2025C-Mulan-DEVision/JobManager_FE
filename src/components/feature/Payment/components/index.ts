@@ -5,3 +5,4 @@ export * from "./PaymentResult";
 export * from "./SubscriptionManagement";
 export * from "./UpgradePrompts";
 export * from "./ProfileSubscriptionCardWithData";
+export * from "./StripeCheckoutForm";
