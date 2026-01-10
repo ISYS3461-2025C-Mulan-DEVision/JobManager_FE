@@ -38,9 +38,29 @@ export const SubscriptionManagementPage: React.FC = () => {
     // Data hooks
     const { subscriptionStatus, isLoading: statusLoading, error: statusError, refetch: refetchStatus } = useSubscriptionStatus();
     const { plans, isLoading: plansLoading, error: plansError } = useSubscriptionPlans();
-    const { history, isLoading: historyLoading, error: historyError, refetch: refetchHistory } = useSubscriptionHistory();
-    const { createIntent, completePurchase, isLoading: purchaseLoading, error: purchaseError, success: purchaseSuccess, clearError, clearSuccess } = useSubscriptionPurchase();
-    const { cancel, isLoading: cancelLoading, error: cancelError, success: cancelSuccess, clearError: clearCancelError, clearSuccess: clearCancelSuccess } = useCancelSubscription();
+    const {
+        history,
+        isLoading: historyLoading,
+        error: historyError,
+        refetch: refetchHistory,
+    } = useSubscriptionHistory();
+    const {
+        createIntent,
+        completePurchase,
+        isLoading: purchaseLoading,
+        error: purchaseError,
+        success: purchaseSuccess,
+        clearError,
+        clearSuccess,
+    } = useSubscriptionPurchase();
+    const {
+        cancel,
+        isLoading: cancelLoading,
+        error: cancelError,
+        success: cancelSuccess,
+        clearError: clearCancelError,
+        clearSuccess: clearCancelSuccess,
+    } = useCancelSubscription();
 
     // Handlers
     const handlePurchase = async () => {
@@ -148,15 +168,8 @@ export const SubscriptionManagementPage: React.FC = () => {
             {/* History Section */}
             <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-gray-900">Payment History</h2>
-                <SubscriptionHistoryTable
-                    history={history}
-                    isLoading={historyLoading}
-                />
-                {historyError && (
-                    <Alert type="error">
-                        {historyError}
-                    </Alert>
-                )}
+                <SubscriptionHistoryTable history={history} isLoading={historyLoading} />
+                {historyError && <Alert type="error">{historyError}</Alert>}
             </div>
         </div>
     );
@@ -191,13 +204,13 @@ export const SubscriptionManagementPage: React.FC = () => {
                 <Alert type="error">{plansError}</Alert>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {plans.map((plan, index) => (
+                    {plans.map((plan) => (
                         <SubscriptionPlanCard
                             key={plan.id}
                             plan={plan}
-                            isPopular={plan.name === "Medium"}
-                            isCurrentPlan={subscriptionStatus?.isPremium && plan.name === "Simplex"}
-                            onSelect={handlePlanSelect}
+                            isPopular={plan.name === "Premium"}
+                            isCurrentPlan={subscriptionStatus?.isPremium && plan.name === "Premium"}
+                            onSelect={handleSelectPlan}
                         />
                     ))}
                 </div>
@@ -248,24 +261,37 @@ export const SubscriptionManagementPage: React.FC = () => {
                             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                 <div className="flex justify-between items-start mb-3">
                                     <div>
-                                        <h3 className="text-xl font-bold text-gray-900">{selectedPlan.name}</h3>
+                                        <h3 className="text-xl font-bold text-gray-900">
+                                            {selectedPlan.name}
+                                        </h3>
                                         <p className="text-sm text-gray-500">
-                                            {selectedPlan.billingPeriod === "MONTHLY" ? "Monthly" : "Yearly"} subscription
+                                            {selectedPlan.billingPeriod === "MONTHLY"
+                                                ? "Monthly"
+                                                : "Yearly"}{" "}
+                                            subscription
                                         </p>
                                     </div>
                                     <div className="text-right">
                                         <span className="text-2xl font-bold text-gray-900">
-                                            {selectedPlan.currency === "USD" ? "$" : selectedPlan.currency}
+                                            {selectedPlan.currency === "USD"
+                                                ? "$"
+                                                : selectedPlan.currency}
                                             {selectedPlan.price}
                                         </span>
                                         <p className="text-xs text-gray-500">
-                                            /{selectedPlan.billingPeriod === "MONTHLY" ? "month" : "year"}
+                                            /
+                                            {selectedPlan.billingPeriod === "MONTHLY"
+                                                ? "month"
+                                                : "year"}
                                         </p>
                                     </div>
                                 </div>
                                 <ul className="space-y-2">
                                     {selectedPlan.features.slice(0, 3).map((feature, index) => (
-                                        <li key={index} className="text-sm text-gray-700 flex items-center gap-2">
+                                        <li
+                                            key={index}
+                                            className="text-sm text-gray-700 flex items-center gap-2"
+                                        >
                                             <span className="text-green-500">✓</span>
                                             {feature}
                                         </li>
@@ -294,14 +320,18 @@ export const SubscriptionManagementPage: React.FC = () => {
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-600">Subtotal</span>
                                 <span className="text-gray-900 font-medium">
-                                    {selectedPlan && `${selectedPlan.currency === "USD" ? "$" : selectedPlan.currency}${selectedPlan.price}`}
+                                    {selectedPlan &&
+                                        `${selectedPlan.currency === "USD" ? "$" : selectedPlan.currency}${selectedPlan.price}`}
                                 </span>
                             </div>
                             <div className="border-t border-gray-200 pt-3">
                                 <div className="flex justify-between">
-                                    <span className="text-base font-semibold text-gray-900">Total</span>
+                                    <span className="text-base font-semibold text-gray-900">
+                                        Total
+                                    </span>
                                     <span className="text-xl font-bold text-gray-900">
-                                        {selectedPlan && `${selectedPlan.currency === "USD" ? "$" : selectedPlan.currency}${selectedPlan.price}`}
+                                        {selectedPlan &&
+                                            `${selectedPlan.currency === "USD" ? "$" : selectedPlan.currency}${selectedPlan.price}`}
                                     </span>
                                 </div>
                             </div>
