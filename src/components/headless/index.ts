@@ -12,8 +12,8 @@ export type { UseButtonProps, UseButtonReturn } from "./Button";
 export { useInput } from "./Input";
 export type { UseInputProps, UseInputReturn } from "./Input";
 
-export { useSelect } from "./Select";
-export type { UseSelectProps, UseSelectReturn } from "./Select";
+export { useSelect, useCustomSelect } from "./Select";
+export type { UseSelectProps, UseSelectReturn, UseCustomSelectProps, UseCustomSelectReturn, SelectOption } from "./Select";
 
 export { useCheckbox } from "./Checkbox";
 export type { UseCheckboxProps, UseCheckboxReturn } from "./Checkbox";

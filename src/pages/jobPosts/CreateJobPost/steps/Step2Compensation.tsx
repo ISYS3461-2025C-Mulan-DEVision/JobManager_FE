@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Input, Select } from "@/components/ui";
 import { JobPostFormData, JobPostFormErrors } from "../types";
-import { SALARY_TYPES, SALARY_TYPE_LABELS } from "@/utils/constants";
+import { useCompensationStep } from "../hooks";
 import { SalaryType } from "@/types";
-import httpClient from "@/services/httpClient";
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface Step2CompensationProps {
     formData: JobPostFormData;
@@ -11,144 +14,76 @@ interface Step2CompensationProps {
     onChange: (field: keyof JobPostFormData, value: any) => void;
 }
 
-export const Step2Compensation: React.FC<Step2CompensationProps> = ({
-    formData,
-    errors,
-    onChange,
-}) => {
-    const [showSalaryNote, setShowSalaryNote] = useState(false);
-    const [countryList, setCountryList] = useState<
-        Array<{ code: string; displayName: string }>
-    >([]);
-    const [countryLoading, setCountryLoading] = useState(true);
-    const [countryError, setCountryError] = useState<string | null>(null);
+// ============================================================================
+// Main Component
+// ============================================================================
 
-    // Fetch countries from API
-    useEffect(() => {
-        let isMounted = true;
-        setCountryLoading(true);
-        setCountryError(null);
+export const Step2Compensation: React.FC<Step2CompensationProps> = (props) => {
+    // Use headless hook for all logic
+    const { salaryType, salary, salaryNote, location } = useCompensationStep(props);
 
-        httpClient
-            .get("/auth/countries")
-            .then((res: any) => {
-                if (isMounted) {
-                    setCountryList(res.data.data || []);
-                    setCountryLoading(false);
-                }
-            })
-            .catch((err: any) => {
-                if (isMounted) {
-                    setCountryError("Failed to load country list");
-                    setCountryLoading(false);
-                    console.error("Error fetching countries:", err);
-                }
-            });
-
-        return () => {
-            isMounted = false;
-        };
-    }, []);
-
-    useEffect(() => {
-        // Auto-show salary note if type is NEGOTIABLE
-        if (formData.salaryType === SALARY_TYPES.NEGOTIABLE) {
-            setShowSalaryNote(true);
-        }
-    }, [formData.salaryType]);
-
-    const salaryTypeOptions = [
-        { value: "", label: "Select salary type" },
-        ...Object.keys(SALARY_TYPES).map((key) => ({
-            value: SALARY_TYPES[key as keyof typeof SALARY_TYPES],
-            label: SALARY_TYPE_LABELS[
-                SALARY_TYPES[key as keyof typeof SALARY_TYPES]
-            ],
-        })),
-    ];
-
+    // Render salary inputs based on config
     const renderSalaryInputs = () => {
-        const type = formData.salaryType as SalaryType;
+        const { config, min, max } = salary;
 
-        if (!type) return null;
-
-        switch (type) {
-            case SALARY_TYPES.RANGE:
+        switch (config.type) {
+            case "range":
                 return (
                     <div className="grid grid-cols-2 gap-4">
                         <Input
-                            label="Minimum Salary *"
+                            label={config.minLabel}
                             type="number"
                             placeholder="50000"
-                            value={formData.salaryMin}
-                            onChange={(value) =>
-                                onChange("salaryMin", value)
-                            }
-                            error={errors.salaryMin}
+                            value={min.value}
+                            onChange={min.onChange}
+                            error={min.error}
                             fullWidth
                         />
                         <Input
-                            label="Maximum Salary *"
+                            label={config.maxLabel}
                             type="number"
                             placeholder="80000"
-                            value={formData.salaryMax}
-                            onChange={(value) =>
-                                onChange("salaryMax", value)
-                            }
-                            error={errors.salaryMax}
+                            value={max.value}
+                            onChange={max.onChange}
+                            error={max.error}
                             fullWidth
                         />
                     </div>
                 );
 
-            case SALARY_TYPES.ABOUT:
+            case "single-min":
                 return (
                     <Input
-                        label="Estimated Salary *"
+                        label={config.minLabel}
                         type="number"
                         placeholder="60000"
-                        value={formData.salaryMin}
-                        onChange={(value) => onChange("salaryMin", value)}
-                        error={errors.salaryMin}
-                        helperText="An approximate salary amount"
+                        value={min.value}
+                        onChange={min.onChange}
+                        error={min.error}
+                        helperText={config.helperText}
                         fullWidth
                     />
                 );
 
-            case SALARY_TYPES.UP_TO:
+            case "single-max":
                 return (
                     <Input
-                        label="Maximum Salary *"
+                        label={config.maxLabel}
                         type="number"
                         placeholder="100000"
-                        value={formData.salaryMax}
-                        onChange={(value) => onChange("salaryMax", value)}
-                        error={errors.salaryMax}
-                        helperText="The highest salary offered"
+                        value={max.value}
+                        onChange={max.onChange}
+                        error={max.error}
+                        helperText={config.helperText}
                         fullWidth
                     />
                 );
 
-            case SALARY_TYPES.FROM:
-                return (
-                    <Input
-                        label="Starting Salary *"
-                        type="number"
-                        placeholder="50000"
-                        value={formData.salaryMin}
-                        onChange={(value) => onChange("salaryMin", value)}
-                        error={errors.salaryMin}
-                        helperText="Minimum salary, with potential for more"
-                        fullWidth
-                    />
-                );
-
-            case SALARY_TYPES.NEGOTIABLE:
+            case "negotiable":
                 return (
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-sm text-blue-800">
-                            Salary will be discussed during the interview
-                            process.
+                            Salary will be discussed during the interview process.
                         </p>
                     </div>
                 );
@@ -163,12 +98,10 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
             {/* Salary Type Selector */}
             <Select
                 label="Salary Type *"
-                options={salaryTypeOptions}
-                value={formData.salaryType}
-                onChange={(e) =>
-                    onChange("salaryType", e.target.value as SalaryType)
-                }
-                error={errors.salaryType}
+                options={salaryType.options}
+                value={salaryType.value}
+                onChange={(e) => salaryType.onChange(e.target.value as SalaryType)}
+                error={salaryType.error}
                 fullWidth
             />
 
@@ -176,12 +109,12 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
             {renderSalaryInputs()}
 
             {/* Optional Salary Note */}
-            {formData.salaryType && (
+            {salaryType.value && (
                 <div>
-                    {!showSalaryNote ? (
+                    {!salaryNote.isVisible ? (
                         <button
                             type="button"
-                            onClick={() => setShowSalaryNote(true)}
+                            onClick={salaryNote.show}
                             className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                         >
                             + Add salary note (optional)
@@ -191,10 +124,8 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                             label="Salary Note (Optional)"
                             type="text"
                             placeholder="e.g., Plus performance bonuses, equity options"
-                            value={formData.salaryNote}
-                            onChange={(value) =>
-                                onChange("salaryNote", value)
-                            }
+                            value={salaryNote.value}
+                            onChange={salaryNote.onChange}
                             helperText="Additional compensation details"
                             fullWidth
                         />
@@ -211,17 +142,8 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                 <div className="space-y-4">
                     <Select
                         label="Country *"
-                        options={[
-                            { value: "", label: "Select a country" },
-                            ...countryList.map((country) => ({
-                                value: country.code,
-                                label: country.displayName,
-                            })),
-                        ]}
-                        // value={formData.countryId}
-                        // onChange={(e) => onChange("countryId", e.target.value)}
-                        // error={errors.countryId || countryError || undefined}
-                        disabled={countryLoading}
+                        options={location.country.options}
+                        disabled={location.country.isLoading}
                         fullWidth
                     />
 
@@ -229,15 +151,13 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                         label="City *"
                         type="text"
                         placeholder="e.g., Ho Chi Minh City"
-                        value={formData.locationCity}
-                        onChange={(value) =>
-                            onChange("locationCity", value)
-                        }
-                        error={errors.locationCity}
+                        value={location.city.value}
+                        onChange={location.city.onChange}
+                        error={location.city.error}
                         fullWidth
                     />
 
-                    {countryLoading && (
+                    {location.country.isLoading && (
                         <p className="text-sm text-gray-500">
                             Loading countries...
                         </p>

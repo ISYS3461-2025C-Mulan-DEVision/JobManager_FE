@@ -1,24 +1,20 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import clsx from "clsx";
+import { useCustomSelect, SelectOption } from "@/components/headless/Select";
 
-export interface SelectOption {
-  value: string;
-  label: React.ReactNode;
-  /** Text to use for searching (required if label is not a string) */
-  searchLabel?: string;
-  disabled?: boolean;
-}
+export type { SelectOption };
 
-export interface SelectProps extends Omit<
-  React.SelectHTMLAttributes<HTMLSelectElement>,
-  "children" | "onChange"
-> {
+export interface SelectProps {
   label?: string;
   error?: string;
   helperText?: string;
   fullWidth?: boolean;
   options: SelectOption[];
+  value?: string;
   onChange?: (e: { target: { value: string } }) => void;
+  disabled?: boolean;
+  id?: string;
+  className?: string;
   /** Whether to show search input in dropdown (default: true) */
   searchable?: boolean;
 }
@@ -37,49 +33,28 @@ export const Select: React.FC<SelectProps> = ({
   searchable = true,
 }) => {
   const selectId = id || label?.toLowerCase().replace(/\s+/g, "-");
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Find selected option
-  const selectedOption = options.find((opt) => opt.value === value);
-
-  // Filter options based on search
-  const filteredOptions = options.filter((option) => {
-    const searchText =
-      option.searchLabel ||
-      (typeof option.label === "string" ? option.label : "");
-    return searchText.toLowerCase().includes(searchTerm.toLowerCase());
+  // Use headless hook for select behavior
+  const {
+    isOpen,
+    selectedOption,
+    filteredOptions,
+    getTriggerProps,
+    getSearchInputProps,
+    getOptionProps,
+    getDropdownRef,
+    close,
+  } = useCustomSelect({
+    value,
+    options,
+    onChange: (newValue) => onChange?.({ target: { value: newValue } }),
+    disabled,
+    searchable,
   });
 
-  // Handle option selection
-  const handleSelect = (optionValue: string) => {
-    if (onChange) {
-      onChange({ target: { value: optionValue } });
-    }
-    setIsOpen(false);
-    setSearchTerm("");
-  };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-        setSearchTerm("");
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen]);
+  const dropdownRef = getDropdownRef();
+  const triggerProps = getTriggerProps();
+  const searchInputProps = getSearchInputProps();
 
   return (
     <div
@@ -97,8 +72,7 @@ export const Select: React.FC<SelectProps> = ({
         <button
           type="button"
           id={selectId}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
-          disabled={disabled}
+          {...triggerProps}
           className={clsx(
             "w-full px-3 py-2 border rounded-lg text-left flex items-center justify-between transition-colors",
             error
@@ -141,7 +115,7 @@ export const Select: React.FC<SelectProps> = ({
           <>
             <div
               className="fixed inset-0 z-10"
-              onClick={() => setIsOpen(false)}
+              onClick={close}
             />
             <div className="absolute z-20 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-80 overflow-hidden">
               {/* Search Input - only show when searchable */}
@@ -150,51 +124,49 @@ export const Select: React.FC<SelectProps> = ({
                   <input
                     type="text"
                     placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    {...searchInputProps}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    autoFocus
                   />
                 </div>
               )}
 
               {/* Options List */}
-              <div className="overflow-y-auto max-h-64">
+              <div className="overflow-y-auto max-h-64" role="listbox">
                 {filteredOptions.length > 0 ? (
-                  filteredOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() =>
-                        !option.disabled && handleSelect(option.value)
-                      }
-                      disabled={option.disabled}
-                      className={clsx(
-                        "w-full px-4 py-2 text-left text-sm hover:bg-blue-50 flex items-center justify-between cursor-pointer",
-                        option.value === value
-                          ? "bg-blue-100 text-blue-900 font-medium"
-                          : "text-gray-700",
-                        option.disabled && "opacity-50 cursor-not-allowed",
-                      )}
-                    >
-                      <span>{option.label}</span>
-                      {option.value === value && (
-                        <svg
-                          className="w-4 h-4 text-blue-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      )}
-                    </button>
-                  ))
+                  filteredOptions.map((option) => {
+                    const optionProps = getOptionProps(option);
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        {...optionProps}
+                        className={clsx(
+                          "w-full px-4 py-2 text-left text-sm hover:bg-blue-50 flex items-center justify-between cursor-pointer",
+                          option.value === value
+                            ? "bg-blue-100 text-blue-900 font-medium"
+                            : "text-gray-700",
+                          option.disabled && "opacity-50 cursor-not-allowed",
+                        )}
+                      >
+                        <span>{option.label}</span>
+                        {option.value === value && (
+                          <svg
+                            className="w-4 h-4 text-blue-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })
                 ) : (
                   <div className="px-4 py-8 text-center text-gray-500 text-sm">
                     No options found

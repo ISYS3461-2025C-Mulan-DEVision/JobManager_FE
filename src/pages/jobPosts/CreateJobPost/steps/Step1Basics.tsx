@@ -1,9 +1,12 @@
 import React from "react";
 import { Input } from "@/components/ui";
 import { JobPostFormData, JobPostFormErrors } from "../types";
-import { EMPLOYMENT_TYPES, EMPLOYMENT_TYPE_LABELS } from "@/utils/constants";
-import { EmploymentType } from "@/types";
+import { useBasicsStep, EmploymentTypeOption } from "../hooks";
 import clsx from "clsx";
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface Step1BasicsProps {
     formData: JobPostFormData;
@@ -11,15 +14,65 @@ interface Step1BasicsProps {
     onChange: (field: keyof JobPostFormData, value: any) => void;
 }
 
-export const Step1Basics: React.FC<Step1BasicsProps> = ({ formData, errors, onChange }) => {
-    const toggleEmploymentType = (type: EmploymentType) => {
-        const current = formData.employmentTypes;
-        const updated = current.includes(type)
-            ? current.filter((t) => t !== type)
-            : [...current, type];
+// ============================================================================
+// Sub-Components (UI Layer)
+// ============================================================================
 
-        onChange("employmentTypes", updated);
-    };
+interface EmploymentTypeCardProps {
+    option: EmploymentTypeOption;
+    onToggle: () => void;
+}
+
+const EmploymentTypeCard: React.FC<EmploymentTypeCardProps> = ({
+    option,
+    onToggle,
+}) => (
+    <label
+        className={clsx(
+            "flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
+            option.isSelected
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-200 hover:border-gray-300",
+            option.isDisabled && "opacity-50 cursor-not-allowed"
+        )}
+    >
+        <input
+            type="checkbox"
+            checked={option.isSelected}
+            onChange={onToggle}
+            disabled={option.isDisabled}
+            className="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+        />
+        <div className="flex-1">
+            <span
+                className={clsx(
+                    "font-medium",
+                    option.isSelected ? "text-blue-700" : "text-gray-900"
+                )}
+            >
+                {option.label}
+            </span>
+            {option.disabledReason && (
+                <p className="text-xs text-gray-500 mt-1">
+                    {option.disabledReason}
+                </p>
+            )}
+            {option.canCombine && !option.isDisabled && (
+                <p className="text-xs text-gray-500 mt-1">
+                    Can only be combined with each other
+                </p>
+            )}
+        </div>
+    </label>
+);
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export const Step1Basics: React.FC<Step1BasicsProps> = (props) => {
+    // Use headless hook for all logic
+    const { title, employmentTypes, fresher } = useBasicsStep(props);
 
     return (
         <div className="space-y-6">
@@ -28,9 +81,9 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({ formData, errors, onCh
                 label="Job Title *"
                 type="text"
                 placeholder="e.g., Senior Full-Stack Developer"
-                value={formData.title}
-                onChange={(value) => onChange("title", value)}
-                error={errors.title}
+                value={title.value}
+                onChange={title.onChange}
+                error={title.error}
                 fullWidth
             />
 
@@ -39,82 +92,20 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({ formData, errors, onCh
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                     Employment Type *
                 </label>
-                <div className="space-y-3">
-                    {(Object.keys(EMPLOYMENT_TYPES) as Array<keyof typeof EMPLOYMENT_TYPES>)
-                        .filter((key) => EMPLOYMENT_TYPES[key] !== EMPLOYMENT_TYPES.FRESHER)
-                        .map((key) => {
-                            const type = EMPLOYMENT_TYPES[key];
-                            const isSelected = formData.employmentTypes.includes(type);
-
-                            const isInternship = type === EMPLOYMENT_TYPES.INTERNSHIP;
-                            const isContract = type === EMPLOYMENT_TYPES.CONTRACT;
-                            const hasOtherTypes = formData.employmentTypes.some(
-                                (t) =>
-                                    t !== EMPLOYMENT_TYPES.INTERNSHIP &&
-                                    t !== EMPLOYMENT_TYPES.CONTRACT
-                            );
-
-                            // Disable logic:
-                            // - If Internship/Contract is selected, disable Full-time/Part-time
-                            // - If Full-time/Part-time is selected, disable all others
-                            let isDisabled = false;
-                            if (isInternship || isContract) {
-                                // Disable if Full-time or Part-time is already selected
-                                isDisabled = hasOtherTypes;
-                            } else {
-                                // Disable Full-time/Part-time if:
-                                // 1. Any type is already selected, OR
-                                // 2. Internship or Contract is selected
-                                isDisabled = formData.employmentTypes.length > 0 && !isSelected;
-                            }
-
-                            return (
-                                <label
-                                    key={type}
-                                    className={clsx(
-                                        "flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
-                                        isSelected
-                                            ? "border-blue-500 bg-blue-50"
-                                            : "border-gray-200 hover:border-gray-300",
-                                        isDisabled && "opacity-50 cursor-not-allowed"
-                                    )}
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={isSelected}
-                                        onChange={() => toggleEmploymentType(type)}
-                                        disabled={isDisabled}
-                                        className="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    <div className="flex-1">
-                                        <span
-                                            className={clsx(
-                                                "font-medium",
-                                                isSelected ? "text-blue-700" : "text-gray-900"
-                                            )}
-                                        >
-                                            {EMPLOYMENT_TYPE_LABELS[type]}
-                                        </span>
-                                        {isDisabled && (
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Only Internship and Contract can be combined
-                                                together
-                                            </p>
-                                        )}
-                                        {(type === EMPLOYMENT_TYPES.INTERNSHIP ||
-                                            type === EMPLOYMENT_TYPES.CONTRACT) &&
-                                            !hasOtherTypes && (
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    Can only be combined with each other
-                                                </p>
-                                            )}
-                                    </div>
-                                </label>
-                            );
-                        })}
+                <div className="space-y-3" role="group" aria-label="Employment types">
+                    {employmentTypes.options.map((option) => {
+                        const optionProps = employmentTypes.getOptionProps(option);
+                        return (
+                            <EmploymentTypeCard
+                                key={option.type}
+                                option={option}
+                                onToggle={optionProps.onChange}
+                            />
+                        );
+                    })}
                 </div>
-                {errors.employmentTypes && (
-                    <p className="mt-2 text-sm text-red-600">{errors.employmentTypes}</p>
+                {employmentTypes.error && (
+                    <p className="mt-2 text-sm text-red-600">{employmentTypes.error}</p>
                 )}
             </div>
 
@@ -123,8 +114,8 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({ formData, errors, onCh
                 <input
                     type="checkbox"
                     id="isFresher"
-                    checked={formData.isFresher}
-                    onChange={(e) => onChange("isFresher", e.target.checked)}
+                    checked={fresher.isChecked}
+                    onChange={(e) => fresher.onChange(e.target.checked)}
                     className="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <label htmlFor="isFresher" className="flex-1 cursor-pointer">
