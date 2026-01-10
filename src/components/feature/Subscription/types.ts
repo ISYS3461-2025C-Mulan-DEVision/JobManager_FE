@@ -1,6 +1,6 @@
 import { SUBSCRIPTION_STATUS } from "@/utils/constants";
 
-export type SubscriptionStatus = typeof SUBSCRIPTION_STATUS[keyof typeof SUBSCRIPTION_STATUS];
+export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUS)[keyof typeof SUBSCRIPTION_STATUS];
 
 export interface SubscriptionStatusResponse {
     companyId: string;
@@ -55,7 +55,7 @@ export interface PaymentMethod {
 
 export interface SubscriptionPlan {
     id: string;
-    name: "Simplex" | "Medium" | "Ultimo";
+    name: "Free" | "Premium";
     price: number;
     currency: string;
     billingPeriod: "MONTHLY" | "YEARLY";

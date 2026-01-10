@@ -92,7 +92,8 @@ export const API_ENDPOINTS = {
         CREATE_PAYMENT_INTENT: "/subscriptions/payment-intent",
         PURCHASE: "/subscriptions/purchase",
         HISTORY: (companyId: string) => `/subscriptions/company/${companyId}/history`,
-        CANCEL: (companyId: string) => `/subscriptions/company/${companyId}/cancel`,
+        CANCEL: (subscriptionId: string) => `/internal/subscriptions/${subscriptionId}/cancel`,
+        GET_BY_COMPANY: (companyId: string) => `/internal/subscriptions/company/${companyId}`,
         RENEW: (companyId: string) => `/subscriptions/company/${companyId}/renew`,
     },
 } as const;

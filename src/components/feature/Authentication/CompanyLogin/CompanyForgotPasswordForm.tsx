@@ -63,7 +63,7 @@ export const CompanyForgotPasswordForm: React.FC<CompanyForgotPasswordFormProps>
                     required
                     placeholder="name@company.com"
                     value={values.email}
-                    onChange={handleChange}
+                    onChange={(value, event) => handleChange(event)}
                     onBlur={() => handleBlur("email")}
                     error={touched.email ? errors.email : undefined}
                     helperText={!touched.email ? "Use your company email address." : undefined}

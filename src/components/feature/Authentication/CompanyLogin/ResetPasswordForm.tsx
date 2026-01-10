@@ -82,7 +82,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
                         required
                         placeholder="Enter new password"
                         value={values.newPassword}
-                        onChange={handleChange}
+                        onChange={(value, event) => handleChange(event)}
                         onBlur={() => handleBlur("newPassword")}
                         error={
                             touched.newPassword ? errors.newPassword : undefined
@@ -117,7 +117,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
                         required
                         placeholder="Confirm new password"
                         value={values.confirmPassword}
-                        onChange={handleChange}
+                        onChange={(value, event) => handleChange(event)}
                         onBlur={() => handleBlur("confirmPassword")}
                         error={
                             touched.confirmPassword

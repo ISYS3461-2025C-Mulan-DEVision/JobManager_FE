@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/Card/Card";
 import { Alert } from "@/components/ui/Alert/Alert";
@@ -15,45 +15,54 @@ import {
     useSubscriptionPurchase,
     useCancelSubscription,
 } from "@/components/feature/Subscription/hooks/useSubscription";
+import { useSubscriptionManagement } from "@/components/feature/Subscription/hooks/useSubscriptionManagement";
 import { getCompanyId } from "@/services/authStorage";
-import type { PaymentMethodType } from "@/components/feature/Subscription/types";
-
-type ViewMode = "overview" | "plans" | "payment";
 
 export const SubscriptionManagementPage: React.FC = () => {
     const navigate = useNavigate();
     const companyId = getCompanyId();
 
-    // State
-    const [viewMode, setViewMode] = useState<ViewMode>("overview");
-    const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethodType | null>(null);
+    // Headless subscription management hook (pure logic, no UI)
+    const {
+        viewMode,
+        selectedPlanId,
+        selectedPaymentMethod,
+        handleUpgrade,
+        handleRenew,
+        handlePlanSelect,
+        handlePaymentMethodSelect,
+        handleBackToOverview,
+        goBack,
+    } = useSubscriptionManagement();
 
-    // Hooks
+    // Data hooks
     const { subscriptionStatus, isLoading: statusLoading, error: statusError, refetch: refetchStatus } = useSubscriptionStatus();
     const { plans, isLoading: plansLoading, error: plansError } = useSubscriptionPlans();
-    const { history, isLoading: historyLoading, error: historyError, refetch: refetchHistory } = useSubscriptionHistory();
-    const { createIntent, completePurchase, isLoading: purchaseLoading, error: purchaseError, success: purchaseSuccess, clearError, clearSuccess } = useSubscriptionPurchase();
-    const { cancel, isLoading: cancelLoading, error: cancelError, success: cancelSuccess, clearError: clearCancelError, clearSuccess: clearCancelSuccess } = useCancelSubscription();
+    const {
+        history,
+        isLoading: historyLoading,
+        error: historyError,
+        refetch: refetchHistory,
+    } = useSubscriptionHistory();
+    const {
+        createIntent,
+        completePurchase,
+        isLoading: purchaseLoading,
+        error: purchaseError,
+        success: purchaseSuccess,
+        clearError,
+        clearSuccess,
+    } = useSubscriptionPurchase();
+    const {
+        cancel,
+        isLoading: cancelLoading,
+        error: cancelError,
+        success: cancelSuccess,
+        clearError: clearCancelError,
+        clearSuccess: clearCancelSuccess,
+    } = useCancelSubscription();
 
     // Handlers
-    const handleUpgrade = () => {
-        setViewMode("plans");
-    };
-
-    const handleRenew = () => {
-        setViewMode("plans");
-    };
-
-    const handleSelectPlan = (planId: string) => {
-        setSelectedPlanId(planId);
-        setViewMode("payment");
-    };
-
-    const handlePaymentMethodSelect = (method: PaymentMethodType) => {
-        setSelectedPaymentMethod(method);
-    };
-
     const handlePurchase = async () => {
         if (!selectedPlanId || !selectedPaymentMethod || !companyId) {
             return;
@@ -93,9 +102,7 @@ export const SubscriptionManagementPage: React.FC = () => {
 
             // Reset state and go back to overview
             setTimeout(() => {
-                setViewMode("overview");
-                setSelectedPlanId(null);
-                setSelectedPaymentMethod(null);
+                handleBackToOverview();
                 clearSuccess();
             }, 2000);
         }
@@ -118,14 +125,6 @@ export const SubscriptionManagementPage: React.FC = () => {
                 clearCancelSuccess();
             }, 3000);
         }
-    };
-
-    const handleBackToOverview = () => {
-        setViewMode("overview");
-        setSelectedPlanId(null);
-        setSelectedPaymentMethod(null);
-        clearError();
-        clearSuccess();
     };
 
     const selectedPlan = plans.find((p) => p.id === selectedPlanId);
@@ -169,15 +168,8 @@ export const SubscriptionManagementPage: React.FC = () => {
             {/* History Section */}
             <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-gray-900">Payment History</h2>
-                <SubscriptionHistoryTable
-                    history={history}
-                    isLoading={historyLoading}
-                />
-                {historyError && (
-                    <Alert type="error">
-                        {historyError}
-                    </Alert>
-                )}
+                <SubscriptionHistoryTable history={history} isLoading={historyLoading} />
+                {historyError && <Alert type="error">{historyError}</Alert>}
             </div>
         </div>
     );
@@ -212,12 +204,12 @@ export const SubscriptionManagementPage: React.FC = () => {
                 <Alert type="error">{plansError}</Alert>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {plans.map((plan, index) => (
+                    {plans.map((plan) => (
                         <SubscriptionPlanCard
                             key={plan.id}
                             plan={plan}
-                            isPopular={plan.name === "Medium"}
-                            isCurrentPlan={subscriptionStatus?.isPremium && plan.name === "Simplex"}
+                            isPopular={plan.name === "Premium"}
+                            isCurrentPlan={subscriptionStatus?.isPremium && plan.name === "Premium"}
                             onSelect={handleSelectPlan}
                         />
                     ))}
@@ -234,7 +226,7 @@ export const SubscriptionManagementPage: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     leftIcon={<ArrowLeft className="w-4 h-4" />}
-                    onClick={() => setViewMode("plans")}
+                    onClick={goBack}
                 >
                     Back
                 </Button>
@@ -269,24 +261,37 @@ export const SubscriptionManagementPage: React.FC = () => {
                             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                 <div className="flex justify-between items-start mb-3">
                                     <div>
-                                        <h3 className="text-xl font-bold text-gray-900">{selectedPlan.name}</h3>
+                                        <h3 className="text-xl font-bold text-gray-900">
+                                            {selectedPlan.name}
+                                        </h3>
                                         <p className="text-sm text-gray-500">
-                                            {selectedPlan.billingPeriod === "MONTHLY" ? "Monthly" : "Yearly"} subscription
+                                            {selectedPlan.billingPeriod === "MONTHLY"
+                                                ? "Monthly"
+                                                : "Yearly"}{" "}
+                                            subscription
                                         </p>
                                     </div>
                                     <div className="text-right">
                                         <span className="text-2xl font-bold text-gray-900">
-                                            {selectedPlan.currency === "USD" ? "$" : selectedPlan.currency}
+                                            {selectedPlan.currency === "USD"
+                                                ? "$"
+                                                : selectedPlan.currency}
                                             {selectedPlan.price}
                                         </span>
                                         <p className="text-xs text-gray-500">
-                                            /{selectedPlan.billingPeriod === "MONTHLY" ? "month" : "year"}
+                                            /
+                                            {selectedPlan.billingPeriod === "MONTHLY"
+                                                ? "month"
+                                                : "year"}
                                         </p>
                                     </div>
                                 </div>
                                 <ul className="space-y-2">
                                     {selectedPlan.features.slice(0, 3).map((feature, index) => (
-                                        <li key={index} className="text-sm text-gray-700 flex items-center gap-2">
+                                        <li
+                                            key={index}
+                                            className="text-sm text-gray-700 flex items-center gap-2"
+                                        >
                                             <span className="text-green-500">✓</span>
                                             {feature}
                                         </li>
@@ -315,14 +320,18 @@ export const SubscriptionManagementPage: React.FC = () => {
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-600">Subtotal</span>
                                 <span className="text-gray-900 font-medium">
-                                    {selectedPlan && `${selectedPlan.currency === "USD" ? "$" : selectedPlan.currency}${selectedPlan.price}`}
+                                    {selectedPlan &&
+                                        `${selectedPlan.currency === "USD" ? "$" : selectedPlan.currency}${selectedPlan.price}`}
                                 </span>
                             </div>
                             <div className="border-t border-gray-200 pt-3">
                                 <div className="flex justify-between">
-                                    <span className="text-base font-semibold text-gray-900">Total</span>
+                                    <span className="text-base font-semibold text-gray-900">
+                                        Total
+                                    </span>
                                     <span className="text-xl font-bold text-gray-900">
-                                        {selectedPlan && `${selectedPlan.currency === "USD" ? "$" : selectedPlan.currency}${selectedPlan.price}`}
+                                        {selectedPlan &&
+                                            `${selectedPlan.currency === "USD" ? "$" : selectedPlan.currency}${selectedPlan.price}`}
                                     </span>
                                 </div>
                             </div>
