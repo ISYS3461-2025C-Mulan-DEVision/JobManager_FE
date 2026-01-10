@@ -1,7 +1,8 @@
 import React from "react";
 import clsx from "clsx";
+import { useButton } from "@/components/headless";
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
     variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
     size?: "sm" | "md" | "lg";
     isLoading?: boolean;
@@ -10,6 +11,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
     leftIcon?: React.ReactNode;
     rightIcon?: React.ReactNode;
     children?: React.ReactNode;
+    onClick?: (event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>) => void;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -23,8 +25,17 @@ export const Button: React.FC<ButtonProps> = ({
     className,
     disabled,
     children,
+    onClick,
+    type = "button",
     ...props
 }) => {
+    // Use headless button hook for behavior
+    const { buttonProps } = useButton({
+        onClick,
+        disabled,
+        isLoading,
+        type,
+    });
     const baseStyles =
         "font-medium rounded-lg transition-[border-color] duration-250 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent cursor-pointer";
 
@@ -44,6 +55,8 @@ export const Button: React.FC<ButtonProps> = ({
 
     return (
         <button
+            {...buttonProps}
+            {...props}
             className={clsx(
                 baseStyles,
                 variants[variant],
@@ -51,8 +64,6 @@ export const Button: React.FC<ButtonProps> = ({
                 fullWidth && "w-full",
                 className,
             )}
-            disabled={disabled || isLoading}
-            {...props}
         >
             {isLoading ? (
                 <span className="flex items-center justify-center">
@@ -79,9 +90,9 @@ export const Button: React.FC<ButtonProps> = ({
                 </span>
             ) : (
                 <span className="flex items-center justify-center gap-2 flex-nowrap">
-                    {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+                    {leftIcon && <span className="shrink-0">{leftIcon}</span>}
                     {children && <span className="whitespace-nowrap">{children}</span>}
-                    {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+                    {rightIcon && <span className="shrink-0">{rightIcon}</span>}
                     {badge && <span className="ml-0.5">{badge}</span>}
                 </span>
             )}
