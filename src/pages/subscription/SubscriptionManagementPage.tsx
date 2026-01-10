@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/Card/Card";
 import { Alert } from "@/components/ui/Alert/Alert";
@@ -15,29 +15,28 @@ import {
     useSubscriptionPurchase,
     useCancelSubscription,
 } from "@/components/feature/Subscription/hooks/useSubscription";
+import { useSubscriptionManagement } from "@/components/feature/Subscription/hooks/useSubscriptionManagement";
 import { getCompanyId } from "@/services/authStorage";
-import type { PaymentMethodType } from "@/components/feature/Subscription/types";
-
-type ViewMode = "overview" | "plans" | "payment";
 
 export const SubscriptionManagementPage: React.FC = () => {
     const navigate = useNavigate();
     const companyId = getCompanyId();
 
-    // State
-    const [viewMode, setViewMode] = useState<ViewMode>("overview");
-    const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethodType | null>(
-        null
-    );
-
-    // Hooks
+    // Headless subscription management hook (pure logic, no UI)
     const {
-        subscriptionStatus,
-        isLoading: statusLoading,
-        error: statusError,
-        refetch: refetchStatus,
-    } = useSubscriptionStatus();
+        viewMode,
+        selectedPlanId,
+        selectedPaymentMethod,
+        handleUpgrade,
+        handleRenew,
+        handlePlanSelect,
+        handlePaymentMethodSelect,
+        handleBackToOverview,
+        goBack,
+    } = useSubscriptionManagement();
+
+    // Data hooks
+    const { subscriptionStatus, isLoading: statusLoading, error: statusError, refetch: refetchStatus } = useSubscriptionStatus();
     const { plans, isLoading: plansLoading, error: plansError } = useSubscriptionPlans();
     const {
         history,
@@ -64,23 +63,6 @@ export const SubscriptionManagementPage: React.FC = () => {
     } = useCancelSubscription();
 
     // Handlers
-    const handleUpgrade = () => {
-        setViewMode("plans");
-    };
-
-    const handleRenew = () => {
-        setViewMode("plans");
-    };
-
-    const handleSelectPlan = (planId: string) => {
-        setSelectedPlanId(planId);
-        setViewMode("payment");
-    };
-
-    const handlePaymentMethodSelect = (method: PaymentMethodType) => {
-        setSelectedPaymentMethod(method);
-    };
-
     const handlePurchase = async () => {
         if (!selectedPlanId || !selectedPaymentMethod || !companyId) {
             return;
@@ -120,9 +102,7 @@ export const SubscriptionManagementPage: React.FC = () => {
 
             // Reset state and go back to overview
             setTimeout(() => {
-                setViewMode("overview");
-                setSelectedPlanId(null);
-                setSelectedPaymentMethod(null);
+                handleBackToOverview();
                 clearSuccess();
             }, 2000);
         }
@@ -145,14 +125,6 @@ export const SubscriptionManagementPage: React.FC = () => {
                 clearCancelSuccess();
             }, 3000);
         }
-    };
-
-    const handleBackToOverview = () => {
-        setViewMode("overview");
-        setSelectedPlanId(null);
-        setSelectedPaymentMethod(null);
-        clearError();
-        clearSuccess();
     };
 
     const selectedPlan = plans.find((p) => p.id === selectedPlanId);
@@ -254,7 +226,7 @@ export const SubscriptionManagementPage: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     leftIcon={<ArrowLeft className="w-4 h-4" />}
-                    onClick={() => setViewMode("plans")}
+                    onClick={goBack}
                 >
                     Back
                 </Button>
