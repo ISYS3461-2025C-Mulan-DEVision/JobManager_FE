@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog/ConfirmDialog";
+import { useConfirmDialog } from "@/components/headless";
 import { ExternalLink } from "lucide-react";
 import { SubscriptionStatusCard } from "@/components/feature/Subscription/components/SubscriptionStatusCard";
 import { SubscriptionHistoryTable } from "@/components/feature/Subscription/components/SubscriptionHistoryTable";
@@ -15,10 +17,30 @@ import {
 export const SubscriptionSection: React.FC = () => {
     const navigate = useNavigate();
 
+    // Headless confirm dialog for cancel subscription
+    const cancelConfirmDialog = useConfirmDialog();
+
     // Hooks
-    const { subscriptionStatus, isLoading: statusLoading, error: statusError, refetch: refetchStatus } = useSubscriptionStatus();
-    const { history, isLoading: historyLoading, error: historyError, refetch: refetchHistory } = useSubscriptionHistory();
-    const { cancel, isLoading: cancelLoading, error: cancelError, success: cancelSuccess, clearError: clearCancelError, clearSuccess: clearCancelSuccess } = useCancelSubscription();
+    const {
+        subscriptionStatus,
+        isLoading: statusLoading,
+        error: statusError,
+        refetch: refetchStatus,
+    } = useSubscriptionStatus();
+    const {
+        history,
+        isLoading: historyLoading,
+        error: historyError,
+        refetch: refetchHistory,
+    } = useSubscriptionHistory();
+    const {
+        cancel,
+        isLoading: cancelLoading,
+        error: cancelError,
+        success: cancelSuccess,
+        clearError: clearCancelError,
+        clearSuccess: clearCancelSuccess,
+    } = useCancelSubscription();
 
     // Handlers
     const handleUpgrade = () => {
@@ -26,30 +48,34 @@ export const SubscriptionSection: React.FC = () => {
     };
 
     const handleRenew = () => {
-        navigate(ROUTES.SUBSCRIPTION);
+        navigate(`${ROUTES.SUBSCRIPTION}/upgrade`);
     };
 
     const handleManageSubscription = () => {
         navigate(ROUTES.SUBSCRIPTION);
     };
 
-    const handleCancelSubscription = async () => {
-        const confirmed = window.confirm(
-            "Are you sure you want to cancel your subscription? You will continue to have access until the end of your billing period."
-        );
+    const handleCancelSubscription = () => {
+        cancelConfirmDialog.open({
+            title: "Cancel Subscription",
+            message:
+                "Are you sure you want to cancel your subscription? You will continue to have access until the end of your billing period.",
+            variant: "warning",
+            confirmText: "Cancel Subscription",
+            cancelText: "Keep Subscription",
+            onConfirm: async () => {
+                const result = await cancel();
 
-        if (!confirmed) return;
+                if (result) {
+                    await refetchStatus();
+                    await refetchHistory();
 
-        const result = await cancel();
-
-        if (result) {
-            await refetchStatus();
-            await refetchHistory();
-
-            setTimeout(() => {
-                clearCancelSuccess();
-            }, 3000);
-        }
+                    setTimeout(() => {
+                        clearCancelSuccess();
+                    }, 3000);
+                }
+            },
+        });
     };
 
     return (
@@ -80,11 +106,7 @@ export const SubscriptionSection: React.FC = () => {
             )}
 
             {/* Status Error */}
-            {statusError && (
-                <Alert type="error">
-                    {statusError}
-                </Alert>
-            )}
+            {statusError && <Alert type="error">{statusError}</Alert>}
 
             {/* Status Card */}
             {subscriptionStatus && !statusLoading && (
@@ -118,23 +140,18 @@ export const SubscriptionSection: React.FC = () => {
                     history={history.slice(0, 5)}
                     isLoading={historyLoading}
                 />
-                {historyError && (
-                    <Alert type="error">
-                        {historyError}
-                    </Alert>
-                )}
+                {historyError && <Alert type="error">{historyError}</Alert>}
                 {history.length > 5 && (
                     <div className="text-center">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleManageSubscription}
-                        >
+                        <Button variant="ghost" size="sm" onClick={handleManageSubscription}>
                             View All History
                         </Button>
                     </div>
                 )}
             </div>
+
+            {/* Headless Confirm Dialog for Cancel Subscription */}
+            <ConfirmDialog dialog={cancelConfirmDialog} />
         </div>
     );
 };

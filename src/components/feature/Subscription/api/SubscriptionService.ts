@@ -12,9 +12,7 @@ import type {
     SubscriptionHistory,
 } from "../types";
 
-export const getSubscriptionStatus = async (): Promise<
-    ApiResponse<SubscriptionStatusResponse>
-> => {
+export const getSubscriptionStatus = async (): Promise<ApiResponse<SubscriptionStatusResponse>> => {
     const companyId = getCompanyId();
     if (!companyId) {
         return {
@@ -49,22 +47,34 @@ export const checkIsPremium = async (): Promise<ApiResponse<boolean>> => {
     return response.data;
 };
 
-export const getSubscriptionPlans = async (): Promise<
-    ApiResponse<SubscriptionPlan[]>
-> => {
-    const response = await httpClient.get<ApiResponse<SubscriptionPlan[]>>(
-        API_ENDPOINTS.SUBSCRIPTIONS.PLANS
-    );
-    return response.data;
+export const getSubscriptionPlans = async (): Promise<ApiResponse<SubscriptionPlan[]>> => {
+    // const response = await httpClient.get<ApiResponse<SubscriptionPlan[]>>(
+    //     API_ENDPOINTS.SUBSCRIPTIONS.PLANS
+    // );
+    // return response.data;
+
+    // Temporarily disabled - return empty data
+    return {
+        success: true,
+        message: "Plans API temporarily disabled",
+        data: [],
+    };
 };
 
 export const getSubscriptionPlan = async (
     planId: string
 ): Promise<ApiResponse<SubscriptionPlan>> => {
-    const response = await httpClient.get<ApiResponse<SubscriptionPlan>>(
-        API_ENDPOINTS.SUBSCRIPTIONS.PLAN(planId)
-    );
-    return response.data;
+    // const response = await httpClient.get<ApiResponse<SubscriptionPlan>>(
+    //     API_ENDPOINTS.SUBSCRIPTIONS.PLAN(planId)
+    // );
+    // return response.data;
+
+    // Temporarily disabled - return empty data
+    return {
+        success: false,
+        message: "Plan API temporarily disabled",
+        data: null as any,
+    };
 };
 
 export const createPaymentIntent = async (
@@ -87,9 +97,7 @@ export const purchaseSubscription = async (
     return response.data;
 };
 
-export const getSubscriptionHistory = async (): Promise<
-    ApiResponse<SubscriptionHistory[]>
-> => {
+export const getSubscriptionHistory = async (): Promise<ApiResponse<SubscriptionHistory[]>> => {
     const companyId = getCompanyId();
     if (!companyId) {
         return {
@@ -98,18 +106,23 @@ export const getSubscriptionHistory = async (): Promise<
             data: [],
         };
     }
-    const response = await httpClient.get<ApiResponse<SubscriptionHistory[]>>(
-        API_ENDPOINTS.SUBSCRIPTIONS.HISTORY(companyId)
-    );
-    return response.data;
+    // const response = await httpClient.get<ApiResponse<SubscriptionHistory[]>>(
+    //     API_ENDPOINTS.SUBSCRIPTIONS.HISTORY(companyId)
+    // );
+    // return response.data;
+
+    // Temporarily disabled - return empty data
+    return {
+        success: true,
+        message: "History API temporarily disabled",
+        data: [],
+    };
 };
 
 /**
  * Get subscription by company ID (internal endpoint)
  */
-export const getSubscriptionByCompanyId = async (): Promise<
-    ApiResponse<SubscriptionResponse>
-> => {
+export const getSubscriptionByCompanyId = async (): Promise<ApiResponse<SubscriptionResponse>> => {
     const companyId = getCompanyId();
     if (!companyId) {
         throw new Error("No company ID found");
@@ -120,22 +133,20 @@ export const getSubscriptionByCompanyId = async (): Promise<
     return response.data;
 };
 
-export const cancelSubscription = async (): Promise<
-    ApiResponse<SubscriptionStatusResponse>
-> => {
+export const cancelSubscription = async (): Promise<ApiResponse<SubscriptionStatusResponse>> => {
     const companyId = getCompanyId();
     if (!companyId) {
         throw new Error("No company ID found");
     }
-    
+
     // First, get the subscription to retrieve its ID
     const subscriptionResponse = await getSubscriptionByCompanyId();
     if (!subscriptionResponse.success || !subscriptionResponse.data?.id) {
         throw new Error("No active subscription found for this company");
     }
-    
+
     const subscriptionId = subscriptionResponse.data.id;
-    
+
     // Cancel using the subscription ID (PATCH request)
     const response = await httpClient.patch<ApiResponse<SubscriptionStatusResponse>>(
         API_ENDPOINTS.SUBSCRIPTIONS.CANCEL(subscriptionId)

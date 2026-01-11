@@ -9,15 +9,14 @@ import {
 } from "../components/feature/Dashboard/RecentApplications";
 import { PremiumBanner } from "../components/feature/Dashboard/PremiumBanner";
 import { PremiumFeaturesAd } from "../components/feature/Dashboard/PremiumFeaturesAd";
-import { NotificationsCard, Notification } from "../components/feature/Dashboard/NotificationsCard";
 import { DashboardUpgradeCTA } from "../components/feature/Payment";
 import { useSubscriptionDetails } from "../components/feature/Payment/hooks/usePaymentFlow";
 import { Button } from "../components/ui/Button/Button";
 import DashboardLayout from "../layout/DashboardLayout";
 import { fetchJobPosts } from "@/services/jobPostService";
+import { notificationService } from "@/components/feature/Notification/api/notificationService";
 import { JobPost } from "@/types";
-import { formatSalary } from "@/utils/jobPostHelpers";
-import { EMPLOYMENT_TYPE_LABELS, ROUTES } from "@/utils/constants";
+import { ROUTES } from "@/utils/constants";
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -41,10 +40,15 @@ const Dashboard: React.FC = () => {
     const [allJobPosts, setAllJobPosts] = useState<JobPost[]>([]);
     const [isLoadingJobs, setIsLoadingJobs] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    
+    // State for notifications
+    const [unreadNotifications, setUnreadNotifications] = useState(0);
+    const [isLoadingNotifications, setIsLoadingNotifications] = useState(true);
 
     // Load job posts on mount
     useEffect(() => {
         loadJobPosts();
+        loadUnreadNotifications();
     }, []);
 
     const loadJobPosts = async () => {
@@ -65,6 +69,19 @@ const Dashboard: React.FC = () => {
             setJobPosts([]);
         } finally {
             setIsLoadingJobs(false);
+        }
+    };
+
+    const loadUnreadNotifications = async () => {
+        try {
+            setIsLoadingNotifications(true);
+            const count = await notificationService.getUnreadCount();
+            setUnreadNotifications(count);
+        } catch (err) {
+            console.error("Error fetching unread notifications:", err);
+            setUnreadNotifications(0);
+        } finally {
+            setIsLoadingNotifications(false);
         }
     };
 
@@ -130,8 +147,15 @@ const Dashboard: React.FC = () => {
     const kpis = {
         activeJobs: allJobPosts.filter((jp) => jp.status === "PUBLISHED").length,
         totalApplications: allJobPosts.reduce((sum, jp) => sum + (jp.applicationsCount || 0), 0),
-        newApplications: 0, // TODO: Calculate from recent applications
-        unreadNotifications: 3, // TODO: Fetch from notifications API
+        // Calculate new applications from the last 24 hours
+        newApplications: allJobPosts
+            .filter((jp) => {
+                const createdDate = new Date(jp.createdAt);
+                const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                return createdDate >= twentyFourHoursAgo;
+            })
+            .reduce((sum, jp) => sum + (jp.applicationsCount || 0), 0),
+        unreadNotifications: unreadNotifications,
     };
 
     const applications: ApplicationSummary[] = [
@@ -164,42 +188,6 @@ const Dashboard: React.FC = () => {
             appliedAt: "2024-12-15T16:45:00Z",
         },
     ];
-
-    // Build notifications array with real subscription data
-    const notifications: Notification[] = React.useMemo(() => {
-        const baseNotifications: Notification[] = [
-            {
-                id: "n1",
-                title: "New Premium Applicant",
-                message: "A highly qualified candidate applied for Senior Frontend Engineer.",
-                type: "SUCCESS",
-                isRead: false,
-                createdAt: "2024-12-17T10:00:00Z",
-            },
-            {
-                id: "n3",
-                title: "Job Post Expired",
-                message: "Your job post 'Marketing Manager' has expired.",
-                type: "INFO",
-                isRead: true,
-                createdAt: "2024-12-15T09:00:00Z",
-            },
-        ];
-
-        // Add subscription expiring notification if applicable
-        if (premiumStatus === "EXPIRING" && daysRemaining > 0) {
-            baseNotifications.splice(1, 0, {
-                id: "n2",
-                title: "Subscription Expiring",
-                message: `Your premium subscription expires in ${daysRemaining} ${daysRemaining === 1 ? "day" : "days"}.`,
-                type: "WARNING",
-                isRead: false,
-                createdAt: new Date().toISOString(),
-            });
-        }
-
-        return baseNotifications;
-    }, [premiumStatus, daysRemaining]);
 
     return (
         <DashboardLayout>
@@ -253,7 +241,6 @@ const Dashboard: React.FC = () => {
                     title="New Applications"
                     value={kpis.newApplications}
                     subValue="last 24h"
-                    active={true} // Highlight this as it's actionable
                     onClick={() => console.log("View New")}
                     isLoading={isLoadingJobs}
                 />
@@ -261,6 +248,7 @@ const Dashboard: React.FC = () => {
                     title="Unread Notifications"
                     value={kpis.unreadNotifications}
                     onClick={() => console.log("View Notifications")}
+                    isLoading={isLoadingNotifications}
                 />
             </div>
 
@@ -300,12 +288,6 @@ const Dashboard: React.FC = () => {
                         applications={applications}
                         onViewCV={(id) => console.log("View CV", id)}
                         onArchive={(id) => console.log("Archive App", id)}
-                    />
-
-                    <NotificationsCard
-                        notifications={notifications}
-                        onMarkAsRead={(id) => console.log("Read", id)}
-                        onViewAll={() => console.log("All Notifications")}
                     />
                 </div>
             </div>
