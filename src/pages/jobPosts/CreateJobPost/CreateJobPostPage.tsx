@@ -47,7 +47,7 @@ const CreateJobPostPage: React.FC = () => {
         salaryMax: "",
         salaryNote: "",
         locationCity: "",
-        // countryId: "",
+        countryCode: "",
         description: "",
         technicalSkills: [],
         isPrivate: false,
@@ -102,6 +102,7 @@ const CreateJobPostPage: React.FC = () => {
             salaryNote: jobPost.salaryNote || "",
             locationCity: jobPost.locationCity,
             description: jobPost.description,
+			countryCode: jobPost.countryCode || "",
             // TODO: Fetch actual skill names from skill service using jobPost.skillIds
             // For now, skills will be lost on edit until skill service integration is complete
             technicalSkills: [],
@@ -157,6 +158,7 @@ const CreateJobPostPage: React.FC = () => {
             title: data.title,
             description: data.description,
             locationCity: data.locationCity,
+			countryCode: data.countryCode || undefined,
             salaryType: data.salaryType,
             salaryMin: data.salaryMin ? parseFloat(data.salaryMin) : undefined,
             salaryMax: data.salaryMax ? parseFloat(data.salaryMax) : undefined,
@@ -271,6 +273,7 @@ const CreateJobPostPage: React.FC = () => {
                     title: formData.title,
                     description: formData.description,
                     locationCity: formData.locationCity,
+					countryCode: formData.countryCode || undefined,
                     salaryType: formData.salaryType,
                     salaryMin: formData.salaryMin
                         ? parseFloat(formData.salaryMin)
@@ -334,6 +337,7 @@ const CreateJobPostPage: React.FC = () => {
                     title: formData.title,
                     description: formData.description,
                     locationCity: formData.locationCity,
+					countryCode: formData.countryCode || undefined,
                     salaryType: formData.salaryType,
                     salaryMin: formData.salaryMin
                         ? parseFloat(formData.salaryMin)

@@ -218,9 +218,9 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = ({
                                 label: country.displayName,
                             })),
                         ]}
-                        // value={formData.countryId}
-                        // onChange={(e) => onChange("countryId", e.target.value)}
-                        // error={errors.countryId || countryError || undefined}
+                        value={formData.countryCode}
+                        onChange={(e) => onChange("countryCode", e.target.value)}
+                        error={errors.countryCode || countryError || undefined}
                         disabled={countryLoading}
                         fullWidth
                     />

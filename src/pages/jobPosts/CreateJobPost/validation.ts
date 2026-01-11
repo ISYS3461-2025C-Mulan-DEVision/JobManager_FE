@@ -1,3 +1,4 @@
+import { error } from "console";
 import { JobPostFormData, JobPostFormErrors } from "./types";
 import { EMPLOYMENT_TYPES, SALARY_TYPES } from "@/utils/constants";
 
@@ -83,9 +84,9 @@ export const validateCompensation = (
         errors.locationCity = "Location city is required";
     }
 
-    // if (!data.countryId) {
-    //     errors.countryId = "Country is required";
-    // }
+    if (!data.countryCode) {
+		errors.countryCode = "Country for this job is required"
+	}
 
     return errors;
 };

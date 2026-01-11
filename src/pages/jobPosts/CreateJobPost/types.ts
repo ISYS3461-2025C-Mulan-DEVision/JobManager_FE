@@ -15,7 +15,7 @@ export interface JobPostFormData {
     salaryMax: string;
     salaryNote: string;
     locationCity: string;
-    // countryId: string;
+    countryCode: string;
 
     // Step 3: Description & Skills
     description: string;
@@ -37,7 +37,7 @@ export interface JobPostFormErrors {
     salaryMin?: string;
     salaryMax?: string;
     locationCity?: string;
-    // countryId?: string;
+    countryCode?: string;
     description?: string;
     technicalSkills?: string;
     expiryAt?: string;
