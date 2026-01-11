@@ -1,17 +1,18 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-    Button,
-    Input,
-    Textarea,
-    Alert,
-    Spinner,
-    LabeledValue,
-    SocialLink,
-    InfoCard,
-    Select,
-    PhoneInput,
-    Badge,
+  Button,
+  Input,
+  Textarea,
+  Alert,
+  Spinner,
+  LabeledValue,
+  SocialLink,
+  InfoCard,
+  Select,
+  PhoneInput,
+  Badge,
+  ImageCropper,
 } from "@/components/ui";
 import { HeadlessModal } from "@/components/headless";
 import {
@@ -31,9 +32,33 @@ import {
 import { useCompanyInfoForm } from "../hooks/useCompanyInfoForm";
 import { companyValidators, COMPANY_SIZE_OPTIONS } from "@/utils/validators";
 import type { CompanyProfileFormData } from "../types";
+
+// Image validation constants
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const LOGO_ASPECT_RATIO = 1; // 1:1 square
+const BANNER_ASPECT_RATIO = 4; // 4:1 wide
+const LOGO_DIMENSION_HINT = "Recommended: 200×200px (square)";
+const BANNER_DIMENSION_HINT = "Recommended: 1200×300px (4:1 ratio)";
 import { checkIsPremium } from "@/components/feature/Subscription/api/SubscriptionService";
 import { clearAuthSession } from "@/services/authStorage";
 import httpClient from "@/services/httpClient";
+
+// File validation helper
+function validateImageFile(file: File): string | null {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return "Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image.";
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    return "File is too large. Maximum size is 5MB.";
+  }
+  return null;
+}
 
 // Banner with Logo Component
 interface BannerWithLogoProps {
@@ -53,128 +78,199 @@ const BannerWithLogo: React.FC<BannerWithLogoProps> = ({
     onBannerUpload,
     onLogoUpload,
 }) => {
-    const bannerInputRef = useRef<HTMLInputElement>(null);
-    const logoInputRef = useRef<HTMLInputElement>(null);
-    const [bannerLoaded, setBannerLoaded] = useState(false);
-    const [logoLoaded, setLogoLoaded] = useState(false);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [bannerLoaded, setBannerLoaded] = useState(false);
+  const [logoLoaded, setLogoLoaded] = useState(false);
 
-    // Preload critical images for faster perceived loading
-    useEffect(() => {
-        if (logoUrl) {
-            const img = new Image();
-            img.src = logoUrl;
-        }
-        if (bannerUrl) {
-            const img = new Image();
-            img.src = bannerUrl;
-        }
-    }, [logoUrl, bannerUrl]);
+  // Cropping modal state
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [cropType, setCropType] = useState<"logo" | "banner">("logo");
+  const [isCropping, setIsCropping] = useState(false);
+  const [cropError, setCropError] = useState<string | null>(null);
 
-    // Reset loaded state when URLs change
-    useEffect(() => {
-        setBannerLoaded(false);
-    }, [bannerUrl]);
+  // Preload critical images for faster perceived loading
+  useEffect(() => {
+    if (logoUrl) {
+      const img = new Image();
+      img.src = logoUrl;
+    }
+    if (bannerUrl) {
+      const img = new Image();
+      img.src = bannerUrl;
+    }
+  }, [logoUrl, bannerUrl]);
 
-    useEffect(() => {
-        setLogoLoaded(false);
-    }, [logoUrl]);
+  // Reset loaded state when URLs change
+  useEffect(() => {
+    setBannerLoaded(false);
+  }, [bannerUrl]);
 
-    const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) onBannerUpload(file);
-    };
+  useEffect(() => {
+    setLogoLoaded(false);
+  }, [logoUrl]);
 
-    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) onLogoUpload(file);
-    };
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const error = validateImageFile(file);
+      if (error) {
+        setCropError(error);
+        return;
+      }
+      // Read file and open cropping modal
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCropImageSrc(reader.result as string);
+        setCropType("banner");
+        setCropModalOpen(true);
+        setCropError(null);
+      };
+      reader.readAsDataURL(file);
+    }
+    // Reset input so same file can be selected again
+    e.target.value = "";
+  };
 
-    return (
-        <div className="relative mb-20">
-            {/* Banner */}
-            <div className="relative h-56 w-full rounded-2xl overflow-hidden bg-gradient-to-r from-slate-100 to-slate-200">
-                {bannerUrl && !bannerLoaded && (
-                    <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-                )}
-                {bannerUrl ? (
-                    <img
-                        src={bannerUrl}
-                        alt="Company Banner"
-                        loading="eager"
-                        onLoad={() => setBannerLoaded(true)}
-                        ref={(img) => {
-                            if (img?.complete) {
-                                setBannerLoaded(true);
-                            }
-                        }}
-                        className={`w-full h-full object-cover transition-opacity duration-300 ${
-                            bannerLoaded ? "opacity-100" : "opacity-0"
-                        }`}
-                    />
-                ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900" />
-                )}
-                {/* Edit Banner Button */}
-                <button
-                    onClick={() => bannerInputRef.current?.click()}
-                    className="absolute top-4 right-4 flex items-center gap-2 bg-white/90 hover:bg-white text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm transition-colors cursor-pointer"
-                >
-                    <Pencil className="w-4 h-4" />
-                    Edit Banner
-                </button>
-                <input
-                    ref={bannerInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleBannerChange}
-                    className="hidden"
-                />
-            </div>
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const error = validateImageFile(file);
+      if (error) {
+        setCropError(error);
+        return;
+      }
+      // Read file and open cropping modal
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCropImageSrc(reader.result as string);
+        setCropType("logo");
+        setCropModalOpen(true);
+        setCropError(null);
+      };
+      reader.readAsDataURL(file);
+    }
+    // Reset input so same file can be selected again
+    e.target.value = "";
+  };
 
-            {/* Logo and Company Name */}
-            <div className="absolute -bottom-16 left-8 flex items-end gap-5">
-                {/* Logo */}
-                <div className="relative">
-                    <div className="w-32 h-32 rounded-2xl border-4 border-white bg-white shadow-lg overflow-hidden">
-                        {logoUrl && !logoLoaded && (
-                            <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl" />
-                        )}
-                        {logoUrl ? (
-                            <img
-                                src={logoUrl}
-                                alt="Company Logo"
-                                loading="eager"
-                                onLoad={() => setLogoLoaded(true)}
-                                ref={(img) => {
-                                    if (img?.complete) {
-                                        setLogoLoaded(true);
-                                    }
-                                }}
-                                className={`w-full h-full object-cover transition-opacity duration-300 ${
-                                    logoLoaded ? "opacity-100" : "opacity-0"
-                                }`}
-                            />
-                        ) : (
-                            <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                                <Building2 className="w-12 h-12 text-slate-400" />
-                            </div>
-                        )}
-                    </div>
-                    {/* Edit Logo Button */}
-                    <button
-                        onClick={() => logoInputRef.current?.click()}
-                        className="absolute -bottom-1 -right-1 w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors cursor-pointer"
-                    >
-                        <Camera className="w-4 h-4" />
-                    </button>
-                    <input
-                        ref={logoInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoChange}
-                        className="hidden"
-                    />
-                </div>
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    setIsCropping(true);
+    try {
+      // Convert blob to file
+      const fileName = cropType === "logo" ? "logo.jpg" : "banner.jpg";
+      const croppedFile = new File([croppedBlob], fileName, {
+        type: "image/jpeg",
+      });
+
+      if (cropType === "logo") {
+        await onLogoUpload(croppedFile);
+      } else {
+        await onBannerUpload(croppedFile);
+      }
+
+      setCropModalOpen(false);
+      setCropImageSrc(null);
+    } catch (error) {
+      setCropError("Failed to upload image. Please try again.");
+    } finally {
+      setIsCropping(false);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setCropModalOpen(false);
+    setCropImageSrc(null);
+    setCropError(null);
+  };
+
+  return (
+    <div className="relative mb-20">
+      {/* Banner */}
+      <div className="relative h-56 w-full rounded-2xl overflow-hidden bg-gradient-to-r from-slate-100 to-slate-200">
+        {bannerUrl && !bannerLoaded && (
+          <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+        )}
+        {bannerUrl ? (
+          <img
+            src={bannerUrl}
+            alt="Company Banner"
+            loading="eager"
+            onLoad={() => setBannerLoaded(true)}
+            ref={(img) => {
+              if (img?.complete) {
+                setBannerLoaded(true);
+              }
+            }}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              bannerLoaded ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900" />
+        )}
+        {/* Edit Banner Button */}
+        <button
+          onClick={() => bannerInputRef.current?.click()}
+          className="absolute top-4 right-4 flex items-center gap-2 bg-white/90 hover:bg-white text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm transition-colors cursor-pointer"
+        >
+          <Pencil className="w-4 h-4" />
+          Edit Banner
+        </button>
+        <input
+          ref={bannerInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleBannerChange}
+          className="hidden"
+        />
+      </div>
+
+      {/* Logo and Company Name */}
+      <div className="absolute -bottom-16 left-8 flex items-end gap-5">
+        {/* Logo */}
+        <div className="relative">
+          <div className="w-32 h-32 rounded-2xl border-4 border-white bg-white shadow-lg overflow-hidden">
+            {logoUrl && !logoLoaded && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-xl" />
+            )}
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt="Company Logo"
+                loading="eager"
+                onLoad={() => setLogoLoaded(true)}
+                ref={(img) => {
+                  if (img?.complete) {
+                    setLogoLoaded(true);
+                  }
+                }}
+                className={`w-full h-full object-cover transition-opacity duration-300 ${
+                  logoLoaded ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            ) : (
+              <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                <Building2 className="w-12 h-12 text-slate-400" />
+              </div>
+            )}
+          </div>
+          {/* Edit Logo Button */}
+          <button
+            onClick={() => logoInputRef.current?.click()}
+            className="absolute -bottom-1 -right-1 w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors cursor-pointer"
+          >
+            <Camera className="w-4 h-4" />
+          </button>
+          <input
+            ref={logoInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleLogoChange}
+            className="hidden"
+          />
+        </div>
 
                 {/* Company Name */}
                 {companyName && (
@@ -190,8 +286,43 @@ const BannerWithLogo: React.FC<BannerWithLogoProps> = ({
                     </div>
                 )}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Error Alert */}
+      {cropError && (
+        <div className="absolute top-4 left-4 right-4 z-10">
+          <Alert type="error" onClose={() => setCropError(null)}>
+            {cropError}
+          </Alert>
         </div>
-    );
+      )}
+
+      {/* Image Cropping Modal */}
+      <HeadlessModal
+        isOpen={cropModalOpen}
+        onClose={handleCropCancel}
+        overlayClassName="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+        className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 overflow-hidden"
+      >
+        {cropImageSrc && (
+          <ImageCropper
+            imageSrc={cropImageSrc}
+            aspect={
+              cropType === "logo" ? LOGO_ASPECT_RATIO : BANNER_ASPECT_RATIO
+            }
+            onCropComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+            isProcessing={isCropping}
+            dimensionHint={
+              cropType === "logo" ? LOGO_DIMENSION_HINT : BANNER_DIMENSION_HINT
+            }
+          />
+        )}
+      </HeadlessModal>
+    </div>
+  );
 };
 
 // Edit Modals
