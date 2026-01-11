@@ -48,7 +48,9 @@ export const useSubscriptionManagement = ({
 }: UseSubscriptionManagementProps = {}): UseSubscriptionManagementReturn => {
     const [viewMode, setViewMode] = useState<ViewMode>("overview");
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethodType | null>(null);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethodType | null>(
+        null
+    );
 
     const goToOverview = useCallback(() => {
         setViewMode("overview");
@@ -91,7 +93,7 @@ export const useSubscriptionManagement = ({
     }, []);
 
     const handleRenew = useCallback(() => {
-        setViewMode("plans");
+        setViewMode("plans"); // Corresponds to /subscription/upgrade route
     }, []);
 
     const handlePlanSelect = useCallback((planId: string) => {

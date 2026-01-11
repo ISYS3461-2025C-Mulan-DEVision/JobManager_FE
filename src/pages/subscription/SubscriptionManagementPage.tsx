@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/Card/Card";
 import { Alert } from "@/components/ui/Alert/Alert";
 import { Button } from "@/components/ui/Button/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog/ConfirmDialog";
+import { useConfirmDialog } from "@/components/headless";
 import { ArrowLeft } from "lucide-react";
 import { SubscriptionStatusCard } from "@/components/feature/Subscription/components/SubscriptionStatusCard";
 import { SubscriptionPlanCard } from "@/components/feature/Subscription/components/SubscriptionPlanCard";
@@ -22,6 +24,9 @@ export const SubscriptionManagementPage: React.FC = () => {
     const navigate = useNavigate();
     const companyId = getCompanyId();
 
+    // Headless confirm dialog for cancel subscription
+    const cancelConfirmDialog = useConfirmDialog();
+
     // Headless subscription management hook (pure logic, no UI)
     const {
         viewMode,
@@ -36,7 +41,12 @@ export const SubscriptionManagementPage: React.FC = () => {
     } = useSubscriptionManagement();
 
     // Data hooks
-    const { subscriptionStatus, isLoading: statusLoading, error: statusError, refetch: refetchStatus } = useSubscriptionStatus();
+    const {
+        subscriptionStatus,
+        isLoading: statusLoading,
+        error: statusError,
+        refetch: refetchStatus,
+    } = useSubscriptionStatus();
     const { plans, isLoading: plansLoading, error: plansError } = useSubscriptionPlans();
     const {
         history,
@@ -108,23 +118,27 @@ export const SubscriptionManagementPage: React.FC = () => {
         }
     };
 
-    const handleCancelSubscription = async () => {
-        const confirmed = window.confirm(
-            "Are you sure you want to cancel your subscription? You will continue to have access until the end of your billing period."
-        );
+    const handleCancelSubscription = () => {
+        cancelConfirmDialog.open({
+            title: "Cancel Subscription",
+            message:
+                "Are you sure you want to cancel your subscription? You will continue to have access until the end of your billing period.",
+            variant: "warning",
+            confirmText: "Cancel Subscription",
+            cancelText: "Keep Subscription",
+            onConfirm: async () => {
+                const result = await cancel();
 
-        if (!confirmed) return;
+                if (result) {
+                    await refetchStatus();
+                    await refetchHistory();
 
-        const result = await cancel();
-
-        if (result) {
-            await refetchStatus();
-            await refetchHistory();
-
-            setTimeout(() => {
-                clearCancelSuccess();
-            }, 3000);
-        }
+                    setTimeout(() => {
+                        clearCancelSuccess();
+                    }, 3000);
+                }
+            },
+        });
     };
 
     const selectedPlan = plans.find((p) => p.id === selectedPlanId);
@@ -355,13 +369,18 @@ export const SubscriptionManagementPage: React.FC = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {viewMode === "overview" && renderOverview()}
-                {viewMode === "plans" && renderPlans()}
-                {viewMode === "payment" && renderPayment()}
+        <>
+            <div className="min-h-screen bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {viewMode === "overview" && renderOverview()}
+                    {viewMode === "plans" && renderPlans()}
+                    {viewMode === "payment" && renderPayment()}
+                </div>
             </div>
-        </div>
+
+            {/* Headless Confirm Dialog for Cancel Subscription */}
+            <ConfirmDialog dialog={cancelConfirmDialog} />
+        </>
     );
 };
 
