@@ -42,10 +42,10 @@ export interface UseSubscriptionManagementReturn {
  * Headless subscription management hook
  * Manages the state and logic for subscription flow without UI
  */
-export const useSubscriptionManagement = ({
-    onPurchaseComplete,
-    onCancelComplete,
-}: UseSubscriptionManagementProps = {}): UseSubscriptionManagementReturn => {
+export const useSubscriptionManagement = (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _props: UseSubscriptionManagementProps = {}
+): UseSubscriptionManagementReturn => {
     const [viewMode, setViewMode] = useState<ViewMode>("overview");
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethodType | null>(
