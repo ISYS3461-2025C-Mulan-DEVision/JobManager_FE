@@ -118,8 +118,14 @@ export const isExpiringSoon = (expiryAt: string): boolean => {
 /**
  * Format expiry date with urgency awareness
  */
-export const formatExpiryDate = (expiryAt: string): string => {
+export const formatExpiryDate = (expiryAt: string | null | undefined): string => {
+
+	if (!expiryAt) {
+		return "N/A";
+	}
+
     const date = new Date(expiryAt);
+
     const now = new Date();
     const diffTime = date.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

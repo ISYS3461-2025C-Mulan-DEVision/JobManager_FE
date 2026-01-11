@@ -90,7 +90,7 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
 				if (item.salaryType === "NEGOTIABLE") {
 					salaryDisplay = "Negotiable";
 				} else {
-					const salaryDisplay = formatSalary(
+					salaryDisplay = formatSalary(
 						item.salaryMin,
 						item.salaryMax,
 						item.salaryType,
