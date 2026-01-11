@@ -27,3 +27,4 @@ export * from "./RangeSlider";
 export * from "./TagInput";
 export * from "./Toggle";
 export * from "./ImageCropper";
+export * from "./Notification";

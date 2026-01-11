@@ -27,6 +27,9 @@ export type { UseCheckboxProps, UseCheckboxReturn } from "./Checkbox";
 export { useCard } from "./Card";
 export type { UseCardProps, UseCardReturn } from "./Card";
 
+// Notification Components
+export * from "./Notification";
+
 // Types
 export * from "./types";
 export type { TableColumn } from "./Table/useTable";
