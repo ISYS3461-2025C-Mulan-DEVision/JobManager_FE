@@ -67,10 +67,7 @@ export const formatSalary = (
         }).format(amount);
     };
 
-    // If custom note is provided, use it
-    if (note) {
-        return note;
-    }
+    let formattedSalary: string;
 
     // Format based on salary type
     switch (type) {
