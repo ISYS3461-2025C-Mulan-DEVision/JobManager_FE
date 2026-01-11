@@ -9,17 +9,11 @@ export const HeadlessForm = <T extends Record<string, any>>({
     className,
 }: HeadlessFormProps<T>) => {
     const [values, setValues] = React.useState<T>(initialValues);
-    const [errors, setErrors] = React.useState<
-        Partial<Record<keyof T, string>>
-    >({});
-    const [touched, setTouched] = React.useState<
-        Partial<Record<keyof T, boolean>>
-    >({});
+    const [errors, setErrors] = React.useState<Partial<Record<keyof T, string>>>({});
+    const [touched, setTouched] = React.useState<Partial<Record<keyof T, boolean>>>({});
 
     const handleChange = (
-        e: React.ChangeEvent<
-            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-        >,
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
     ) => {
         const { name, value } = e.target;
         setValues((prev) => ({ ...prev, [name]: value }));
@@ -62,7 +56,7 @@ export const HeadlessForm = <T extends Record<string, any>>({
                 acc[key as keyof T] = true;
                 return acc;
             },
-            {} as Partial<Record<keyof T, boolean>>,
+            {} as Partial<Record<keyof T, boolean>>
         );
         setTouched(allTouched);
 

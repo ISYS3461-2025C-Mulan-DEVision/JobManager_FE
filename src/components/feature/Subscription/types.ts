@@ -1,11 +1,7 @@
-// Subscription Types
-
 import { SUBSCRIPTION_STATUS } from "@/utils/constants";
 
-// Subscription Status enum
-export type SubscriptionStatus = typeof SUBSCRIPTION_STATUS[keyof typeof SUBSCRIPTION_STATUS];
+export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUS)[keyof typeof SUBSCRIPTION_STATUS];
 
-// Subscription Status Response (from external API)
 export interface SubscriptionStatusResponse {
     companyId: string;
     status: SubscriptionStatus;
@@ -13,7 +9,6 @@ export interface SubscriptionStatusResponse {
     isPremium: boolean;
 }
 
-// Full Subscription Response (from internal API)
 export interface SubscriptionResponse {
     id: string;
     companyId: string;
@@ -25,7 +20,6 @@ export interface SubscriptionResponse {
     updatedAt: string;
 }
 
-// Create Subscription Request
 export interface CreateSubscriptionRequest {
     companyId: string;
     status?: SubscriptionStatus;
@@ -33,16 +27,77 @@ export interface CreateSubscriptionRequest {
     endAt?: string;
 }
 
-// Update Subscription Request
 export interface UpdateSubscriptionRequest {
     status?: SubscriptionStatus;
     startAt?: string;
     endAt?: string;
 }
 
-// Common API Response Wrapper
 export interface ApiResponse<T> {
     success: boolean;
     message: string;
     data: T;
+}
+
+export type PaymentMethodType = "STRIPE" | "PAYPAL";
+
+export interface PaymentMethod {
+    id: string;
+    type: PaymentMethodType;
+    last4?: string;
+    brand?: string;
+    expiryMonth?: number;
+    expiryYear?: number;
+    email?: string;
+    isDefault: boolean;
+    createdAt: string;
+}
+
+export interface SubscriptionPlan {
+    id: string;
+    name: "Free" | "Premium";
+    price: number;
+    currency: string;
+    billingPeriod: "MONTHLY" | "YEARLY";
+    features: string[];
+}
+
+export interface CreatePaymentIntentRequest {
+    companyId: string;
+    planId: string;
+    paymentMethodType: PaymentMethodType;
+}
+
+export interface PaymentIntentResponse {
+    clientSecret: string;
+    paymentIntentId: string;
+    amount: number;
+    currency: string;
+}
+
+export interface SubscriptionPurchaseRequest {
+    companyId: string;
+    planId: string;
+    paymentMethodId: string;
+    paymentIntentId: string;
+}
+
+export interface SubscriptionHistory {
+    id: string;
+    companyId: string;
+    planName: string;
+    amount: number;
+    currency: string;
+    status: "SUCCESS" | "FAILED" | "PENDING";
+    paymentMethod: PaymentMethodType;
+    startDate: string;
+    endDate: string;
+    createdAt: string;
+}
+
+export interface SubscriptionNotification {
+    id: string;
+    companyId: string;
+    emailNotifications: boolean;
+    notifyDaysBefore: number;
 }
