@@ -5,23 +5,7 @@ import type {
     SearchState,
     Applicant,
 } from "../types";
-
-// Default search state - aligned with new JA API params
-const defaultSearchState: SearchState = {
-    username: "",
-    countryCode: undefined,
-    city: undefined,
-    employmentTypes: [],
-    education: undefined,
-    workExperience: undefined,
-    // TODO: Salary filtering - uncomment when JA adds salary support
-    // minSalary: undefined,
-    // maxSalary: undefined,
-    skillIds: [],
-    sortBy: "newest",
-    page: 0,
-    pageSize: 10,
-};
+import { DEFAULT_SEARCH_STATE } from "../types";
 
 interface UseApplicantSearchReturn {
     // State
@@ -41,11 +25,11 @@ interface UseApplicantSearchReturn {
 }
 
 // Toggle this to use mock data instead of API
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 export const useApplicantSearch = (): UseApplicantSearchReturn => {
     // Search state
-    const [searchState, setSearchStateInternal] = useState<SearchState>(defaultSearchState);
+    const [searchState, setSearchStateInternal] = useState<SearchState>(DEFAULT_SEARCH_STATE);
 
     // Results state
     const [applicants, setApplicants] = useState<Applicant[]>([]);
@@ -71,7 +55,7 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
 
     // Reset search state
     const resetSearchState = useCallback(() => {
-        setSearchStateInternal(defaultSearchState);
+        setSearchStateInternal(DEFAULT_SEARCH_STATE);
     }, []);
 
     // Go to specific page
@@ -152,6 +136,52 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
             if (searchState.countryCode) {
                 filteredApplicants = filteredApplicants.filter(
                     (a) => a.countryCode === searchState.countryCode
+                );
+            }
+
+            // Filter by city (case-insensitive partial match, like JA service)
+            if (searchState.city) {
+                const cityTerm = searchState.city.toLowerCase();
+                filteredApplicants = filteredApplicants.filter(
+                    (a) => a.city?.toLowerCase().includes(cityTerm)
+                );
+            }
+
+            // Filter by work experience (search in job title, company, description - like JA service)
+            if (searchState.workExperience) {
+                const keywords = searchState.workExperience
+                    .split(',')
+                    .map((k) => k.trim().toLowerCase())
+                    .filter((k) => k.length > 0);
+                
+                if (keywords.length > 0) {
+                    filteredApplicants = filteredApplicants.filter((a) =>
+                        a.workExperience.some((exp) =>
+                            keywords.some(
+                                (kw) =>
+                                    exp.title?.toLowerCase().includes(kw) ||
+                                    exp.company?.toLowerCase().includes(kw) ||
+                                    exp.description?.toLowerCase().includes(kw)
+                            )
+                        )
+                    );
+                }
+            }
+
+            // Filter by education degree
+            if (searchState.education) {
+                filteredApplicants = filteredApplicants.filter((a) =>
+                    a.education.some((edu) => edu.degree === searchState.education)
+                );
+            }
+
+            // Filter by skills (OR semantics - match if any skill matches)
+            if (searchState.skillIds.length > 0) {
+                const skillNames = searchState.skillIds.map((s) => s.toLowerCase());
+                filteredApplicants = filteredApplicants.filter((a) =>
+                    a.skills.some((skill) =>
+                        skillNames.includes(skill.name.toLowerCase())
+                    )
                 );
             }
 
@@ -241,6 +271,7 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
         // searchState.minSalary,
         // searchState.maxSalary,
         searchState.skillIds,
+        searchState.statusFilter,
     ]);
 
     return {

@@ -24,6 +24,11 @@ export type StatusFilterType = 'ALL' | 'FAVORITE' | 'WARNING' | 'MARKED';
 export interface SearchState {
     /** Username/name search (firstName, lastName). Maps to JA's 'username' param. */
     username: string;
+    /**
+     * Full-Text Search query for searching across Work Experience, Objective Summary, 
+     * and Technical Skills fields. Case-insensitive.
+     */
+    ftsQuery?: string;
     countryCode?: string;
     /** City filter. Maps to JA's 'city' param. */
     city?: string;
@@ -32,9 +37,15 @@ export interface SearchState {
     education?: EducationDegree;
     /** Work experience keywords. Maps to JA's 'workExperience' param. */
     workExperience?: string;
-    // TODO: Salary filtering - JA service does not have salary fields yet
-    // minSalary?: number;
-    // maxSalary?: number;
+    /**
+     * Minimum salary expectation.
+     * TODO: Salary for Search - JA's UserResponse doesn't have salary fields.
+     * These are ONLY used for creating/editing search profiles (for Kafka notification matching).
+     * They are NOT sent to the search API because JA cannot filter by salary.
+     * When JA adds salary to UserResponse, enable salary filtering in ApplicantSearchService.ts.
+     */
+    minSalary?: number;
+    maxSalary?: number;
     skillIds: string[];
     sortBy: ApplicantSortOption;
     page: number;
@@ -45,14 +56,15 @@ export interface SearchState {
 
 export const DEFAULT_SEARCH_STATE: SearchState = {
     username: "",
+    ftsQuery: undefined,
     countryCode: undefined,
     city: undefined,
     employmentTypes: [],
     education: undefined,
     workExperience: undefined,
     // TODO: Salary filtering - uncomment when JA adds salary support
-    // minSalary: undefined,
-    // maxSalary: undefined,
+    minSalary: undefined,
+    maxSalary: undefined,
     skillIds: [],
     sortBy: "newest",
     page: 0,
@@ -84,9 +96,12 @@ export interface CreateSearchProfileRequest {
     employmentTypes?: EmploymentType[];
     skillIds?: string[];
     isActive?: boolean;
-    // TODO: Salary filtering - uncomment when JA adds salary support
-    // minSalary?: number;
-    // maxSalary?: number;
+    /**
+     * TODO: Salary for Search - These are saved to profiles for Kafka notification matching.
+     * They are NOT used in search API because JA's UserResponse doesn't have salary.
+     */
+    minSalary?: number;
+    maxSalary?: number;
 }
 
 // Search Profile - Update Request
@@ -99,9 +114,12 @@ export interface UpdateSearchProfileRequest {
     employmentTypes?: EmploymentType[];
     skillIds?: string[];
     isActive?: boolean;
-    // TODO: Salary filtering - uncomment when JA adds salary support
-    // minSalary?: number;
-    // maxSalary?: number;
+    /**
+     * TODO: Salary for Search - These are saved to profiles for Kafka notification matching.
+     * They are NOT used in search API because JA's UserResponse doesn't have salary.
+     */
+    minSalary?: number;
+    maxSalary?: number;
 }
 
 // Search Profile - Update Status Request
@@ -123,9 +141,11 @@ export interface SearchProfileResponse {
     isActive: boolean;
     createdAt: string;
     updatedAt: string;
-    // TODO: Salary filtering - uncomment when JA adds salary support
-    // minSalary?: number;
-    // maxSalary?: number;
+    /**
+     * TODO: Salary for Search - Saved for Kafka notification matching.
+     */
+    minSalary?: number;
+    maxSalary?: number;
 }
 
 // Search Profile - Active Response (External, read-only)

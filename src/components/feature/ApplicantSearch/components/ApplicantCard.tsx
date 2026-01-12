@@ -35,21 +35,7 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
   // };
 
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow relative">
-      {/* Warning/Favorite indicators */}
-      {isFavorite && (
-        <span className="absolute top-2 right-2 text-yellow-500">
-          <Star className="w-5 h-5" fill="currentColor" />
-        </span>
-      )}
-      {isWarning && (
-        <span
-          className={`absolute top-2 ${isFavorite ? "right-9" : "right-2"} text-red-500`}
-        >
-          <AlertCircle className="w-5 h-5" />
-        </span>
-      )}
-
+    <Card className="p-4 hover:shadow-md transition-shadow">
       <div className="flex flex-col sm:flex-row items-start gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
@@ -80,10 +66,21 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
             )}
           </div>
 
-          {/* Name & Email */}
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
-            {applicant.fullName}
-          </h3>
+          {/* Name & Status Icons */}
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-gray-900 truncate">
+              {applicant.fullName}
+            </h3>
+            {isFavorite && (
+              <Star
+                className="w-5 h-5 text-yellow-500 flex-shrink-0"
+                fill="currentColor"
+              />
+            )}
+            {isWarning && (
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+            )}
+          </div>
           <p className="text-sm text-gray-500 truncate">{applicant.email}</p>
 
           {/* Details */}
