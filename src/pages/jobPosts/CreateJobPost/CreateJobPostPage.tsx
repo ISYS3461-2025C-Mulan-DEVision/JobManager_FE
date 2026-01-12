@@ -50,6 +50,7 @@ const CreateJobPostPage: React.FC = () => {
         countryCode: "",
         description: "",
         technicalSkills: [],
+		selectedSkills: [],
         isPrivate: false,
         expiryAt: "",
         isPublished: false,
@@ -153,6 +154,9 @@ const CreateJobPostPage: React.FC = () => {
         // Currently, skills are not being sent to the backend
         // Need to integrate with skill service to map skill names to IDs
 
+		// Extract skill IDs from selected skills
+		const skillIds = data.selectedSkills?.map(skill => skill.id) || [];
+
         return {
             companyId,
             title: data.title,
@@ -170,7 +174,7 @@ const CreateJobPostPage: React.FC = () => {
                 data.employmentTypes.length > 0
                     ? data.employmentTypes[0]
                     : undefined,
-            // skillIds: undefined, // TODO: Map technicalSkills to skillIds
+            skillIds: skillIds, // TODO: Map technicalSkills to skillIds
         };
     };
 
@@ -287,6 +291,7 @@ const CreateJobPostPage: React.FC = () => {
                     expiryAt: formData.expiryAt
                         ? `${formData.expiryAt}T23:59:59`
                         : undefined,
+					skillIds: formData.selectedSkills?.map(skill => skill.id) || [],
                 };
                 await updateJobPost(id, updateData);
                 alert("Job post updated successfully!");
@@ -351,6 +356,7 @@ const CreateJobPostPage: React.FC = () => {
                     expiryAt: formData.expiryAt
                         ? `${formData.expiryAt}T23:59:59`
                         : undefined,
+					skillIds: formData.selectedSkills?.map(skill => skill.id) || [],
                 };
                 await updateJobPost(id, updateData);
 

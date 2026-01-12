@@ -175,7 +175,7 @@ export const Step4Visibility: React.FC<Step4VisibilityProps> = ({
                         <div className="flex justify-between">
                             <span className="text-gray-600">Skills:</span>
                             <span className="font-medium text-gray-900">
-                                {formData.technicalSkills.length} added
+                                {formData.selectedSkills?.length || 0} added
                             </span>
                         </div>
                         <div className="flex justify-between">

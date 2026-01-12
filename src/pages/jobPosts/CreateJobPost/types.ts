@@ -1,4 +1,4 @@
-import { EmploymentType, SalaryType } from "@/types";
+import { EmploymentType, SalaryType, Skill } from "@/types";
 
 /**
  * Form data structure for creating/editing job posts
@@ -20,6 +20,7 @@ export interface JobPostFormData {
     // Step 3: Description & Skills
     description: string;
     technicalSkills: string[];
+	selectedSkills?: Skill[];
 
     // Step 4: Visibility & Publish
     isPrivate: boolean;
