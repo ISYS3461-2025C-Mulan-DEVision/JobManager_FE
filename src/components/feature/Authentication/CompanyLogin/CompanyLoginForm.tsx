@@ -62,7 +62,7 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                     required
                     placeholder="name@company.com"
                     value={values.email}
-                    onChange={handleChange}
+                    onChange={(value, event) => handleChange(event)}
                     onBlur={() => handleBlur("email")}
                     error={touched.email ? errors.email : undefined}
                     helperText={
@@ -82,7 +82,7 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                     required
                     placeholder="Enter your password"
                     value={values.password}
-                    onChange={handleChange}
+                    onChange={(value, event) => handleChange(event)}
                     onBlur={() => handleBlur("password")}
                     onKeyUp={(e) =>
                         setCapsLockOn(

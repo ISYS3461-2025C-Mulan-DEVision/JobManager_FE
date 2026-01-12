@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button, Spinner } from "@/components/ui";
-import {
-    JobPostFormData,
-    JobPostFormErrors,
-    FormStep,
-    FORM_STEPS,
-    SaveStatus,
-} from "./types";
+import { useToastContext } from "@/components/headless/Toast";
+import { JobPostFormData, JobPostFormErrors, FormStep, FORM_STEPS, SaveStatus } from "./types";
 import {
     validateBasics,
     validateCompensation,
@@ -33,6 +28,7 @@ import { CreateJobPostRequest, UpdateJobPostRequest, JobPost } from "@/types";
 
 const CreateJobPostPage: React.FC = () => {
     const navigate = useNavigate();
+    const toast = useToastContext();
     const { id } = useParams<{ id: string }>();
     const isEditMode = Boolean(id);
 
@@ -50,7 +46,7 @@ const CreateJobPostPage: React.FC = () => {
         countryCode: "",
         description: "",
         technicalSkills: [],
-		selectedSkills: [],
+        selectedSkills: [],
         isPrivate: false,
         expiryAt: "",
         isPublished: false,
@@ -85,25 +81,19 @@ const CreateJobPostPage: React.FC = () => {
      */
     const convertJobPostToFormData = (jobPost: JobPost): JobPostFormData => {
         // Extract date part from ISO datetime string (e.g., "2026-01-09T23:59:59" -> "2026-01-09")
-        const expiryDate = jobPost.expiryAt
-            ? jobPost.expiryAt.split("T")[0]
-            : "";
+        const expiryDate = jobPost.expiryAt ? jobPost.expiryAt.split("T")[0] : "";
 
         return {
             title: jobPost.title,
-            employmentTypes: jobPost.employmentType
-                ? [jobPost.employmentType]
-                : [],
+            employmentTypes: jobPost.employmentType ? [jobPost.employmentType] : [],
             isFresher: jobPost.isFresher,
             salaryType: jobPost.salaryType,
-            salaryMin:
-                jobPost.salaryMin !== null ? jobPost.salaryMin.toString() : "",
-            salaryMax:
-                jobPost.salaryMax !== null ? jobPost.salaryMax.toString() : "",
+            salaryMin: jobPost.salaryMin !== null ? jobPost.salaryMin.toString() : "",
+            salaryMax: jobPost.salaryMax !== null ? jobPost.salaryMax.toString() : "",
             salaryNote: jobPost.salaryNote || "",
             locationCity: jobPost.locationCity,
             description: jobPost.description,
-			countryCode: jobPost.countryCode || "",
+            countryCode: jobPost.countryCode || "",
             // TODO: Fetch actual skill names from skill service using jobPost.skillIds
             // For now, skills will be lost on edit until skill service integration is complete
             technicalSkills: [],
@@ -125,7 +115,7 @@ const CreateJobPostPage: React.FC = () => {
                 error?.response?.data?.message ||
                 error?.message ||
                 "Failed to load job post. Please try again.";
-            alert(errorMessage);
+            toast.error(errorMessage);
             // Navigate back to job posts page on error
             navigate(ROUTES.JOB_POSTS);
         } finally {
@@ -136,9 +126,7 @@ const CreateJobPostPage: React.FC = () => {
     /**
      * Convert form data to API request format
      */
-    const convertFormDataToRequest = (
-        data: JobPostFormData
-    ): CreateJobPostRequest => {
+    const convertFormDataToRequest = (data: JobPostFormData): CreateJobPostRequest => {
         const companyId = getCompanyId();
         if (!companyId) {
             throw new Error("Company ID not found. Please log in again.");
@@ -146,23 +134,21 @@ const CreateJobPostPage: React.FC = () => {
 
         // Convert date string to ISO 8601 datetime (end of day)
         // Input: "2026-01-09" -> Output: "2026-01-09T23:59:59"
-        const expiryAtDateTime = data.expiryAt
-            ? `${data.expiryAt}T23:59:59`
-            : data.expiryAt;
+        const expiryAtDateTime = data.expiryAt ? `${data.expiryAt}T23:59:59` : data.expiryAt;
 
         // TODO: Convert technicalSkills (names) to skillIds (UUIDs) using skill service
         // Currently, skills are not being sent to the backend
         // Need to integrate with skill service to map skill names to IDs
 
-		// Extract skill IDs from selected skills
-		const skillIds = data.selectedSkills?.map(skill => skill.id) || [];
+        // Extract skill IDs from selected skills
+        const skillIds = data.selectedSkills?.map((skill) => skill.id) || [];
 
         return {
             companyId,
             title: data.title,
             description: data.description,
             locationCity: data.locationCity,
-			countryCode: data.countryCode || undefined,
+            countryCode: data.countryCode || undefined,
             salaryType: data.salaryType,
             salaryMin: data.salaryMin ? parseFloat(data.salaryMin) : undefined,
             salaryMax: data.salaryMax ? parseFloat(data.salaryMax) : undefined,
@@ -170,10 +156,7 @@ const CreateJobPostPage: React.FC = () => {
             isFresher: data.isFresher,
             isPrivate: data.isPrivate,
             expiryAt: expiryAtDateTime,
-            employmentType:
-                data.employmentTypes.length > 0
-                    ? data.employmentTypes[0]
-                    : undefined,
+            employmentType: data.employmentTypes.length > 0 ? data.employmentTypes[0] : undefined,
             skillIds: skillIds, // TODO: Map technicalSkills to skillIds
         };
     };
@@ -277,29 +260,23 @@ const CreateJobPostPage: React.FC = () => {
                     title: formData.title,
                     description: formData.description,
                     locationCity: formData.locationCity,
-					countryCode: formData.countryCode || undefined,
+                    countryCode: formData.countryCode || undefined,
                     salaryType: formData.salaryType,
-                    salaryMin: formData.salaryMin
-                        ? parseFloat(formData.salaryMin)
-                        : undefined,
-                    salaryMax: formData.salaryMax
-                        ? parseFloat(formData.salaryMax)
-                        : undefined,
+                    salaryMin: formData.salaryMin ? parseFloat(formData.salaryMin) : undefined,
+                    salaryMax: formData.salaryMax ? parseFloat(formData.salaryMax) : undefined,
                     salaryNote: formData.salaryNote || undefined,
                     isFresher: formData.isFresher,
                     isPrivate: formData.isPrivate,
-                    expiryAt: formData.expiryAt
-                        ? `${formData.expiryAt}T23:59:59`
-                        : undefined,
-					skillIds: formData.selectedSkills?.map(skill => skill.id) || [],
+                    expiryAt: formData.expiryAt ? `${formData.expiryAt}T23:59:59` : undefined,
+                    skillIds: formData.selectedSkills?.map((skill) => skill.id) || [],
                 };
                 await updateJobPost(id, updateData);
-                alert("Job post updated successfully!");
+                toast.success("Job post updated successfully!");
             } else {
                 // Create new job post
                 const requestData = convertFormDataToRequest(formData);
                 await createJobPost(requestData);
-                alert("Draft saved successfully!");
+                toast.success("Draft saved successfully!");
             }
 
             setSaveStatus("saved");
@@ -316,7 +293,7 @@ const CreateJobPostPage: React.FC = () => {
                 error?.response?.data?.message ||
                 error?.message ||
                 "Failed to save draft. Please try again.";
-            alert(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setIsSubmitting(false);
         }
@@ -328,7 +305,7 @@ const CreateJobPostPage: React.FC = () => {
         setErrors(allErrors);
 
         if (Object.keys(allErrors).length > 0) {
-            alert("Please fix all errors before publishing");
+            toast.warning("Please fix all errors before publishing");
             return;
         }
 
@@ -342,27 +319,21 @@ const CreateJobPostPage: React.FC = () => {
                     title: formData.title,
                     description: formData.description,
                     locationCity: formData.locationCity,
-					countryCode: formData.countryCode || undefined,
+                    countryCode: formData.countryCode || undefined,
                     salaryType: formData.salaryType,
-                    salaryMin: formData.salaryMin
-                        ? parseFloat(formData.salaryMin)
-                        : undefined,
-                    salaryMax: formData.salaryMax
-                        ? parseFloat(formData.salaryMax)
-                        : undefined,
+                    salaryMin: formData.salaryMin ? parseFloat(formData.salaryMin) : undefined,
+                    salaryMax: formData.salaryMax ? parseFloat(formData.salaryMax) : undefined,
                     salaryNote: formData.salaryNote || undefined,
                     isFresher: formData.isFresher,
                     isPrivate: formData.isPrivate,
-                    expiryAt: formData.expiryAt
-                        ? `${formData.expiryAt}T23:59:59`
-                        : undefined,
-					skillIds: formData.selectedSkills?.map(skill => skill.id) || [],
+                    expiryAt: formData.expiryAt ? `${formData.expiryAt}T23:59:59` : undefined,
+                    skillIds: formData.selectedSkills?.map((skill) => skill.id) || [],
                 };
                 await updateJobPost(id, updateData);
 
                 // Publish the updated job post
                 await publishJobPost(id);
-                alert("Job post updated and published successfully! 🎉");
+                toast.success("Job post updated and published successfully! 🎉", 5000);
             } else {
                 // Create new job post and publish
                 const requestData = convertFormDataToRequest(formData);
@@ -370,7 +341,7 @@ const CreateJobPostPage: React.FC = () => {
 
                 // Then immediately publish it
                 await publishJobPost(createdJobPost.id);
-                alert("Job post published successfully! 🎉");
+                toast.success("Job post published successfully! 🎉", 5000);
             }
 
             setSaveStatus("saved");
@@ -384,7 +355,7 @@ const CreateJobPostPage: React.FC = () => {
                 error?.response?.data?.message ||
                 error?.message ||
                 "Failed to publish job post. Please try again.";
-            alert(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setIsSubmitting(false);
         }
@@ -394,11 +365,7 @@ const CreateJobPostPage: React.FC = () => {
         switch (currentStep) {
             case FormStep.BASICS:
                 return (
-                    <Step1Basics
-                        formData={formData}
-                        errors={errors}
-                        onChange={handleFieldChange}
-                    />
+                    <Step1Basics formData={formData} errors={errors} onChange={handleFieldChange} />
                 );
             case FormStep.COMPENSATION:
                 return (
@@ -488,9 +455,7 @@ const CreateJobPostPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900">
-                                {isEditMode
-                                    ? "Edit Job Post"
-                                    : "Create New Job Post"}
+                                {isEditMode ? "Edit Job Post" : "Create New Job Post"}
                             </h1>
                             <p className="text-sm text-gray-500 mt-1">
                                 Fill in the details to post your job
@@ -534,11 +499,7 @@ const CreateJobPostPage: React.FC = () => {
                                                       : "bg-gray-200 text-gray-500"
                                             )}
                                         >
-                                            {step.id < currentStep ? (
-                                                "✓"
-                                            ) : (
-                                                <span>{index + 1}</span>
-                                            )}
+                                            {step.id < currentStep ? "✓" : <span>{index + 1}</span>}
                                         </div>
                                         <div className="hidden sm:block text-left">
                                             <div
@@ -606,9 +567,8 @@ const CreateJobPostPage: React.FC = () => {
                 {currentStep === FormStep.BASICS && (
                     <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-sm text-blue-800">
-                            💡 <strong>Pro tip:</strong> Be specific with your
-                            job title to attract the right candidates. Use
-                            common industry terms.
+                            💡 <strong>Pro tip:</strong> Be specific with your job title to attract
+                            the right candidates. Use common industry terms.
                         </p>
                     </div>
                 )}

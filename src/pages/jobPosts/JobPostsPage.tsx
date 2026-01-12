@@ -7,9 +7,9 @@ import {
 	EMPLOYMENT_TYPE_LABELS,
 	ROUTES,
 } from "@/utils/constants";
-import { fetchJobPosts } from "@/services/jobPostService";
-import { Button, Spinner } from "@/components/ui";
-import { HeadlessTabs, TabItem } from "@/components/headless";
+import { fetchJobPosts, archiveJobPost } from "@/services/jobPostService";
+import { Button, Spinner, ConfirmDialog } from "@/components/ui";
+import { HeadlessTabs, TabItem, useConfirmDialog } from "@/components/headless";
 import { JobPostRow } from "@/components/feature/JobPosts";
 import clsx from "clsx";
 
@@ -27,6 +27,9 @@ const JobPostsPage: React.FC = () => {
 	const [currentPage, setCurrentPage] = useState(0);
 	const [totalPages, setTotalPages] = useState(1); // total pages from backend
 	const [totalItems, setTotalItems] = useState(0); // total job posts count
+
+	// Headless confirm dialog for archive action
+	const archiveConfirmDialog = useConfirmDialog();
 
 	// Tabs configuration
 	const tabs: TabItem[] = [
@@ -122,21 +125,25 @@ const JobPostsPage: React.FC = () => {
 		navigate(ROUTES.JOB_POST_EDIT.replace(":id", id));
 	};
 
-	// const handleArchiveJobPost = async (id: string) => {
-	// 	if (
-	// 		!window.confirm("Are you sure you want to archive this job post?")
-	// 	) {
-	// 		return;
-	// 	}
-  //
-	// 	try {
-	// 		await archiveJobPost(id);
-	// 		await loadJobPosts();
-	// 	} catch (err) {
-	// 		alert("Failed to archive job post. Please try again.");
-	// 		console.error("Error archiving job post:", err);
-	// 	}
-	// };
+	const handleArchiveJobPost = (id: string) => {
+		archiveConfirmDialog.open({
+			title: "Archive Job Post",
+			message:
+				"Are you sure you want to archive this job post? This will remove it from active listings but you can still view it in your archives.",
+			variant: "warning",
+			confirmText: "Archive",
+			cancelText: "Cancel",
+			onConfirm: async () => {
+				try {
+					await archiveJobPost(id);
+					await loadJobPosts(currentPage);
+				} catch (err) {
+					setError("Failed to archive job post. Please try again.");
+					console.error("Error archiving job post:", err);
+				}
+			},
+		});
+	};
 
 	const toggleEmploymentTypeFilter = (type: EmploymentType) => {
 		setSelectedEmploymentTypes((prev) =>
@@ -350,7 +357,7 @@ const JobPostsPage: React.FC = () => {
 											jobPost={jobPost}
 											onView={handleViewJobPost}
 											onEdit={handleEditJobPost}
-											// onArchive={handleArchiveJobPost}
+											onArchive={handleArchiveJobPost}
 										/>
 									))}
 								</tbody>
@@ -411,6 +418,9 @@ const JobPostsPage: React.FC = () => {
 					</div>
 				)}
 			</div>
+
+			{/* Headless Confirm Dialog for Archive */}
+			<ConfirmDialog dialog={archiveConfirmDialog} />
 		</div>
 	);
 };

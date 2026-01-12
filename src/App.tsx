@@ -6,19 +6,32 @@ import {
     jobRoutes,
     applicantRoutes,
     applicationRoutes,
+    subscriptionRoutes,
 } from "@/routes";
+import { ToastProvider, useToastContext } from "@/components/headless/Toast";
+import { ToastContainer } from "@/components/ui/Toast";
+
+// Toast container that uses the context
+const AppToastContainer = () => {
+    const toast = useToastContext();
+    return <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} />;
+};
 
 function App() {
     return (
-        <AppLayout>
-            <Routes>
-                {mainRoutes}
-                {authRoutes}
-                {jobRoutes}
-                {applicantRoutes}
-                {applicationRoutes}
-            </Routes>
-        </AppLayout>
+        <ToastProvider>
+            <AppLayout>
+                <Routes>
+                    {mainRoutes}
+                    {authRoutes}
+                    {jobRoutes}
+                    {applicantRoutes}
+                    {applicationRoutes}
+                    {subscriptionRoutes}
+                </Routes>
+            </AppLayout>
+            <AppToastContainer />
+        </ToastProvider>
     );
 }
 

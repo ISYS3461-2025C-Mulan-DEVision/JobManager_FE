@@ -2,11 +2,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../ui";
 import { getStoredUser, clearAuthSession } from "../../services/authStorage";
 import { useState, useEffect } from "react";
-import {
-    getCompanyProfile,
-    getCompany,
-} from "@/components/feature/CompanyProfile/api";
+import { getCompanyProfile, getCompany } from "@/components/feature/CompanyProfile/api";
 import { checkIsPremium } from "@/components/feature/Subscription/api/SubscriptionService";
+import { NotificationDropdown } from "@/components/feature/Notification";
 
 type AppHeaderProps = {
     className?: string;
@@ -48,13 +46,11 @@ export default function AppHeader({ className }: AppHeaderProps) {
         const fetchCompanyData = async () => {
             if (user?.companyId) {
                 try {
-                    const [profile, company, premiumStatus] = await Promise.all(
-                        [
-                            getCompanyProfile().catch(() => null),
-                            getCompany().catch(() => null),
-                            checkIsPremium().catch(() => ({ data: false })),
-                        ]
-                    );
+                    const [profile, company, premiumStatus] = await Promise.all([
+                        getCompanyProfile().catch(() => null),
+                        getCompany().catch(() => null),
+                        checkIsPremium().catch(() => ({ data: false })),
+                    ]);
                     setCompanyLogoUrl(profile?.logoUrl || null);
                     setCompanyName(company?.name || null);
                     setIsPremium(premiumStatus.data ?? false);
@@ -85,22 +81,11 @@ export default function AppHeader({ className }: AppHeaderProps) {
             <div className="h-20 border-b border-gray-200 bg-white">
                 <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
                     <div className="flex items-center gap-8">
-                        <Link
-                            to={user ? "/dashboard" : "/"}
-                            className="flex items-center gap-3"
-                        >
-                            <img
-                                src="/logo/logo.png"
-                                alt="DEVision"
-                                className="h-12 w-auto"
-                            />
+                        <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-3">
+                            <img src="/logo/logo.png" alt="DEVision" className="h-12 w-auto" />
                             <div className="leading-tight">
-                                <div className="text-sm font-semibold text-gray-900">
-                                    DEVision
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                    Company hiring portal
-                                </div>
+                                <div className="text-sm font-semibold text-gray-900">DEVision</div>
+                                <div className="text-xs text-gray-500">Company hiring portal</div>
                             </div>
                         </Link>
 
@@ -143,12 +128,13 @@ export default function AppHeader({ className }: AppHeaderProps) {
                     <div className="flex items-center gap-4">
                         {user ? (
                             <>
+                                {/* Notification Bell */}
+                                <NotificationDropdown isPremium={isPremium} />
+
                                 <div
                                     className="relative"
                                     onMouseEnter={() => setIsDropdownOpen(true)}
-                                    onMouseLeave={() =>
-                                        setIsDropdownOpen(false)
-                                    }
+                                    onMouseLeave={() => setIsDropdownOpen(false)}
                                 >
                                     <div className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover: transition-all duration-200 hover:scale-105">
                                         <div
@@ -168,9 +154,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                                 </div>
                                             ) : (
                                                 <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
-                                                    {user.email
-                                                        .charAt(0)
-                                                        .toUpperCase()}
+                                                    {user.email.charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
@@ -181,8 +165,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                             <div className="bg-white rounded-md shadow-lg py-1 border border-gray-100">
                                                 <div className="px-4 py-3 border-b border-gray-100">
                                                     <p className="text-sm font-medium text-gray-900 truncate">
-                                                        {companyName ||
-                                                            user.email}
+                                                        {companyName || user.email}
                                                     </p>
                                                     <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
                                                         <span
@@ -233,10 +216,7 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                     </Link>
                                 )}
                                 {!onRegister && (
-                                    <Link
-                                        to="/register"
-                                        className="inline-flex"
-                                    >
+                                    <Link to="/register" className="inline-flex">
                                         <Button>Get started</Button>
                                     </Link>
                                 )}

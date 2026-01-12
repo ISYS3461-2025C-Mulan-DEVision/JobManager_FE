@@ -13,36 +13,36 @@ export const PremiumBanner: React.FC<PremiumBannerProps> = ({
     daysRemaining,
     onUpgrade,
 }) => {
-    if (
-        status === "PREMIUM" &&
-        (daysRemaining === undefined || daysRemaining > 7)
-    ) {
-        return null; // Don't show if healthy premium
+    // Don't show banner for FREE or healthy PREMIUM users
+    if (status === "FREE") {
+        return null;
+    }
+
+    if (status === "PREMIUM" && (daysRemaining === undefined || daysRemaining > 7)) {
+        return null;
     }
 
     const config = {
         FREE: {
-            title: "Upgrade to Premium",
-            message:
-                "Unlock advanced analytics, unlimited job posts, and priority support.",
-            buttonText: "Upgrade Now",
-            bg: "bg-gradient-to-r from-indigo-500 to-purple-600",
-            textColor: "text-white",
+            title: "",
+            message: "",
+            buttonText: "",
+            bg: "",
+            textColor: "",
         },
         EXPIRING: {
-            title: `Subscription Expiring in ${daysRemaining} Days`,
+            title: `Subscription Expiring in ${daysRemaining} ${daysRemaining === 1 ? "Day" : "Days"}`,
             message: "Renew now to keep your premium benefits active.",
             buttonText: "Renew Subscription",
-            bg: "bg-yellow-50 border-l-4 border-yellow-400",
-            textColor: "text-yellow-800",
+            bg: "bg-amber-50 border-l-4 border-amber-500",
+            textColor: "text-gray-700",
         },
         EXPIRED: {
             title: "Subscription Expired",
-            message:
-                "Your premium features are currently disabled. Reactivate to restore access.",
+            message: "Your premium features are currently disabled. Reactivate to restore access.",
             buttonText: "Reactivate Now",
-            bg: "bg-red-50 border-l-4 border-red-400",
-            textColor: "text-red-800",
+            bg: "bg-gray-50 border-l-4 border-gray-400",
+            textColor: "text-gray-700",
         },
         PREMIUM: {
             // Fallback
@@ -56,44 +56,15 @@ export const PremiumBanner: React.FC<PremiumBannerProps> = ({
 
     const currentConfig = config[status];
 
-    if (status === "FREE") {
-        return (
-            <div
-                className={`rounded-lg shadow-md p-6 ${currentConfig.bg} ${currentConfig.textColor} mb-6`}
-            >
-                <div className="flex flex-col md:flex-row justify-between items-center">
-                    <div className="mb-4 md:mb-0">
-                        <h3 className="text-xl font-bold">
-                            {currentConfig.title}
-                        </h3>
-                        <p className="mt-1 opacity-90">
-                            {currentConfig.message}
-                        </p>
-                    </div>
-                    <button
-                        onClick={onUpgrade}
-                        className="bg-white text-indigo-600 font-semibold py-2 px-6 rounded-md shadow hover:bg-gray-100 transition-colors"
-                    >
-                        {currentConfig.buttonText}
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className={`p-4 rounded-md ${currentConfig.bg} mb-6`}>
             <div className="flex justify-between items-center">
                 <div className="flex">
                     <div className="ml-3">
-                        <h3
-                            className={`text-sm font-medium ${currentConfig.textColor}`}
-                        >
+                        <h3 className={`text-sm font-medium ${currentConfig.textColor}`}>
                             {currentConfig.title}
                         </h3>
-                        <div
-                            className={`mt-2 text-sm ${currentConfig.textColor} opacity-90`}
-                        >
+                        <div className={`mt-2 text-sm ${currentConfig.textColor} opacity-90`}>
                             <p>{currentConfig.message}</p>
                         </div>
                     </div>
@@ -104,8 +75,8 @@ export const PremiumBanner: React.FC<PremiumBannerProps> = ({
                             onClick={onUpgrade}
                             className={`px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                                 status === "EXPIRING"
-                                    ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 focus:ring-yellow-500"
-                                    : "bg-red-100 text-red-800 hover:bg-red-200 focus:ring-red-500"
+                                    ? "bg-amber-100 text-amber-700 hover:bg-amber-200 focus:ring-amber-500"
+                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500"
                             }`}
                         >
                             {currentConfig.buttonText}

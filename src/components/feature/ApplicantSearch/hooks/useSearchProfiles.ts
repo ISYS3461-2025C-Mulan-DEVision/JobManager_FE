@@ -88,9 +88,9 @@ export const useSearchProfiles = (): UseSearchProfilesReturn => {
                     employmentTypes: searchState.employmentTypes,
                     skillIds: searchState.skillIds,
                     isActive: true,
-                    // TODO: Salary filtering - uncomment when JA adds salary support
-                    // minSalary: searchState.minSalary,
-                    // maxSalary: searchState.maxSalary,
+                    // Salary for profile matching (not used in search API)
+                    minSalary: searchState.minSalary,
+                    maxSalary: searchState.maxSalary,
                 };
 
                 const response = await ApplicantSearchService.createSearchProfile(request);

@@ -83,11 +83,17 @@ export const API_ENDPOINTS = {
         UPDATE_STATUS: (id: string) => `/internal/search-profiles/${id}/status`,
     },
 
-    // Subscriptions
     SUBSCRIPTIONS: {
-        // External endpoints
         STATUS: (companyId: string) => `/subscriptions/company/${companyId}`,
         IS_PREMIUM: (companyId: string) =>
             `/subscriptions/company/${companyId}/is-premium`,
+        PLANS: "/subscriptions/plans",
+        PLAN: (planId: string) => `/subscriptions/plans/${planId}`,
+        CREATE_PAYMENT_INTENT: "/subscriptions/payment-intent",
+        PURCHASE: "/subscriptions/purchase",
+        HISTORY: (companyId: string) => `/subscriptions/company/${companyId}/history`,
+        CANCEL: (subscriptionId: string) => `/internal/subscriptions/${subscriptionId}/cancel`,
+        GET_BY_COMPANY: (companyId: string) => `/internal/subscriptions/company/${companyId}`,
+        RENEW: (companyId: string) => `/subscriptions/company/${companyId}/renew`,
     },
 } as const;
