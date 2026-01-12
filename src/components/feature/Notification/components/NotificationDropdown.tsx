@@ -17,7 +17,11 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
 
-    const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications();
+    // Use fast polling for near real-time updates (every 3 seconds)
+    const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications({
+        autoRefresh: true,
+        refreshInterval: 3000, // Poll every 3 seconds for near real-time
+    });
 
     const handleToggle = useCallback(() => {
         setIsOpen((prev) => !prev);
