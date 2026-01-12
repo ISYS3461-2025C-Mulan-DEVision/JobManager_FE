@@ -7,7 +7,7 @@ import {
 	EMPLOYMENT_TYPE_LABELS,
 	ROUTES,
 } from "@/utils/constants";
-import { fetchJobPosts, archiveJobPost } from "@/services/jobPostService";
+import { fetchJobPosts } from "@/services/jobPostService";
 import { Button, Spinner } from "@/components/ui";
 import { HeadlessTabs, TabItem } from "@/components/headless";
 import { JobPostRow } from "@/components/feature/JobPosts";
@@ -122,21 +122,21 @@ const JobPostsPage: React.FC = () => {
 		navigate(ROUTES.JOB_POST_EDIT.replace(":id", id));
 	};
 
-	const handleArchiveJobPost = async (id: string) => {
-		if (
-			!window.confirm("Are you sure you want to archive this job post?")
-		) {
-			return;
-		}
-
-		try {
-			await archiveJobPost(id);
-			await loadJobPosts();
-		} catch (err) {
-			alert("Failed to archive job post. Please try again.");
-			console.error("Error archiving job post:", err);
-		}
-	};
+	// const handleArchiveJobPost = async (id: string) => {
+	// 	if (
+	// 		!window.confirm("Are you sure you want to archive this job post?")
+	// 	) {
+	// 		return;
+	// 	}
+  //
+	// 	try {
+	// 		await archiveJobPost(id);
+	// 		await loadJobPosts();
+	// 	} catch (err) {
+	// 		alert("Failed to archive job post. Please try again.");
+	// 		console.error("Error archiving job post:", err);
+	// 	}
+	// };
 
 	const toggleEmploymentTypeFilter = (type: EmploymentType) => {
 		setSelectedEmploymentTypes((prev) =>
@@ -215,10 +215,6 @@ const JobPostsPage: React.FC = () => {
 									EMPLOYMENT_TYPES
 								) as EmploymentType[]
 							)
-								.filter(
-									(type) =>
-										type !== EMPLOYMENT_TYPES.FREELANCE
-								)
 								.map((type) => (
 									<button
 										key={type}
@@ -354,7 +350,7 @@ const JobPostsPage: React.FC = () => {
 											jobPost={jobPost}
 											onView={handleViewJobPost}
 											onEdit={handleEditJobPost}
-											onArchive={handleArchiveJobPost}
+											// onArchive={handleArchiveJobPost}
 										/>
 									))}
 								</tbody>
