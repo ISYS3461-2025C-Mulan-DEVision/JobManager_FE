@@ -36,9 +36,9 @@ const FILTER_KEYS: (keyof SearchState)[] = [
   "employmentTypes",
   "education",
   "workExperience",
-  // TODO: Salary filtering - uncomment when JA adds salary support
-  // "minSalary",
-  // "maxSalary",
+  // TODO: Salary for Search - These are only for profile creation (Kafka matching)
+  "minSalary",
+  "maxSalary",
   "skillIds",
 ];
 
@@ -122,9 +122,9 @@ export const ApplicantSearchPage: React.FC = () => {
         employmentTypes: selectedProfile.employmentTypes,
         education: selectedProfile.education,
         workExperience: selectedProfile.workExperience,
-        // TODO: Salary filtering - uncomment when JA adds salary support
-        // minSalary: selectedProfile.minSalary,
-        // maxSalary: selectedProfile.maxSalary,
+        // Salary for profile matching (not used in search API)
+        minSalary: selectedProfile.minSalary,
+        maxSalary: selectedProfile.maxSalary,
         skillIds: selectedProfile.skillIds,
         page: 0,
       };
@@ -194,9 +194,9 @@ export const ApplicantSearchPage: React.FC = () => {
       employmentTypes: searchState.employmentTypes,
       education: searchState.education,
       workExperience: searchState.workExperience,
-      // TODO: Salary filtering - uncomment when JA adds salary support
-      // minSalary: searchState.minSalary,
-      // maxSalary: searchState.maxSalary,
+      // Salary for profile matching (not used in search API)
+      minSalary: searchState.minSalary,
+      maxSalary: searchState.maxSalary,
       skillIds: searchState.skillIds,
     };
 
@@ -263,9 +263,9 @@ export const ApplicantSearchPage: React.FC = () => {
       employmentTypes: searchState.employmentTypes,
       education: searchState.education,
       workExperience: searchState.workExperience,
-      // TODO: Salary filtering - uncomment when JA adds salary support
-      // minSalary: searchState.minSalary,
-      // maxSalary: searchState.maxSalary,
+      // Salary for profile matching (not used in search API)
+      minSalary: searchState.minSalary,
+      maxSalary: searchState.maxSalary,
       skillIds: searchState.skillIds,
     };
 

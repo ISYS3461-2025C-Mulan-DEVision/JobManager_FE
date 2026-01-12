@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Select,
   Checkbox,
-  // TODO: Uncomment when JA adds salary support
-  // RangeSlider,
+  RangeSlider,
   TagInput,
   RadioGroup,
   Toggle,
@@ -109,14 +108,20 @@ export const Filters: React.FC<FiltersProps> = ({
     onFilterChange({ education: value as EducationDegree | undefined });
   };
 
-  // TODO: Salary filtering - uncomment when JA adds salary support
-  // const handleSalaryMinChange = (value: number) => {
-  //   onFilterChange({ minSalary: value });
-  // };
-  //
-  // const handleSalaryMaxChange = (value: number) => {
-  //   onFilterChange({ maxSalary: value });
-  // };
+  /**
+   * Salary handlers - used for search profile creation only.
+   * TODO: Salary for Search - These values are saved to search profiles for
+   * Kafka notification matching, but NOT sent to the applicant search API
+   * because JA's UserResponse doesn't have salary fields yet.
+   * When JA adds salary to UserResponse, enable salary filtering in ApplicantSearchService.ts.
+   */
+  const handleSalaryMinChange = (value: number) => {
+    onFilterChange({ minSalary: value });
+  };
+
+  const handleSalaryMaxChange = (value: number) => {
+    onFilterChange({ maxSalary: value });
+  };
 
   const handleSkillAdd = (skillId: string) => {
     onFilterChange({ skillIds: [...searchState.skillIds, skillId] });
@@ -222,24 +227,31 @@ export const Filters: React.FC<FiltersProps> = ({
         />
       </div>
 
-      {/* TODO: Salary Range - JA does not have salary fields yet */}
-      {/* Uncomment when JA adds salary support to UserResponse */}
       {/*
+       * TODO: Salary for Search
+       * This filter is saved to search profiles for Kafka notification matching.
+       * It does NOT affect the applicant search results because JA's UserResponse
+       * doesn't have salary fields yet. Remove this note when JA adds salary support.
+       */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Salary</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">
+          Salary Range
+        </h3>
+        <p className="text-xs text-gray-500 mb-3">
+          Used for profile notifications only
+        </p>
         <RangeSlider
           min={0}
-          max={10000}
-          step={100}
-          minGap={100}
+          max={100000}
+          step={500}
+          minGap={500}
           minValue={searchState.minSalary ?? 0}
-          maxValue={searchState.maxSalary ?? 10000}
+          maxValue={searchState.maxSalary ?? 100000}
           onMinChange={handleSalaryMinChange}
           onMaxChange={handleSalaryMaxChange}
           formatValue={(v) => v.toLocaleString()}
         />
       </div>
-      */}
 
       {/* Skill Tags */}
       <div>
