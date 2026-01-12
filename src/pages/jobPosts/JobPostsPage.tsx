@@ -17,6 +17,9 @@ const JobPostsPage: React.FC = () => {
     const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<EmploymentType[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
 
     // Headless confirm dialog for archive action
     const archiveConfirmDialog = useConfirmDialog();
@@ -50,12 +53,21 @@ const JobPostsPage: React.FC = () => {
         filterJobPosts();
     }, [activeTab, selectedEmploymentTypes, searchQuery, jobPosts]);
 
-    const loadJobPosts = async () => {
+    const loadJobPosts = async (page: number = 0) => {
         try {
             setLoading(true);
             setError(null);
-            const response = await fetchJobPosts({});
+
+            // fetch paginated data from backend
+            const response = await fetchJobPosts({
+                page: page,
+                pageSize: 10,
+            });
+
             setJobPosts(response.data);
+            setCurrentPage(response.meta.currentPage);
+            setTotalPages(response.meta.totalPages);
+            setTotalItems(response.meta.totalItems);
         } catch (err) {
             setError("Failed to load job posts. Please try again.");
             console.error("Error fetching job posts:", err);
@@ -111,7 +123,7 @@ const JobPostsPage: React.FC = () => {
             onConfirm: async () => {
                 try {
                     await archiveJobPost(id);
-                    await loadJobPosts();
+                    await loadJobPosts(currentPage);
                 } catch (err) {
                     setError("Failed to archive job post. Please try again.");
                     console.error("Error archiving job post:", err);
@@ -124,6 +136,12 @@ const JobPostsPage: React.FC = () => {
         setSelectedEmploymentTypes((prev) =>
             prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
         );
+
+        // Reset to first page when filter changes
+        if (currentPage !== 0) {
+            setCurrentPage(0);
+            loadJobPosts(0);
+        }
     };
 
     if (loading) {
@@ -160,7 +178,14 @@ const JobPostsPage: React.FC = () => {
                             type="text"
                             placeholder="Search by title, description, or department..."
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                // Reset to first page when search changes
+                                if (currentPage !== 0) {
+                                    setCurrentPage(0);
+                                    loadJobPosts(0);
+                                }
+                            }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
@@ -171,22 +196,20 @@ const JobPostsPage: React.FC = () => {
                             Employment Type
                         </label>
                         <div className="flex flex-wrap gap-2">
-                            {(Object.values(EMPLOYMENT_TYPES) as EmploymentType[])
-                                .filter((type) => type !== EMPLOYMENT_TYPES.FREELANCE)
-                                .map((type) => (
-                                    <button
-                                        key={type}
-                                        onClick={() => toggleEmploymentTypeFilter(type)}
-                                        className={clsx(
-                                            "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                                            selectedEmploymentTypes.includes(type)
-                                                ? "bg-blue-100 text-blue-700 border-2 border-blue-400"
-                                                : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                                        )}
-                                    >
-                                        {EMPLOYMENT_TYPE_LABELS[type]}
-                                    </button>
-                                ))}
+                            {(Object.values(EMPLOYMENT_TYPES) as EmploymentType[]).map((type) => (
+                                <button
+                                    key={type}
+                                    onClick={() => toggleEmploymentTypeFilter(type)}
+                                    className={clsx(
+                                        "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                                        selectedEmploymentTypes.includes(type)
+                                            ? "bg-blue-100 text-blue-700 border-2 border-blue-400"
+                                            : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
+                                    )}
+                                >
+                                    {EMPLOYMENT_TYPE_LABELS[type]}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
@@ -194,7 +217,14 @@ const JobPostsPage: React.FC = () => {
                     <HeadlessTabs
                         tabs={tabs}
                         defaultTab={activeTab}
-                        onChange={(tabId) => setActiveTab(tabId as JobStatus)}
+                        onChange={(tabId) => {
+                            setActiveTab(tabId as JobStatus);
+                            // Reset to first page when tab changes
+                            if (currentPage !== 0) {
+                                setCurrentPage(0);
+                                loadJobPosts(0);
+                            }
+                        }}
                     >
                         {(currentTab, setTab, tabItems) => (
                             <div className="border-b border-gray-200">
@@ -302,10 +332,53 @@ const JobPostsPage: React.FC = () => {
                     )}
                 </div>
 
-                {/* Results Summary */}
+                {/* Results Summary & Pagination Controls */}
                 {filteredPosts.length > 0 && (
-                    <div className="mt-4 text-sm text-gray-600">
-                        Showing {filteredPosts.length} of {jobPosts.length} job posts
+                    <div className="mt-4 flex items-center justify-between">
+                        {/* Left: Results Summary */}
+                        <div className="text-sm text-gray-600">
+                            Showing {jobPosts.length} job posts on this page
+                            <span className="mx-2">•</span>
+                            <span className="font-medium">{totalItems} total job posts</span>
+                        </div>
+
+                        {/* Right: Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="flex items-center gap-2">
+                                {/* Previous Button */}
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => {
+                                        const prevPage = currentPage - 1;
+                                        setCurrentPage(prevPage);
+                                        loadJobPosts(prevPage);
+                                    }}
+                                    disabled={currentPage === 0 || loading}
+                                >
+                                    Previous
+                                </Button>
+
+                                {/* Page Info */}
+                                <span className="text-sm text-gray-600 px-3">
+                                    Page {currentPage + 1} of {totalPages}
+                                </span>
+
+                                {/* Next Button */}
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => {
+                                        const nextPage = currentPage + 1;
+                                        setCurrentPage(nextPage);
+                                        loadJobPosts(nextPage);
+                                    }}
+                                    disabled={currentPage >= totalPages - 1 || loading}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

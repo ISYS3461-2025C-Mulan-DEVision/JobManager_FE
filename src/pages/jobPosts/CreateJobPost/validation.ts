@@ -43,18 +43,13 @@ export const validateBasics = (data: JobPostFormData): JobPostFormErrors => {
 
     // Validation: Only Internship + Contract can be combined
     if (data.employmentTypes.length > 1) {
-        const hasInternship = data.employmentTypes.includes(
-            EMPLOYMENT_TYPES.INTERNSHIP
-        );
-        const hasContract = data.employmentTypes.includes(
-            EMPLOYMENT_TYPES.CONTRACT
-        );
+        const hasInternship = data.employmentTypes.includes(EMPLOYMENT_TYPES.INTERNSHIP);
+        const hasContract = data.employmentTypes.includes(EMPLOYMENT_TYPES.CONTRACT);
         const isValidCombination =
             hasInternship && hasContract && data.employmentTypes.length === 2;
 
         if (!isValidCombination) {
-            errors.employmentTypes =
-                "Only Internship and Contract can be combined together";
+            errors.employmentTypes = "Only Internship and Contract can be combined together";
         }
     }
 
@@ -64,9 +59,7 @@ export const validateBasics = (data: JobPostFormData): JobPostFormErrors => {
 /**
  * Validate Step 2: Compensation & Location
  */
-export const validateCompensation = (
-    data: JobPostFormData
-): JobPostFormErrors => {
+export const validateCompensation = (data: JobPostFormData): JobPostFormErrors => {
     const errors: JobPostFormErrors = {};
 
     if (!data.salaryType) {
@@ -98,10 +91,7 @@ export const validateCompensation = (
         ) {
             errors.salaryMax = "Maximum salary must be greater than minimum";
         }
-    } else if (
-        data.salaryType === SALARY_TYPES.ABOUT ||
-        data.salaryType === SALARY_TYPES.FROM
-    ) {
+    } else if (data.salaryType === SALARY_TYPES.ABOUT || data.salaryType === SALARY_TYPES.FROM) {
         if (!data.salaryMin || parseFloat(data.salaryMin) <= 0) {
             errors.salaryMin = "Salary amount is required";
         } else {
@@ -125,9 +115,9 @@ export const validateCompensation = (
         errors.locationCity = "Location city is required";
     }
 
-    // if (!data.countryId) {
-    //     errors.countryId = "Country is required";
-    // }
+    if (!data.countryCode) {
+        errors.countryCode = "Country for this job is required";
+    }
 
     return errors;
 };
@@ -135,19 +125,21 @@ export const validateCompensation = (
 /**
  * Validate Step 3: Description & Skills
  */
-export const validateDescription = (
-    data: JobPostFormData
-): JobPostFormErrors => {
+export const validateDescription = (data: JobPostFormData): JobPostFormErrors => {
     const errors: JobPostFormErrors = {};
 
     if (!data.description.trim()) {
         errors.description = "Job description is required";
     } else if (data.description.length < 50) {
-        errors.description =
-            "Job description should be at least 50 characters for better clarity";
+        errors.description = "Job description should be at least 50 characters for better clarity";
     }
 
-    if (data.technicalSkills.length === 0) {
+    // if (data.technicalSkills.length === 0) {
+    //     errors.technicalSkills = "Please add at least one technical skill";
+    // }
+
+    // Update skills validation to use selectedSkills
+    if (!data.selectedSkills || data.selectedSkills.length === 0) {
         errors.technicalSkills = "Please add at least one technical skill";
     }
 
@@ -157,9 +149,7 @@ export const validateDescription = (
 /**
  * Validate Step 4: Visibility & Publish
  */
-export const validateVisibility = (
-    data: JobPostFormData
-): JobPostFormErrors => {
+export const validateVisibility = (data: JobPostFormData): JobPostFormErrors => {
     const errors: JobPostFormErrors = {};
 
     if (data.expiryAt) {

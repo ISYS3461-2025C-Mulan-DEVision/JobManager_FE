@@ -43,9 +43,10 @@ const CreateJobPostPage: React.FC = () => {
         salaryMax: "",
         salaryNote: "",
         locationCity: "",
-        // countryId: "",
+        countryCode: "",
         description: "",
         technicalSkills: [],
+        selectedSkills: [],
         isPrivate: false,
         expiryAt: "",
         isPublished: false,
@@ -92,6 +93,7 @@ const CreateJobPostPage: React.FC = () => {
             salaryNote: jobPost.salaryNote || "",
             locationCity: jobPost.locationCity,
             description: jobPost.description,
+            countryCode: jobPost.countryCode || "",
             // TODO: Fetch actual skill names from skill service using jobPost.skillIds
             // For now, skills will be lost on edit until skill service integration is complete
             technicalSkills: [],
@@ -138,11 +140,15 @@ const CreateJobPostPage: React.FC = () => {
         // Currently, skills are not being sent to the backend
         // Need to integrate with skill service to map skill names to IDs
 
+        // Extract skill IDs from selected skills
+        const skillIds = data.selectedSkills?.map((skill) => skill.id) || [];
+
         return {
             companyId,
             title: data.title,
             description: data.description,
             locationCity: data.locationCity,
+            countryCode: data.countryCode || undefined,
             salaryType: data.salaryType,
             salaryMin: data.salaryMin ? parseFloat(data.salaryMin) : undefined,
             salaryMax: data.salaryMax ? parseFloat(data.salaryMax) : undefined,
@@ -151,7 +157,7 @@ const CreateJobPostPage: React.FC = () => {
             isPrivate: data.isPrivate,
             expiryAt: expiryAtDateTime,
             employmentType: data.employmentTypes.length > 0 ? data.employmentTypes[0] : undefined,
-            // skillIds: undefined, // TODO: Map technicalSkills to skillIds
+            skillIds: skillIds, // TODO: Map technicalSkills to skillIds
         };
     };
 
@@ -254,6 +260,7 @@ const CreateJobPostPage: React.FC = () => {
                     title: formData.title,
                     description: formData.description,
                     locationCity: formData.locationCity,
+                    countryCode: formData.countryCode || undefined,
                     salaryType: formData.salaryType,
                     salaryMin: formData.salaryMin ? parseFloat(formData.salaryMin) : undefined,
                     salaryMax: formData.salaryMax ? parseFloat(formData.salaryMax) : undefined,
@@ -311,6 +318,7 @@ const CreateJobPostPage: React.FC = () => {
                     title: formData.title,
                     description: formData.description,
                     locationCity: formData.locationCity,
+                    countryCode: formData.countryCode || undefined,
                     salaryType: formData.salaryType,
                     salaryMin: formData.salaryMin ? parseFloat(formData.salaryMin) : undefined,
                     salaryMax: formData.salaryMax ? parseFloat(formData.salaryMax) : undefined,

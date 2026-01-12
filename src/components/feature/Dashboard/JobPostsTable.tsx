@@ -10,6 +10,8 @@ import { Tooltip } from "../../ui/Tooltip/Tooltip";
 import { JobPost } from "@/types";
 import { SYNC_STATUS, ROUTES } from "@/utils/constants";
 import { JobStatusBadge } from "../JobPosts/JobStatusBadge";
+// Add this import at the top with other imports
+import { formatSalary } from "@/utils/jobPostHelpers";
 
 interface JobPostsTableProps {
     data: JobPost[];
@@ -43,9 +45,7 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
             header: "Job Title",
             render: (item) => (
                 <div>
-                    <div className="font-medium text-gray-900">
-                        {item.title}
-                    </div>
+                    <div className="font-medium text-gray-900">{item.title}</div>
                     <div className="text-xs text-gray-500">
                         Updated {new Date(item.updatedAt).toLocaleDateString()}
                     </div>
@@ -58,16 +58,15 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
             render: (item) => (
                 <div className="flex flex-col gap-1">
                     {item.status && <JobStatusBadge status={item.status} />}
-                    {item.syncStatus &&
-                        item.syncStatus !== SYNC_STATUS.SYNCED && (
-                            <span className="text-[10px] text-gray-400">
-                                {item.syncStatus === SYNC_STATUS.PENDING
-                                    ? "Syncing..."
-                                    : item.syncStatus === SYNC_STATUS.UPDATING
-                                      ? "Updating..."
-                                      : "Sync Failed"}
-                            </span>
-                        )}
+                    {item.syncStatus && item.syncStatus !== SYNC_STATUS.SYNCED && (
+                        <span className="text-[10px] text-gray-400">
+                            {item.syncStatus === SYNC_STATUS.PENDING
+                                ? "Syncing..."
+                                : item.syncStatus === SYNC_STATUS.UPDATING
+                                  ? "Updating..."
+                                  : "Sync Failed"}
+                        </span>
+                    )}
                 </div>
             ),
         },
@@ -89,25 +88,30 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
                 let salaryDisplay = "Negotiable";
                 if (item.salaryType === "NEGOTIABLE") {
                     salaryDisplay = "Negotiable";
-                } else if (item.salaryMin && item.salaryMax) {
-                    salaryDisplay = `$${item.salaryMin.toLocaleString()} - $${item.salaryMax.toLocaleString()}`;
-                } else if (item.salaryMin) {
-                    salaryDisplay = `From $${item.salaryMin.toLocaleString()}`;
-                } else if (item.salaryMax) {
-                    salaryDisplay = `Up to $${item.salaryMax.toLocaleString()}`;
+                } else {
+                    salaryDisplay = formatSalary(
+                        item.salaryMin,
+                        item.salaryMax,
+                        item.salaryType,
+                        null // Don't pass note to formatting
+                    );
                 }
 
+                const tooltipContent = item.salaryNote
+                    ? `${item.salaryNote}`
+                    : "No note for salary";
+
                 return (
-                    <Tooltip
-                        content={
-                            item.salaryNote ||
-                            "Estimated annual or hourly range"
-                        }
-                    >
-                        <span className="cursor-help border-b border-dotted border-gray-400">
-                            {salaryDisplay}
-                        </span>
-                    </Tooltip>
+                    <div className="flex flex-col">
+                        <Tooltip content={tooltipContent}>
+                            <span className="cursor-help border-b border-dotted border-gray-400">
+                                {salaryDisplay}
+                            </span>
+                        </Tooltip>
+                        {item.salaryNote && (
+                            <span className="text-xs text-gray-500 mt-0.5">{item.salaryNote}</span>
+                        )}
+                    </div>
                 );
             },
         },
@@ -122,12 +126,7 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            navigate(
-                                ROUTES.JOB_POST_APPLICATIONS.replace(
-                                    ":jobPostId",
-                                    item.id
-                                )
-                            );
+                            navigate(ROUTES.JOB_POST_APPLICATIONS.replace(":jobPostId", item.id));
                         }}
                         className="text-blue-600 hover:text-blue-800 text-xs font-medium"
                     >
@@ -229,9 +228,7 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
                                     key={`${item.id}-${String(col.key)}`}
                                     className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                                 >
-                                    {col.render
-                                        ? col.render(item)
-                                        : (item as any)[col.key]}
+                                    {col.render ? col.render(item) : (item as any)[col.key]}
                                 </td>
                             ))}
                         </tr>
