@@ -9,6 +9,7 @@ import type {
 // Default search state - aligned with new JA API params
 const defaultSearchState: SearchState = {
     username: "",
+    ftsQuery: undefined,
     countryCode: undefined,
     city: undefined,
     employmentTypes: [],
@@ -155,6 +156,52 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
                 );
             }
 
+            // Filter by city (case-insensitive partial match, like JA service)
+            if (searchState.city) {
+                const cityTerm = searchState.city.toLowerCase();
+                filteredApplicants = filteredApplicants.filter(
+                    (a) => a.city?.toLowerCase().includes(cityTerm)
+                );
+            }
+
+            // Filter by work experience (search in job title, company, description - like JA service)
+            if (searchState.workExperience) {
+                const keywords = searchState.workExperience
+                    .split(',')
+                    .map((k) => k.trim().toLowerCase())
+                    .filter((k) => k.length > 0);
+                
+                if (keywords.length > 0) {
+                    filteredApplicants = filteredApplicants.filter((a) =>
+                        a.workExperience.some((exp) =>
+                            keywords.some(
+                                (kw) =>
+                                    exp.title?.toLowerCase().includes(kw) ||
+                                    exp.company?.toLowerCase().includes(kw) ||
+                                    exp.description?.toLowerCase().includes(kw)
+                            )
+                        )
+                    );
+                }
+            }
+
+            // Filter by education degree
+            if (searchState.education) {
+                filteredApplicants = filteredApplicants.filter((a) =>
+                    a.education.some((edu) => edu.degree === searchState.education)
+                );
+            }
+
+            // Filter by skills (OR semantics - match if any skill matches)
+            if (searchState.skillIds.length > 0) {
+                const skillNames = searchState.skillIds.map((s) => s.toLowerCase());
+                filteredApplicants = filteredApplicants.filter((a) =>
+                    a.skills.some((skill) =>
+                        skillNames.includes(skill.name.toLowerCase())
+                    )
+                );
+            }
+
             // Filter by employment types (OR semantics)
             if (searchState.employmentTypes.length > 0) {
                 filteredApplicants = filteredApplicants.filter(
@@ -241,6 +288,7 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
         // searchState.minSalary,
         // searchState.maxSalary,
         searchState.skillIds,
+        searchState.statusFilter,
     ]);
 
     return {

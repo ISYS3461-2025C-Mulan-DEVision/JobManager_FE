@@ -24,6 +24,11 @@ export type StatusFilterType = 'ALL' | 'FAVORITE' | 'WARNING' | 'MARKED';
 export interface SearchState {
     /** Username/name search (firstName, lastName). Maps to JA's 'username' param. */
     username: string;
+    /**
+     * Full-Text Search query for searching across Work Experience, Objective Summary, 
+     * and Technical Skills fields. Case-insensitive.
+     */
+    ftsQuery?: string;
     countryCode?: string;
     /** City filter. Maps to JA's 'city' param. */
     city?: string;
@@ -51,6 +56,7 @@ export interface SearchState {
 
 export const DEFAULT_SEARCH_STATE: SearchState = {
     username: "",
+    ftsQuery: undefined,
     countryCode: undefined,
     city: undefined,
     employmentTypes: [],

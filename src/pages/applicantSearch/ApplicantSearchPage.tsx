@@ -71,6 +71,7 @@ export const ApplicantSearchPage: React.FC = () => {
     error: searchError,
     updateSearchState,
     setSearchState,
+    resetSearchState,
     search,
     goToPage,
   } = useApplicantSearch();
@@ -169,7 +170,8 @@ export const ApplicantSearchPage: React.FC = () => {
       } else {
         selectProfile(profileId);
         if (!profileId) {
-          // Reset original filters when deselecting profile
+          // Reset filters to default when deselecting profile
+          resetSearchState();
           setOriginalFilters(searchState);
         }
       }
@@ -180,6 +182,7 @@ export const ApplicantSearchPage: React.FC = () => {
       selectedProfile?.id,
       selectProfile,
       searchState,
+      resetSearchState,
     ],
   );
 
@@ -330,8 +333,10 @@ export const ApplicantSearchPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
           <SearchBar
             searchTerm={searchState.username}
+            ftsQuery={searchState.ftsQuery}
             sortBy={searchState.sortBy}
             onSearchTermChange={(username) => updateSearchState({ username })}
+            onFtsQueryChange={(ftsQuery) => updateSearchState({ ftsQuery })}
             onSortChange={(sortBy) => updateSearchState({ sortBy })}
             onSearch={handleSearch}
             disabled={isSearching}
@@ -369,6 +374,7 @@ export const ApplicantSearchPage: React.FC = () => {
               <Filters
                 searchState={searchState}
                 onFilterChange={handleFilterChange}
+                onClearFilters={resetSearchState}
                 onSearch={handleSearch}
                 disabled={isSearching}
                 selectedProfileId={selectedProfile?.id}
@@ -410,7 +416,6 @@ export const ApplicantSearchPage: React.FC = () => {
                         key={tab.id}
                         onClick={() => {
                           updateSearchState({ statusFilter: tab.id, page: 0 });
-                          search();
                         }}
                         className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
                           isActive
