@@ -31,6 +31,10 @@ export const searchApplicants = async (
     if (searchState.username) {
         params.append("username", searchState.username);
     }
+    // FTS Query - Full-Text Search across Work Experience, Objective Summary, and Technical Skills
+    if (searchState.ftsQuery) {
+        params.append("ftsQuery", searchState.ftsQuery);
+    }
     if (searchState.countryCode) {
         params.append("countryCode", searchState.countryCode);
     }

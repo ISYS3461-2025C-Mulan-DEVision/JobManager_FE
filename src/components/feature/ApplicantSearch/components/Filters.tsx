@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Select,
   Checkbox,
-  // TODO: Uncomment when JA adds salary support
-  // RangeSlider,
+  RangeSlider,
   TagInput,
   RadioGroup,
   Toggle,
@@ -27,6 +26,7 @@ import ApplicantSearchService from "../api/ApplicantSearchService";
 interface FiltersProps {
   searchState: SearchState;
   onFilterChange: (updates: Partial<SearchState>) => void;
+  onClearFilters?: () => void;
   onSearch?: () => void;
   disabled?: boolean;
   // Search profile props
@@ -39,6 +39,7 @@ interface FiltersProps {
 export const Filters: React.FC<FiltersProps> = ({
   searchState,
   onFilterChange,
+  onClearFilters,
   // onSearch prop is available for future use if needed
   disabled = false,
   selectedProfileId,
@@ -95,6 +96,18 @@ export const Filters: React.FC<FiltersProps> = ({
     onFilterChange({ countryCode: value || undefined });
   };
 
+  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    onFilterChange({ city: value || undefined });
+  };
+
+  const handleWorkExperienceChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const value = e.target.value;
+    onFilterChange({ workExperience: value || undefined });
+  };
+
   const handleEmploymentTypeChange = (
     type: EmploymentType,
     checked: boolean,
@@ -109,23 +122,37 @@ export const Filters: React.FC<FiltersProps> = ({
     onFilterChange({ education: value as EducationDegree | undefined });
   };
 
-  // TODO: Salary filtering - uncomment when JA adds salary support
-  // const handleSalaryMinChange = (value: number) => {
-  //   onFilterChange({ minSalary: value });
-  // };
-  //
-  // const handleSalaryMaxChange = (value: number) => {
-  //   onFilterChange({ maxSalary: value });
-  // };
+  /**
+   * Salary handlers - used for search profile creation only.
+   * TODO: Salary for Search - These values are saved to search profiles for
+   * Kafka notification matching, but NOT sent to the applicant search API
+   * because JA's UserResponse doesn't have salary fields yet.
+   * When JA adds salary to UserResponse, enable salary filtering in ApplicantSearchService.ts.
+   */
+  const handleSalaryMinChange = (value: number) => {
+    onFilterChange({ minSalary: value });
+  };
+
+  const handleSalaryMaxChange = (value: number) => {
+    onFilterChange({ maxSalary: value });
+  };
 
   const handleSkillAdd = (skillId: string) => {
-    onFilterChange({ skillIds: [...searchState.skillIds, skillId] });
+    // Find the skill name from the ID to pass to the API
+    const skill = skills.find((s) => s.id === skillId);
+    if (skill) {
+      onFilterChange({ skillIds: [...searchState.skillIds, skill.name] });
+    }
   };
 
   const handleSkillRemove = (skillId: string) => {
-    onFilterChange({
-      skillIds: searchState.skillIds.filter((id) => id !== skillId),
-    });
+    // Remove by name since we store names
+    const skill = skills.find((s) => s.id === skillId);
+    if (skill) {
+      onFilterChange({
+        skillIds: searchState.skillIds.filter((name) => name !== skill.name),
+      });
+    }
   };
 
   const handleProfileStatusToggle = (checked: boolean) => {
@@ -180,6 +207,32 @@ export const Filters: React.FC<FiltersProps> = ({
           disabled={disabled || isLoadingCountries}
           fullWidth
         />
+        <input
+          type="text"
+          placeholder="Enter city name..."
+          value={searchState.city || ""}
+          onChange={handleCityChange}
+          disabled={disabled}
+          className="mt-2 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+        />
+      </div>
+
+      {/* Work Experience / Job Title */}
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">
+          Work Experience
+        </h3>
+        <p className="text-xs text-gray-500 mb-2">
+          Search by job title, company, or keywords
+        </p>
+        <input
+          type="text"
+          placeholder="e.g. Software Engineer, Google..."
+          value={searchState.workExperience || ""}
+          onChange={handleWorkExperienceChange}
+          disabled={disabled}
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+        />
       </div>
 
       {/* Employment Type */}
@@ -222,24 +275,31 @@ export const Filters: React.FC<FiltersProps> = ({
         />
       </div>
 
-      {/* TODO: Salary Range - JA does not have salary fields yet */}
-      {/* Uncomment when JA adds salary support to UserResponse */}
       {/*
+       * TODO: Salary for Search
+       * This filter is saved to search profiles for Kafka notification matching.
+       * It does NOT affect the applicant search results because JA's UserResponse
+       * doesn't have salary fields yet. Remove this note when JA adds salary support.
+       */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Salary</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">
+          Salary Range
+        </h3>
+        <p className="text-xs text-gray-500 mb-3">
+          Used for profile notifications only
+        </p>
         <RangeSlider
           min={0}
-          max={10000}
-          step={100}
-          minGap={100}
+          max={100000}
+          step={500}
+          minGap={500}
           minValue={searchState.minSalary ?? 0}
-          maxValue={searchState.maxSalary ?? 10000}
+          maxValue={searchState.maxSalary ?? 100000}
           onMinChange={handleSalaryMinChange}
           onMaxChange={handleSalaryMaxChange}
           formatValue={(v) => v.toLocaleString()}
         />
       </div>
-      */}
 
       {/* Skill Tags */}
       <div>
@@ -253,6 +313,17 @@ export const Filters: React.FC<FiltersProps> = ({
           disabled={disabled || isLoadingSkills}
         />
       </div>
+
+      {/* Clear Filters Button */}
+      {onClearFilters && (
+        <button
+          onClick={onClearFilters}
+          disabled={disabled}
+          className="w-full py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Clear All Filters
+        </button>
+      )}
     </div>
   );
 };
