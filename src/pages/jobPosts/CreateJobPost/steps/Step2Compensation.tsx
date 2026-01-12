@@ -140,13 +140,10 @@ export const Step2Compensation: React.FC<Step2CompensationProps> = (props) => {
                 <div className="space-y-4">
                     <Select
                         label="Country *"
-                        options={[
-                            { value: "", label: "Select a country" },
-                            ...location.country.options,
-                        ]}
-                        value={location.country.value}
-                        onChange={(e) => location.country.onChange(e.target.value)}
-                        error={location.country.error}
+                        options={location.country.options}
+                        value={props.formData.countryCode}
+                        onChange={(e) => props.onChange("countryCode", e.target.value)}
+                        error={location.country.error || undefined}
                         disabled={location.country.isLoading}
                         fullWidth
                     />

@@ -21,8 +21,8 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
     jobPost,
     onView,
     onEdit,
-    className,
     onArchive,
+    className,
 }) => {
     const navigate = useNavigate();
     const isExpiring = isExpiringSoon(jobPost.expiryAt);

@@ -268,7 +268,6 @@ const CreateJobPostPage: React.FC = () => {
                     isFresher: formData.isFresher,
                     isPrivate: formData.isPrivate,
                     expiryAt: formData.expiryAt ? `${formData.expiryAt}T23:59:59` : undefined,
-                    skillIds: formData.selectedSkills?.map((skill) => skill.id) || [],
                 };
                 await updateJobPost(id, updateData);
                 toast.success("Job post updated successfully!");
@@ -327,7 +326,6 @@ const CreateJobPostPage: React.FC = () => {
                     isFresher: formData.isFresher,
                     isPrivate: formData.isPrivate,
                     expiryAt: formData.expiryAt ? `${formData.expiryAt}T23:59:59` : undefined,
-                    skillIds: formData.selectedSkills?.map((skill) => skill.id) || [],
                 };
                 await updateJobPost(id, updateData);
 
