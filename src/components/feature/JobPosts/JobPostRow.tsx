@@ -1,21 +1,18 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { JobPost } from "@/types";
-import { SYNC_STATUS, ROUTES } from "@/utils/constants";
+import { SYNC_STATUS, ROUTES, JOB_STATUS } from "@/utils/constants";
 import { formatExpiryDate, isExpiringSoon } from "@/utils/jobPostHelpers";
-import {
-    JobStatusBadge,
-    EmploymentTypeChip,
-    SalaryBadge,
-    KafkaSyncIndicator,
-} from "./index";
+import { JobStatusBadge, EmploymentTypeChip, SalaryBadge, KafkaSyncIndicator } from "./index";
 import { Button } from "@/components/ui";
+import { Archive } from "lucide-react";
 import clsx from "clsx";
 
 interface JobPostRowProps {
     jobPost: JobPost;
     onView?: (id: string) => void;
     onEdit?: (id: string) => void;
+    onArchive?: (id: string) => void;
     className?: string;
 }
 
@@ -23,6 +20,7 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
     jobPost,
     onView,
     onEdit,
+    onArchive,
     className,
 }) => {
     const navigate = useNavigate();
@@ -50,12 +48,8 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
             <td className="px-6 py-4">
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-semibold text-gray-900">
-                            {jobPost.title}
-                        </h3>
-                        {jobPost.status && (
-                            <JobStatusBadge status={jobPost.status} />
-                        )}
+                        <h3 className="text-sm font-semibold text-gray-900">{jobPost.title}</h3>
+                        {jobPost.status && <JobStatusBadge status={jobPost.status} />}
                     </div>
                     <span className="text-xs text-gray-500">
                         {jobPost.locationCity}
@@ -105,9 +99,7 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
                         {formatExpiryDate(jobPost.expiryAt)}
                     </span>
                     {isExpiring && (
-                        <span className="text-xs text-red-500 font-semibold">
-                            ⚠️ Urgent
-                        </span>
+                        <span className="text-xs text-red-500 font-semibold">⚠️ Urgent</span>
                     )}
                 </div>
             </td>
@@ -139,6 +131,17 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
                     >
                         Edit
                     </Button>
+                    {jobPost.status !== JOB_STATUS.ARCHIVED && onArchive && (
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onArchive(jobId)}
+                            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                            title="Archive job post"
+                        >
+                            <Archive className="w-4 h-4" />
+                        </Button>
+                    )}
                 </div>
             </td>
         </tr>

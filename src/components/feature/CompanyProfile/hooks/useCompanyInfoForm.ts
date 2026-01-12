@@ -145,7 +145,9 @@ export function useCompanyInfoForm(): UseCompanyInfoFormReturn {
         setError(null);
         try {
             const result = await uploadLogo(file);
-            setProfile((prev) => prev ? { ...prev, logoUrl: result.url } : prev);
+            // Add cache-busting timestamp to force browser to reload the image
+            const cacheBustedUrl = `${result.url}?t=${Date.now()}`;
+            setProfile((prev) => prev ? { ...prev, logoUrl: cacheBustedUrl } : prev);
             setSuccessMessage("Logo uploaded successfully!");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to upload logo");
@@ -156,7 +158,9 @@ export function useCompanyInfoForm(): UseCompanyInfoFormReturn {
         setError(null);
         try {
             const result = await uploadBanner(file);
-            setProfile((prev) => prev ? { ...prev, bannerUrl: result.url } : prev);
+            // Add cache-busting timestamp to force browser to reload the image
+            const cacheBustedUrl = `${result.url}?t=${Date.now()}`;
+            setProfile((prev) => prev ? { ...prev, bannerUrl: cacheBustedUrl } : prev);
             setSuccessMessage("Banner uploaded successfully!");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to upload banner");

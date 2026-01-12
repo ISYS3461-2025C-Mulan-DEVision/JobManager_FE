@@ -30,18 +30,16 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   disabled = false,
 }) => {
-  const sortOptions = Object.entries(APPLICANT_SORT_OPTIONS).map(
-    ([, value]) => ({
-      value,
-      label: APPLICANT_SORT_LABELS[value],
-    }),
-  );
+    const sortOptions = Object.entries(APPLICANT_SORT_OPTIONS).map(([, value]) => ({
+        value,
+        label: APPLICANT_SORT_LABELS[value],
+    }));
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      onSearch();
-    }
-  };
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            onSearch();
+        }
+    };
 
   return (
     <div className="flex flex-col gap-4">

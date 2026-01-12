@@ -62,7 +62,7 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                     required
                     placeholder="name@company.com"
                     value={values.email}
-                    onChange={handleChange}
+                    onChange={(value, event) => handleChange(event)}
                     onBlur={() => handleBlur("email")}
                     error={touched.email ? errors.email : undefined}
                     helperText={
@@ -82,7 +82,7 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                     required
                     placeholder="Enter your password"
                     value={values.password}
-                    onChange={handleChange}
+                    onChange={(value, event) => handleChange(event)}
                     onBlur={() => handleBlur("password")}
                     onKeyUp={(e) =>
                         setCapsLockOn(
@@ -158,9 +158,9 @@ export const CompanyLoginForm: React.FC<CompanyLoginFormProps> = ({
                         const target = `${apiBase}/oauth2/authorization/google`;
                         window.location.href = target;
                     }}
-                    className="w-full inline-flex items-center justify-center"
+                    leftIcon={<GoogleLogo />}
+                    fullWidth
                 >
-                    <GoogleLogo className="mr-2" />
                     Continue with Google
                 </Button>
 

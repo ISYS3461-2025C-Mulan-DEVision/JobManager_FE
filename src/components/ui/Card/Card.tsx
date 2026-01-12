@@ -1,11 +1,16 @@
 import React from "react";
 import clsx from "clsx";
+import { useCard } from "@/components/headless";
 
 export interface CardProps {
     children: React.ReactNode;
     className?: string;
     padding?: "none" | "sm" | "md" | "lg";
     hover?: boolean;
+    selectable?: boolean;
+    selected?: boolean;
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+    onSelect?: (selected: boolean) => void;
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -13,7 +18,20 @@ export const Card: React.FC<CardProps> = ({
     className,
     padding = "md",
     hover = false,
+    selectable = false,
+    selected,
+    onClick,
+    onSelect,
 }) => {
+    // Use headless card hook for behavior
+    const { cardProps, isSelected } = useCard({
+        onClick,
+        hoverable: hover,
+        selectable,
+        selected,
+        onSelect,
+    });
+
     const paddingStyles = {
         none: "",
         sm: "p-3",
@@ -23,10 +41,12 @@ export const Card: React.FC<CardProps> = ({
 
     return (
         <div
+            {...cardProps}
             className={clsx(
                 "bg-white rounded-lg border border-gray-200 shadow-sm",
                 paddingStyles[padding],
                 hover && "hover:shadow-md transition-shadow cursor-pointer",
+                selectable && isSelected && "ring-2 ring-blue-500 border-blue-500",
                 className,
             )}
         >

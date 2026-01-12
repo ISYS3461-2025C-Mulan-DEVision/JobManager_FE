@@ -5,7 +5,7 @@ import {
     CompanyMediaGallery,
     AccountSecurityPanel,
     NotificationsPlaceholder,
-    SubscriptionPlaceholder,
+    SubscriptionSection,
 } from "./sections";
 
 interface CompanyProfileContentProps {
@@ -24,7 +24,7 @@ export const CompanyProfileContent: React.FC<CompanyProfileContentProps> = ({ ac
             case "notifications":
                 return <NotificationsPlaceholder />;
             case "payment-subscription":
-                return <SubscriptionPlaceholder />;
+                return <SubscriptionSection />;
             default:
                 return <CompanyInfoForm />;
         }

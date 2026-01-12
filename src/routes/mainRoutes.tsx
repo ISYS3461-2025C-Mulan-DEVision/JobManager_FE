@@ -2,6 +2,7 @@ import { Route } from "react-router-dom";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import ProfilePage from "@/pages/profile/ProfilePage";
+import { NotificationsPage } from "@/pages/notifications";
 import { ROUTES } from "@/utils";
 import { PublicRoute } from "@/components/common/PublicRoute";
 import { ProtectedRoute } from "@/components/common/ProtectedRoute";
@@ -31,6 +32,15 @@ export const mainRoutes = [
         element={
             <ProtectedRoute>
                 <ProfilePage />
+            </ProtectedRoute>
+        }
+    />,
+    <Route
+        key="notifications"
+        path="/notifications"
+        element={
+            <ProtectedRoute>
+                <NotificationsPage />
             </ProtectedRoute>
         }
     />,

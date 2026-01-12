@@ -8,34 +8,47 @@ import {
     ApplicationSummary,
 } from "../components/feature/Dashboard/RecentApplications";
 import { PremiumBanner } from "../components/feature/Dashboard/PremiumBanner";
-import {
-    NotificationsCard,
-    Notification,
-} from "../components/feature/Dashboard/NotificationsCard";
+import { PremiumFeaturesAd } from "../components/feature/Dashboard/PremiumFeaturesAd";
+import { DashboardUpgradeCTA } from "../components/feature/Payment";
+import { useSubscriptionDetails } from "../components/feature/Payment/hooks/usePaymentFlow";
 import { Button } from "../components/ui/Button/Button";
 import DashboardLayout from "../layout/DashboardLayout";
 import { fetchJobPosts } from "@/services/jobPostService";
+import { notificationService } from "@/components/feature/Notification/api/notificationService";
 import { JobPost } from "@/types";
-import { formatSalary } from "@/utils/jobPostHelpers";
-import { EMPLOYMENT_TYPE_LABELS, ROUTES } from "@/utils/constants";
+import { ROUTES } from "@/utils/constants";
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
 
-    // Mock Data
-    const [premiumStatus] = useState<
-        "FREE" | "PREMIUM" | "EXPIRING" | "EXPIRED"
-    >("EXPIRING");
+    // Fetch real subscription status
+    const { subscription, isLoading: isLoadingSubscription } = useSubscriptionDetails();
+
+    // Derive premium status from subscription
+    const premiumStatus: "FREE" | "PREMIUM" | "EXPIRING" | "EXPIRED" = React.useMemo(() => {
+        if (!subscription) return "FREE";
+        if (subscription.status === "EXPIRED") return "EXPIRED";
+        if (subscription.isExpiringSoon && subscription.isPremium) return "EXPIRING";
+        if (subscription.isPremium) return "PREMIUM";
+        return "FREE";
+    }, [subscription]);
+
+    const daysRemaining = subscription?.daysRemaining || 0;
 
     // State for real job posts
     const [jobPosts, setJobPosts] = useState<JobPost[]>([]);
     const [allJobPosts, setAllJobPosts] = useState<JobPost[]>([]);
     const [isLoadingJobs, setIsLoadingJobs] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    
+    // State for notifications
+    const [unreadNotifications, setUnreadNotifications] = useState(0);
+    const [isLoadingNotifications, setIsLoadingNotifications] = useState(true);
 
     // Load job posts on mount
     useEffect(() => {
         loadJobPosts();
+        loadUnreadNotifications();
     }, []);
 
     const loadJobPosts = async () => {
@@ -59,12 +72,23 @@ const Dashboard: React.FC = () => {
         }
     };
 
+    const loadUnreadNotifications = async () => {
+        try {
+            setIsLoadingNotifications(true);
+            const count = await notificationService.getUnreadCount();
+            setUnreadNotifications(count);
+        } catch (err) {
+            console.error("Error fetching unread notifications:", err);
+            setUnreadNotifications(0);
+        } finally {
+            setIsLoadingNotifications(false);
+        }
+    };
+
     // Calculate trends based on historical data
     const calculateTrends = () => {
         const now = new Date();
-        const thirtyDaysAgo = new Date(
-            now.getTime() - 30 * 24 * 60 * 60 * 1000
-        );
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
         // Current period (last 30 days)
@@ -79,18 +103,13 @@ const Dashboard: React.FC = () => {
         });
 
         // Active jobs trend
-        const currentActiveJobs = allJobPosts.filter(
-            (job) => job.status === "PUBLISHED"
-        ).length;
+        const currentActiveJobs = allJobPosts.filter((job) => job.status === "PUBLISHED").length;
         const previousActiveJobs = allJobPosts.filter(
-            (job) =>
-                job.status === "PUBLISHED" &&
-                new Date(job.createdAt) < thirtyDaysAgo
+            (job) => job.status === "PUBLISHED" && new Date(job.createdAt) < thirtyDaysAgo
         ).length;
 
         const activeJobsDiff = currentActiveJobs - previousActiveJobs;
-        const activeJobsTrend =
-            activeJobsDiff > 0 ? "up" : activeJobsDiff < 0 ? "down" : "neutral";
+        const activeJobsTrend = activeJobsDiff > 0 ? "up" : activeJobsDiff < 0 ? "down" : "neutral";
 
         // Applications trend (sum of all applications)
         const currentApplications = currentPeriodJobs.reduce(
@@ -108,11 +127,7 @@ const Dashboard: React.FC = () => {
                 ? Math.round((applicationsDiff / previousApplications) * 100)
                 : 0;
         const applicationsTrend =
-            applicationsDiff > 0
-                ? "up"
-                : applicationsDiff < 0
-                  ? "down"
-                  : "neutral";
+            applicationsDiff > 0 ? "up" : applicationsDiff < 0 ? "down" : "neutral";
 
         return {
             activeJobs: {
@@ -130,14 +145,17 @@ const Dashboard: React.FC = () => {
 
     // Calculate KPIs from real data
     const kpis = {
-        activeJobs: allJobPosts.filter((jp) => jp.status === "PUBLISHED")
-            .length,
-        totalApplications: allJobPosts.reduce(
-            (sum, jp) => sum + (jp.applicationsCount || 0),
-            0
-        ),
-        newApplications: 0, // TODO: Calculate from recent applications
-        unreadNotifications: 3, // TODO: Fetch from notifications API
+        activeJobs: allJobPosts.filter((jp) => jp.status === "PUBLISHED").length,
+        totalApplications: allJobPosts.reduce((sum, jp) => sum + (jp.applicationsCount || 0), 0),
+        // Calculate new applications from the last 24 hours
+        newApplications: allJobPosts
+            .filter((jp) => {
+                const createdDate = new Date(jp.createdAt);
+                const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                return createdDate >= twentyFourHoursAgo;
+            })
+            .reduce((sum, jp) => sum + (jp.applicationsCount || 0), 0),
+        unreadNotifications: unreadNotifications,
     };
 
     const applications: ApplicationSummary[] = [
@@ -171,45 +189,13 @@ const Dashboard: React.FC = () => {
         },
     ];
 
-    const notifications: Notification[] = [
-        {
-            id: "n1",
-            title: "New Premium Applicant",
-            message:
-                "A highly qualified candidate applied for Senior Frontend Engineer.",
-            type: "SUCCESS",
-            isRead: false,
-            createdAt: "2024-12-17T10:00:00Z",
-        },
-        {
-            id: "n2",
-            title: "Subscription Expiring",
-            message: "Your premium subscription expires in 5 days.",
-            type: "WARNING",
-            isRead: false,
-            createdAt: "2024-12-16T09:00:00Z",
-        },
-        {
-            id: "n3",
-            title: "Job Post Expired",
-            message: "Your job post 'Marketing Manager' has expired.",
-            type: "INFO",
-            isRead: true,
-            createdAt: "2024-12-15T09:00:00Z",
-        },
-    ];
-
     return (
         <DashboardLayout>
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">
-                        Dashboard
-                    </h1>
-                    <p className="text-gray-500">
-                        Overview of your hiring pipeline
-                    </p>
+                    <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+                    <p className="text-gray-500">Overview of your hiring pipeline</p>
                 </div>
                 <Button
                     onClick={() => navigate(ROUTES.JOB_POST_CREATE)}
@@ -220,11 +206,16 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Premium Banner */}
-            <PremiumBanner
-                status={premiumStatus}
-                daysRemaining={5}
-                onUpgrade={() => console.log("Upgrade")}
-            />
+            {!isLoadingSubscription && (
+                <PremiumBanner
+                    status={premiumStatus}
+                    daysRemaining={daysRemaining}
+                    onUpgrade={() => navigate(`${ROUTES.SUBSCRIPTION}/upgrade`)}
+                />
+            )}
+
+            {/* Premium Upgrade CTA - Show for non-premium users */}
+            {premiumStatus === "FREE" && <DashboardUpgradeCTA variant="full" />}
 
             {/* KPI Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -250,7 +241,6 @@ const Dashboard: React.FC = () => {
                     title="New Applications"
                     value={kpis.newApplications}
                     subValue="last 24h"
-                    active={true} // Highlight this as it's actionable
                     onClick={() => console.log("View New")}
                     isLoading={isLoadingJobs}
                 />
@@ -258,6 +248,7 @@ const Dashboard: React.FC = () => {
                     title="Unread Notifications"
                     value={kpis.unreadNotifications}
                     onClick={() => console.log("View Notifications")}
+                    isLoading={isLoadingNotifications}
                 />
             </div>
 
@@ -277,11 +268,7 @@ const Dashboard: React.FC = () => {
                                 View All Jobs
                             </button>
                         </div>
-                        {error && (
-                            <div className="text-red-600 text-sm mb-4">
-                                {error}
-                            </div>
-                        )}
+                        {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
                         <JobPostsTable
                             data={jobPosts}
                             onView={(id) => navigate(`/job-posts/${id}`)}
@@ -294,16 +281,13 @@ const Dashboard: React.FC = () => {
 
                 {/* Right Column: Applications & Notifications (1/3 width) */}
                 <div className="space-y-6">
+                    {/* Premium Features Ad - Only for non-premium users */}
+                    {premiumStatus === "FREE" && <PremiumFeaturesAd />}
+
                     <RecentApplications
                         applications={applications}
                         onViewCV={(id) => console.log("View CV", id)}
                         onArchive={(id) => console.log("Archive App", id)}
-                    />
-
-                    <NotificationsCard
-                        notifications={notifications}
-                        onMarkAsRead={(id) => console.log("Read", id)}
-                        onViewAll={() => console.log("All Notifications")}
                     />
                 </div>
             </div>

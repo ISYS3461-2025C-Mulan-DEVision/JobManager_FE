@@ -1,7 +1,12 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import { Textarea } from "@/components/ui";
 import { JobPostFormData, JobPostFormErrors } from "../types";
+import { useDescriptionStep } from "../hooks";
 import clsx from "clsx";
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface Step3DescriptionProps {
     formData: JobPostFormData;
@@ -9,106 +14,74 @@ interface Step3DescriptionProps {
     onChange: (field: keyof JobPostFormData, value: any) => void;
 }
 
-// Common technical skills for autocomplete
-const COMMON_SKILLS = [
-    "JavaScript",
-    "TypeScript",
-    "React",
-    "Vue.js",
-    "Angular",
-    "Node.js",
-    "Python",
-    "Java",
-    "Spring Boot",
-    "C#",
-    ".NET",
-    "PHP",
-    "Ruby",
-    "Go",
-    "Rust",
-    "SQL",
-    "PostgreSQL",
-    "MySQL",
-    "MongoDB",
-    "Redis",
-    "Docker",
-    "Kubernetes",
-    "AWS",
-    "Azure",
-    "GCP",
-    "Git",
-    "CI/CD",
-    "Agile",
-    "Scrum",
-];
+// ============================================================================
+// Sub-Components (UI Layer)
+// ============================================================================
 
-export const Step3Description: React.FC<Step3DescriptionProps> = ({
-    formData,
-    errors,
-    onChange,
-}) => {
-    const [skillInput, setSkillInput] = useState("");
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const [filteredSkills, setFilteredSkills] = useState<string[]>([]);
-    const skillInputRef = useRef<HTMLInputElement>(null);
+interface SkillChipProps {
+    skill: string;
+    onRemove: () => void;
+}
 
-    const handleSkillInputChange = (value: string) => {
-        setSkillInput(value);
+const SkillChip: React.FC<SkillChipProps> = ({ skill, onRemove }) => (
+    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+        {skill}
+        <button type="button" onClick={onRemove} className="hover:text-blue-900 focus:outline-none">
+            ×
+        </button>
+    </span>
+);
 
-        if (value.trim().length > 0) {
-            const filtered = COMMON_SKILLS.filter(
-                (skill) =>
-                    skill.toLowerCase().includes(value.toLowerCase()) &&
-                    !formData.technicalSkills.includes(skill)
-            );
-            setFilteredSkills(filtered);
-            setShowSuggestions(filtered.length > 0);
-        } else {
-            setShowSuggestions(false);
-        }
-    };
+interface SuggestionListProps {
+    suggestions: string[];
+    onSelect: (skill: string) => void;
+}
 
-    const addSkill = (skill: string) => {
-        const trimmedSkill = skill.trim();
-        if (trimmedSkill && !formData.technicalSkills.includes(trimmedSkill)) {
-            onChange("technicalSkills", [
-                ...formData.technicalSkills,
-                trimmedSkill,
-            ]);
-            setSkillInput("");
-            setShowSuggestions(false);
-            skillInputRef.current?.focus();
-        }
-    };
+const SuggestionList: React.FC<SuggestionListProps> = ({ suggestions, onSelect }) => (
+    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+        {suggestions.map((skill) => (
+            <button
+                key={skill}
+                type="button"
+                onClick={() => onSelect(skill)}
+                className="w-full text-left px-4 py-2 hover:bg-blue-50 text-sm transition-colors"
+            >
+                {skill}
+            </button>
+        ))}
+    </div>
+);
 
-    const removeSkill = (skillToRemove: string) => {
-        onChange(
-            "technicalSkills",
-            formData.technicalSkills.filter((skill) => skill !== skillToRemove)
-        );
-    };
+interface PopularSkillsProps {
+    skills: string[];
+    onSelect: (skill: string) => void;
+}
 
-    const handleSkillInputKeyDown = (
-        e: React.KeyboardEvent<HTMLInputElement>
-    ) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            addSkill(skillInput);
-        } else if (
-            e.key === "Backspace" &&
-            skillInput === "" &&
-            formData.technicalSkills.length > 0
-        ) {
-            // Remove last skill if input is empty
-            const newSkills = [...formData.technicalSkills];
-            newSkills.pop();
-            onChange("technicalSkills", newSkills);
-        }
-    };
+const PopularSkills: React.FC<PopularSkillsProps> = ({ skills, onSelect }) => (
+    <div className="mt-3">
+        <p className="text-xs text-gray-600 mb-2">Popular skills:</p>
+        <div className="flex flex-wrap gap-2">
+            {skills.map((skill) => (
+                <button
+                    key={skill}
+                    type="button"
+                    onClick={() => onSelect(skill)}
+                    className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                >
+                    + {skill}
+                </button>
+            ))}
+        </div>
+    </div>
+);
 
-    const characterCount = formData.description.length;
-    const maxCharacters = 10000;
-    const isNearLimit = characterCount > maxCharacters * 0.9;
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export const Step3Description: React.FC<Step3DescriptionProps> = (props) => {
+    // Use headless hook for all logic
+    const { description, skills } = useDescriptionStep(props);
 
     return (
         <div className="space-y-6">
@@ -117,9 +90,9 @@ export const Step3Description: React.FC<Step3DescriptionProps> = ({
                 <Textarea
                     label="Job Description *"
                     placeholder="Describe the role, responsibilities, requirements, and what makes this position exciting..."
-                    value={formData.description}
-                    onChange={(e) => onChange("description", e.target.value)}
-                    error={errors.description}
+                    value={description.value}
+                    onChange={(e) => description.onChange(e.target.value)}
+                    error={description.error}
                     rows={10}
                     fullWidth
                 />
@@ -130,11 +103,11 @@ export const Step3Description: React.FC<Step3DescriptionProps> = ({
                     <span
                         className={clsx(
                             "text-xs",
-                            isNearLimit ? "text-red-600" : "text-gray-500"
+                            description.isNearLimit ? "text-red-600" : "text-gray-500"
                         )}
                     >
-                        {characterCount.toLocaleString()} /{" "}
-                        {maxCharacters.toLocaleString()}
+                        {description.characterCount.toLocaleString()} /{" "}
+                        {description.maxCharacters.toLocaleString()}
                     </span>
                 </div>
 
@@ -144,15 +117,9 @@ export const Step3Description: React.FC<Step3DescriptionProps> = ({
                         💡 Tips for a great job description:
                     </p>
                     <ul className="text-xs text-blue-700 space-y-1 ml-4 list-disc">
-                        <li>
-                            Start with an engaging overview of the role and your
-                            company
-                        </li>
+                        <li>Start with an engaging overview of the role and your company</li>
                         <li>List key responsibilities clearly</li>
-                        <li>
-                            Specify required and preferred qualifications
-                            separately
-                        </li>
+                        <li>Specify required and preferred qualifications separately</li>
                         <li>Highlight what makes your company unique</li>
                         <li>Mention benefits and growth opportunities</li>
                     </ul>
@@ -169,44 +136,25 @@ export const Step3Description: React.FC<Step3DescriptionProps> = ({
                 <div className="relative">
                     <div className="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 transition-colors min-h-[48px]">
                         {/* Skill Chips */}
-                        {formData.technicalSkills.map((skill) => (
-                            <span
+                        {skills.items.map((skill) => (
+                            <SkillChip
                                 key={skill}
-                                className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
-                            >
-                                {skill}
-                                <button
-                                    type="button"
-                                    onClick={() => removeSkill(skill)}
-                                    className="hover:text-blue-900 focus:outline-none"
-                                >
-                                    ×
-                                </button>
-                            </span>
+                                skill={skill}
+                                onRemove={() => skills.remove(skill)}
+                            />
                         ))}
 
                         {/* Input */}
                         <input
-                            ref={skillInputRef}
+                            ref={skills.inputRef}
                             type="text"
-                            value={skillInput}
-                            onChange={(e) =>
-                                handleSkillInputChange(e.target.value)
-                            }
-                            onKeyDown={handleSkillInputKeyDown}
-                            onBlur={() =>
-                                setTimeout(() => setShowSuggestions(false), 200)
-                            }
-                            onFocus={() => {
-                                if (
-                                    skillInput.trim().length > 0 &&
-                                    filteredSkills.length > 0
-                                ) {
-                                    setShowSuggestions(true);
-                                }
-                            }}
+                            value={skills.inputValue}
+                            onChange={(e) => skills.handleInputChange(e.target.value)}
+                            onKeyDown={skills.handleKeyDown}
+                            onBlur={skills.handleInputBlur}
+                            onFocus={skills.handleInputFocus}
                             placeholder={
-                                formData.technicalSkills.length === 0
+                                skills.items.length === 0
                                     ? "Type a skill and press Enter..."
                                     : "Add more..."
                             }
@@ -215,52 +163,24 @@ export const Step3Description: React.FC<Step3DescriptionProps> = ({
                     </div>
 
                     {/* Autocomplete Suggestions */}
-                    {showSuggestions && filteredSkills.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                            {filteredSkills.map((skill) => (
-                                <button
-                                    key={skill}
-                                    type="button"
-                                    onClick={() => addSkill(skill)}
-                                    className="w-full text-left px-4 py-2 hover:bg-blue-50 text-sm transition-colors"
-                                >
-                                    {skill}
-                                </button>
-                            ))}
-                        </div>
+                    {skills.suggestions.isVisible && (
+                        <SuggestionList
+                            suggestions={skills.suggestions.items}
+                            onSelect={skills.add}
+                        />
                     )}
                 </div>
 
-                {errors.technicalSkills && (
-                    <p className="mt-2 text-sm text-red-600">
-                        {errors.technicalSkills}
-                    </p>
-                )}
+                {skills.error && <p className="mt-2 text-sm text-red-600">{skills.error}</p>}
 
                 <p className="mt-2 text-xs text-gray-500">
-                    Press Enter to add a skill, or select from suggestions.
-                    Free-text skills are allowed.
+                    Press Enter to add a skill, or select from suggestions. Free-text skills are
+                    allowed.
                 </p>
 
                 {/* Quick Add Popular Skills */}
-                {formData.technicalSkills.length === 0 && (
-                    <div className="mt-3">
-                        <p className="text-xs text-gray-600 mb-2">
-                            Popular skills:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                            {COMMON_SKILLS.slice(0, 8).map((skill) => (
-                                <button
-                                    key={skill}
-                                    type="button"
-                                    onClick={() => addSkill(skill)}
-                                    className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
-                                >
-                                    + {skill}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                {skills.items.length === 0 && (
+                    <PopularSkills skills={skills.popularSkills} onSelect={skills.add} />
                 )}
             </div>
         </div>

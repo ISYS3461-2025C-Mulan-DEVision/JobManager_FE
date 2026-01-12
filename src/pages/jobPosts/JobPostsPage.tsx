@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { JobPost, JobStatus, EmploymentType } from "@/types";
-import {
-    JOB_STATUS,
-    EMPLOYMENT_TYPES,
-    EMPLOYMENT_TYPE_LABELS,
-    ROUTES,
-} from "@/utils/constants";
+import { JOB_STATUS, EMPLOYMENT_TYPES, EMPLOYMENT_TYPE_LABELS, ROUTES } from "@/utils/constants";
 import { fetchJobPosts, archiveJobPost } from "@/services/jobPostService";
-import { Button, Spinner } from "@/components/ui";
-import { HeadlessTabs, TabItem } from "@/components/headless";
+import { Button, Spinner, ConfirmDialog } from "@/components/ui";
+import { HeadlessTabs, TabItem, useConfirmDialog } from "@/components/headless";
 import { JobPostRow } from "@/components/feature/JobPosts";
 import clsx from "clsx";
 
@@ -19,31 +14,29 @@ const JobPostsPage: React.FC = () => {
     const [jobPosts, setJobPosts] = useState<JobPost[]>([]);
     const [filteredPosts, setFilteredPosts] = useState<JobPost[]>([]);
     const [activeTab, setActiveTab] = useState<JobStatus>(JOB_STATUS.PUBLISHED);
-    const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<
-        EmploymentType[]
-    >([]);
+    const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<EmploymentType[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [error, setError] = useState<string | null>(null);
+
+    // Headless confirm dialog for archive action
+    const archiveConfirmDialog = useConfirmDialog();
 
     // Tabs configuration
     const tabs: TabItem[] = [
         {
             id: JOB_STATUS.PUBLISHED,
             label: "Published",
-            count: jobPosts.filter((jp) => jp.status === JOB_STATUS.PUBLISHED)
-                .length,
+            count: jobPosts.filter((jp) => jp.status === JOB_STATUS.PUBLISHED).length,
         },
         {
             id: JOB_STATUS.DRAFT,
             label: "Draft",
-            count: jobPosts.filter((jp) => jp.status === JOB_STATUS.DRAFT)
-                .length,
+            count: jobPosts.filter((jp) => jp.status === JOB_STATUS.DRAFT).length,
         },
         {
             id: JOB_STATUS.PRIVATE,
             label: "🔒 Private",
-            count: jobPosts.filter((jp) => jp.status === JOB_STATUS.PRIVATE)
-                .length,
+            count: jobPosts.filter((jp) => jp.status === JOB_STATUS.PRIVATE).length,
         },
     ];
 
@@ -77,9 +70,7 @@ const JobPostsPage: React.FC = () => {
         // Filter by employment type
         if (selectedEmploymentTypes.length > 0) {
             filtered = filtered.filter((post) =>
-                post.employmentType
-                    ? selectedEmploymentTypes.includes(post.employmentType)
-                    : false
+                post.employmentType ? selectedEmploymentTypes.includes(post.employmentType) : false
             );
         }
 
@@ -109,27 +100,29 @@ const JobPostsPage: React.FC = () => {
         navigate(ROUTES.JOB_POST_EDIT.replace(":id", id));
     };
 
-    const handleArchiveJobPost = async (id: string) => {
-        if (
-            !window.confirm("Are you sure you want to archive this job post?")
-        ) {
-            return;
-        }
-
-        try {
-            await archiveJobPost(id);
-            await loadJobPosts();
-        } catch (err) {
-            alert("Failed to archive job post. Please try again.");
-            console.error("Error archiving job post:", err);
-        }
+    const handleArchiveJobPost = (id: string) => {
+        archiveConfirmDialog.open({
+            title: "Archive Job Post",
+            message:
+                "Are you sure you want to archive this job post? This will remove it from active listings but you can still view it in your archives.",
+            variant: "warning",
+            confirmText: "Archive",
+            cancelText: "Cancel",
+            onConfirm: async () => {
+                try {
+                    await archiveJobPost(id);
+                    await loadJobPosts();
+                } catch (err) {
+                    setError("Failed to archive job post. Please try again.");
+                    console.error("Error archiving job post:", err);
+                }
+            },
+        });
     };
 
     const toggleEmploymentTypeFilter = (type: EmploymentType) => {
         setSelectedEmploymentTypes((prev) =>
-            prev.includes(type)
-                ? prev.filter((t) => t !== type)
-                : [...prev, type]
+            prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
         );
     };
 
@@ -147,18 +140,12 @@ const JobPostsPage: React.FC = () => {
             <div className="bg-white border-b border-gray-200 px-6 py-4">
                 <div className="flex items-center justify-between max-w-7xl mx-auto">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            Job Posts
-                        </h1>
+                        <h1 className="text-2xl font-bold text-gray-900">Job Posts</h1>
                         <p className="text-sm text-gray-500 mt-1">
                             Manage and track your company's job postings
                         </p>
                     </div>
-                    <Button
-                        variant="primary"
-                        size="md"
-                        onClick={handleCreateJobPost}
-                    >
+                    <Button variant="primary" size="md" onClick={handleCreateJobPost}>
                         + Create Job Post
                     </Button>
                 </div>
@@ -184,26 +171,15 @@ const JobPostsPage: React.FC = () => {
                             Employment Type
                         </label>
                         <div className="flex flex-wrap gap-2">
-                            {(
-                                Object.values(
-                                    EMPLOYMENT_TYPES
-                                ) as EmploymentType[]
-                            )
-                                .filter(
-                                    (type) =>
-                                        type !== EMPLOYMENT_TYPES.FREELANCE
-                                )
+                            {(Object.values(EMPLOYMENT_TYPES) as EmploymentType[])
+                                .filter((type) => type !== EMPLOYMENT_TYPES.FREELANCE)
                                 .map((type) => (
                                     <button
                                         key={type}
-                                        onClick={() =>
-                                            toggleEmploymentTypeFilter(type)
-                                        }
+                                        onClick={() => toggleEmploymentTypeFilter(type)}
                                         className={clsx(
                                             "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                                            selectedEmploymentTypes.includes(
-                                                type
-                                            )
+                                            selectedEmploymentTypes.includes(type)
                                                 ? "bg-blue-100 text-blue-700 border-2 border-blue-400"
                                                 : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
                                         )}
@@ -222,10 +198,7 @@ const JobPostsPage: React.FC = () => {
                     >
                         {(currentTab, setTab, tabItems) => (
                             <div className="border-b border-gray-200">
-                                <nav
-                                    className="flex space-x-8"
-                                    aria-label="Tabs"
-                                >
+                                <nav className="flex space-x-8" aria-label="Tabs">
                                     {tabItems.map((tab) => (
                                         <button
                                             key={tab.id}
@@ -270,8 +243,7 @@ const JobPostsPage: React.FC = () => {
                     {filteredPosts.length === 0 ? (
                         <div className="text-center py-12">
                             <p className="text-gray-500 text-lg">
-                                {searchQuery ||
-                                selectedEmploymentTypes.length > 0
+                                {searchQuery || selectedEmploymentTypes.length > 0
                                     ? "No job posts match your filters"
                                     : "No job posts found"}
                             </p>
@@ -333,11 +305,13 @@ const JobPostsPage: React.FC = () => {
                 {/* Results Summary */}
                 {filteredPosts.length > 0 && (
                     <div className="mt-4 text-sm text-gray-600">
-                        Showing {filteredPosts.length} of {jobPosts.length} job
-                        posts
+                        Showing {filteredPosts.length} of {jobPosts.length} job posts
                     </div>
                 )}
             </div>
+
+            {/* Headless Confirm Dialog for Archive */}
+            <ConfirmDialog dialog={archiveConfirmDialog} />
         </div>
     );
 };

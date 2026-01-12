@@ -2,6 +2,28 @@ import { JobPostFormData, JobPostFormErrors } from "./types";
 import { EMPLOYMENT_TYPES, SALARY_TYPES } from "@/utils/constants";
 
 /**
+ * Maximum salary value allowed (numeric field with precision 19, scale 2)
+ * Database constraint: absolute value must be less than 10^17
+ * Using a practical limit of 1 billion (1,000,000,000) for realistic salaries
+ * while staying well within the database constraint
+ */
+const MAX_SALARY_VALUE = 1000000000;
+const MAX_SALARY_DISPLAY = "1,000,000,000";
+
+/**
+ * Validate salary value doesn't exceed the maximum allowed limit
+ */
+const validateSalaryOverflow = (value: string): string | null => {
+    if (!value) return null;
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) return null;
+    if (numValue > MAX_SALARY_VALUE) {
+        return `Salary cannot exceed ${MAX_SALARY_DISPLAY}`;
+    }
+    return null;
+};
+
+/**
  * Validate Step 1: Basics
  */
 export const validateBasics = (data: JobPostFormData): JobPostFormErrors => {
@@ -55,9 +77,19 @@ export const validateCompensation = (
     if (data.salaryType === SALARY_TYPES.RANGE) {
         if (!data.salaryMin || parseFloat(data.salaryMin) <= 0) {
             errors.salaryMin = "Minimum salary is required for range type";
+        } else {
+            const overflowError = validateSalaryOverflow(data.salaryMin);
+            if (overflowError) {
+                errors.salaryMin = overflowError;
+            }
         }
         if (!data.salaryMax || parseFloat(data.salaryMax) <= 0) {
             errors.salaryMax = "Maximum salary is required for range type";
+        } else {
+            const overflowError = validateSalaryOverflow(data.salaryMax);
+            if (overflowError) {
+                errors.salaryMax = overflowError;
+            }
         }
         if (
             data.salaryMin &&
@@ -72,10 +104,20 @@ export const validateCompensation = (
     ) {
         if (!data.salaryMin || parseFloat(data.salaryMin) <= 0) {
             errors.salaryMin = "Salary amount is required";
+        } else {
+            const overflowError = validateSalaryOverflow(data.salaryMin);
+            if (overflowError) {
+                errors.salaryMin = overflowError;
+            }
         }
     } else if (data.salaryType === SALARY_TYPES.UP_TO) {
         if (!data.salaryMax || parseFloat(data.salaryMax) <= 0) {
             errors.salaryMax = "Maximum salary is required";
+        } else {
+            const overflowError = validateSalaryOverflow(data.salaryMax);
+            if (overflowError) {
+                errors.salaryMax = overflowError;
+            }
         }
     }
 

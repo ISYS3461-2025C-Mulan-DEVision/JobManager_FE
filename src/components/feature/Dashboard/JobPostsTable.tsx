@@ -1,7 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 import { HeadlessTable } from "../../headless/Table/Table";
 import { TableColumn } from "../../headless/Table/useTable";
+import { Button } from "../../ui/Button/Button";
 import { Card } from "../../ui/Card/Card";
 import { Skeleton } from "../../ui/Skeleton/Skeleton";
 import { Tooltip } from "../../ui/Tooltip/Tooltip";
@@ -185,9 +187,12 @@ export const JobPostsTable: React.FC<JobPostsTableProps> = ({
         return (
             <Card className="text-center py-12">
                 <p className="text-gray-500 mb-4">No job posts found.</p>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                <Button
+                    onClick={() => navigate(ROUTES.JOB_POST_CREATE)}
+                    leftIcon={<Plus className="w-4 h-4" />}
+                >
                     Create your first job post
-                </button>
+                </Button>
             </Card>
         );
     }
