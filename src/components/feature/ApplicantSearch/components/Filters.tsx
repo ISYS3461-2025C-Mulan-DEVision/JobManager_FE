@@ -248,10 +248,10 @@ export const Filters: React.FC<FiltersProps> = ({
               checked={searchState.employmentTypes.includes(
                 value as EmploymentType,
               )}
-              onChange={(e) =>
+              onChange={(checked) =>
                 handleEmploymentTypeChange(
                   value as EmploymentType,
-                  e.target.checked,
+                  checked,
                 )
               }
               disabled={disabled}
