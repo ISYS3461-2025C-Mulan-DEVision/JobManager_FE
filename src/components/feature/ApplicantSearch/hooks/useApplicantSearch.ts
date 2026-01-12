@@ -5,24 +5,7 @@ import type {
     SearchState,
     Applicant,
 } from "../types";
-
-// Default search state - aligned with new JA API params
-const defaultSearchState: SearchState = {
-    username: "",
-    ftsQuery: undefined,
-    countryCode: undefined,
-    city: undefined,
-    employmentTypes: [],
-    education: undefined,
-    workExperience: undefined,
-    // TODO: Salary filtering - uncomment when JA adds salary support
-    // minSalary: undefined,
-    // maxSalary: undefined,
-    skillIds: [],
-    sortBy: "newest",
-    page: 0,
-    pageSize: 10,
-};
+import { DEFAULT_SEARCH_STATE } from "../types";
 
 interface UseApplicantSearchReturn {
     // State
@@ -46,7 +29,7 @@ const USE_MOCK_DATA = false;
 
 export const useApplicantSearch = (): UseApplicantSearchReturn => {
     // Search state
-    const [searchState, setSearchStateInternal] = useState<SearchState>(defaultSearchState);
+    const [searchState, setSearchStateInternal] = useState<SearchState>(DEFAULT_SEARCH_STATE);
 
     // Results state
     const [applicants, setApplicants] = useState<Applicant[]>([]);
@@ -72,7 +55,7 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
 
     // Reset search state
     const resetSearchState = useCallback(() => {
-        setSearchStateInternal(defaultSearchState);
+        setSearchStateInternal(DEFAULT_SEARCH_STATE);
     }, []);
 
     // Go to specific page
