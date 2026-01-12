@@ -96,4 +96,10 @@ export const API_ENDPOINTS = {
         GET_BY_COMPANY: (companyId: string) => `/internal/subscriptions/company/${companyId}`,
         RENEW: (companyId: string) => `/subscriptions/company/${companyId}/renew`,
     },
+
+    // Payment
+    PAYMENT: {
+        HISTORY_BY_PAYER: (payerId: string, payerType: string) =>
+            `/payment/payer/${payerId}/type/${payerType}`,
+    },
 } as const;
