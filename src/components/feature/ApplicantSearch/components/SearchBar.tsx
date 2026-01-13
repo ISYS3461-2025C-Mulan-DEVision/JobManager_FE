@@ -50,7 +50,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <Input
             type="text"
             value={searchTerm}
-            onChange={(e) => onSearchTermChange(e.target.value)}
+            onChange={onSearchTermChange}
             onKeyDown={handleKeyDown}
             placeholder="Search by name..."
             disabled={disabled}

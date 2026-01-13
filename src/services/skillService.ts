@@ -1,6 +1,10 @@
 import axios from "axios";
 import { JA_USER_SERVICE_URL, JA_AUTH_TOKEN, SKILLS_ENDPOINT } from "@/utils/constants";
 import { Skill } from "@/types/skill";
+import { MOCK_SKILLS } from "@/components/feature/ApplicantSearch/data/mockSkills";
+
+// Toggle this to use mock skills when JA service is down
+const USE_MOCK_SKILLS = false;
 
 /**
  * Response format from JA Skills API
@@ -15,6 +19,8 @@ interface SkillsApiResponse {
 /**
  * Skills Service - Direct communication with JA User Service
  * Fetches all skills once, client-side filtering
+ * 
+ * Set USE_MOCK_SKILLS = true when JA service is unavailable
  */
 class SkillService {
     private skillsCache: Skill[] | null = null;
@@ -35,6 +41,12 @@ class SkillService {
      * Get all available skills (with caching)
      */
     async getAllSkills(): Promise<Skill[]> {
+        // Use mock data when JA service is unavailable
+        if (USE_MOCK_SKILLS) {
+            console.log('Using mock skills data:', MOCK_SKILLS.length);
+            return MOCK_SKILLS;
+        }
+
         const now = Date.now();
         
         // Return cached data if still valid

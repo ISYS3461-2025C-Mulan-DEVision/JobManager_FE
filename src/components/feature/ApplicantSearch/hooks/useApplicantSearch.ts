@@ -177,10 +177,10 @@ export const useApplicantSearch = (): UseApplicantSearchReturn => {
 
             // Filter by skills (OR semantics - match if any skill matches)
             if (searchState.skillIds.length > 0) {
-                const skillNames = searchState.skillIds.map((s) => s.toLowerCase());
-                filteredApplicants = filteredApplicants.filter((a) =>
-                    a.skills.some((skill) =>
-                        skillNames.includes(skill.name.toLowerCase())
+                // Filter by skill ID (searchState.skillIds contains UUIDs)
+                filteredApplicants = filteredApplicants.filter((applicant) =>
+                    applicant.skills.some((skill) =>
+                        searchState.skillIds.includes(skill.id)
                     )
                 );
             }

@@ -11,6 +11,7 @@ import type {
     SearchState,
     Country,
 } from "../types";
+import { skillService } from "@/services/skillService";
 
 // Helper Functions
 const getCompanyId = (): string => {
@@ -53,9 +54,18 @@ export const searchApplicants = async (
         });
     }
     if (searchState.skillIds.length > 0) {
-        searchState.skillIds.forEach((id) => {
-            params.append("skills", id);
-        });
+        try {
+            // Resolve IDs to Names for JA API (which expects names)
+            const allSkills = await skillService.getAllSkills();
+            searchState.skillIds.forEach((id) => {
+                const skill = allSkills.find((s) => s.id === id);
+                if (skill) {
+                    params.append("skills", skill.name);
+                }
+            });
+        } catch (error) {
+            console.error("Failed to resolve skill IDs for search", error);
+        }
     }
     // TODO: Salary filtering - uncomment when JA adds salary support
     // if (searchState.minSalary !== undefined) {

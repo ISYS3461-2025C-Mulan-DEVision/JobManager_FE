@@ -6,6 +6,7 @@ import {
   TagInput,
   RadioGroup,
   Toggle,
+  Input,
 } from "@/components/ui";
 import type { RadioOption } from "@/components/ui";
 import type { Tag } from "@/components/ui/TagInput";
@@ -22,6 +23,8 @@ import type {
   EmploymentType,
 } from "../types";
 import ApplicantSearchService from "../api/ApplicantSearchService";
+
+import { skillService } from "@/services/skillService";
 
 interface FiltersProps {
   searchState: SearchState;
@@ -51,6 +54,7 @@ export const Filters: React.FC<FiltersProps> = ({
   const [isLoadingCountries, setIsLoadingCountries] = useState(true);
   const [skills, setSkills] = useState<Tag[]>([]);
   const [isLoadingSkills, setIsLoadingSkills] = useState(true);
+  const [cityInput, setCityInput] = useState(searchState.city || "");
 
   // Load countries on mount
   useEffect(() => {
@@ -73,15 +77,13 @@ export const Filters: React.FC<FiltersProps> = ({
   useEffect(() => {
     const loadSkills = async () => {
       try {
-        const response = await ApplicantSearchService.getSkills();
-        if (response.success && response.data) {
-          // Map API response to Tag format expected by TagInput
-          const mappedSkills: Tag[] = response.data.map((skill) => ({
-            id: skill.id,
-            name: skill.name,
-          }));
-          setSkills(mappedSkills);
-        }
+        const fetchedSkills = await skillService.getAllSkills();
+        // Map API response to Tag format expected by TagInput
+        const mappedSkills: Tag[] = fetchedSkills.map((skill) => ({
+          id: skill.id,
+          name: skill.name,
+        }));
+        setSkills(mappedSkills);
       } catch (err) {
         console.error("Failed to load skills:", err);
       } finally {
@@ -96,9 +98,14 @@ export const Filters: React.FC<FiltersProps> = ({
     onFilterChange({ countryCode: value || undefined });
   };
 
-  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    onFilterChange({ city: value || undefined });
+  const handleCityChange = (value: string) => {
+    setCityInput(value);
+  };
+
+  const handleCityKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      onFilterChange({ city: cityInput || undefined });
+    }
   };
 
   const handleWorkExperienceChange = (
@@ -138,21 +145,17 @@ export const Filters: React.FC<FiltersProps> = ({
   };
 
   const handleSkillAdd = (skillId: string) => {
-    // Find the skill name from the ID to pass to the API
-    const skill = skills.find((s) => s.id === skillId);
-    if (skill) {
-      onFilterChange({ skillIds: [...searchState.skillIds, skill.name] });
+    // Add skill ID directly
+    if (!searchState.skillIds.includes(skillId)) {
+      onFilterChange({ skillIds: [...searchState.skillIds, skillId] });
     }
   };
 
   const handleSkillRemove = (skillId: string) => {
-    // Remove by name since we store names
-    const skill = skills.find((s) => s.id === skillId);
-    if (skill) {
-      onFilterChange({
-        skillIds: searchState.skillIds.filter((name) => name !== skill.name),
-      });
-    }
+    // Remove by ID
+    onFilterChange({
+      skillIds: searchState.skillIds.filter((id) => id !== skillId),
+    });
   };
 
   const handleProfileStatusToggle = (checked: boolean) => {
@@ -207,14 +210,17 @@ export const Filters: React.FC<FiltersProps> = ({
           disabled={disabled || isLoadingCountries}
           fullWidth
         />
-        <input
-          type="text"
-          placeholder="Enter city name..."
-          value={searchState.city || ""}
-          onChange={handleCityChange}
-          disabled={disabled}
-          className="mt-2 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-        />
+        <div className="mt-2">
+          <Input
+            type="text"
+            placeholder="Enter city name and press Enter..."
+            value={cityInput}
+            onChange={handleCityChange}
+            onKeyDown={handleCityKeyDown}
+            disabled={disabled}
+            fullWidth
+          />
+        </div>
       </div>
 
       {/* Work Experience / Job Title */}
@@ -249,10 +255,7 @@ export const Filters: React.FC<FiltersProps> = ({
                 value as EmploymentType,
               )}
               onChange={(checked) =>
-                handleEmploymentTypeChange(
-                  value as EmploymentType,
-                  checked,
-                )
+                handleEmploymentTypeChange(value as EmploymentType, checked)
               }
               disabled={disabled}
             />
