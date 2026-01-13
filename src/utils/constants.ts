@@ -3,6 +3,15 @@
 // API Configuration
 // All requests should go through the gateway (port 8080), not individual services
 export const API_BASE_URL = `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api`;
+
+export const JA_USER_SERVICE_URL = import.meta.env.VITE_JA_USER_SERVICE_URL;
+export const JA_AUTH_TOKEN = import.meta.env.VITE_JA_AUTH_TOKEN;
+
+export const NGROK_HEADERS = {
+  "ngrok-skip-browser-warning": "true",
+  "User-Agent": "DEVisionJobManager/1.0"
+};
+
 export const API_TIMEOUT = 30000; // 30 seconds
 
 // Authentication
@@ -122,6 +131,8 @@ export const APPLICANT_SORT_LABELS: Record<string, string> = {
     // salaryDesc: "Salary descending",
     isFresher: "Is fresher",
 };
+
+export const SKILLS_ENDPOINT = "/api/v1/skills";
 
 // Salary Types (matching backend SalaryType enum)
 export const SALARY_TYPES = {

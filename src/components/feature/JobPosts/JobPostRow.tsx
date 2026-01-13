@@ -5,6 +5,7 @@ import { SYNC_STATUS, ROUTES, JOB_STATUS } from "@/utils/constants";
 import { formatExpiryDate, isExpiringSoon } from "@/utils/jobPostHelpers";
 import { JobStatusBadge, EmploymentTypeChip, SalaryBadge, KafkaSyncIndicator } from "./index";
 import { Button } from "@/components/ui";
+import { SkillsList } from "@/components/common/SkillsList";
 import { Archive } from "lucide-react";
 import clsx from "clsx";
 
@@ -55,6 +56,18 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
                         {jobPost.locationCity}
                         {jobPost.isFresher && " • Fresher friendly"}
                     </span>
+
+                    {/* Skills - Under Job Title */}
+                    {jobPost.skillIds && jobPost.skillIds.length > 0 && (
+                        <div className="mt-1">
+                            <SkillsList
+                                skillIds={jobPost.skillIds}
+                                maxDisplay={4}
+                                size="sm"
+                                showCount={true}
+                            />
+                        </div>
+                    )}
                 </div>
             </td>
 
@@ -76,6 +89,16 @@ export const JobPostRow: React.FC<JobPostRowProps> = ({
                     note={jobPost.salaryNote}
                 />
             </td>
+
+            {/* ⚠️ REMOVE THIS IF IT EXISTS - No separate Skills column */}
+            {/* <td className="px-6 py-4">
+                <SkillsList
+                    skillIds={jobPost.skillIds}
+                    maxDisplay={3}
+                    size="sm"
+                    showCount={true}
+                />
+            </td> */}
 
             {/* Applications Count */}
             <td className="px-6 py-4">
