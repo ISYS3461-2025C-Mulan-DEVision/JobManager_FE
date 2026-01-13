@@ -38,23 +38,25 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         }
     };
 
-    return (
-        <div className="flex flex-col gap-3 sm:gap-4">
-            {/* Search Inputs Row */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 items-stretch sm:items-center">
-                {/* Name Search Input */}
-                <div className="relative flex-1 w-full sm:max-w-xs">
-                    <Input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => onSearchTermChange(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Search by name..."
-                        disabled={disabled}
-                        fullWidth
-                        endAdornment={<Search className="w-4 h-4 text-gray-400" />}
-                    />
-                </div>
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Search Inputs Row */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        {/* Name Search Input */}
+        <div className="relative flex-1 w-full sm:max-w-xs">
+          <Input
+            type="text"
+            value={searchTerm}
+            onChange={onSearchTermChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Search by name..."
+            disabled={disabled}
+            fullWidth
+            endAdornment={
+              <Search className="w-4 h-4 text-gray-400" />
+            }
+          />
+        </div>
 
                 {/* Full-Text Search Input */}
                 <div className="relative flex-1 w-full">

@@ -120,7 +120,6 @@ export const APPLICANT_SORT_OPTIONS = {
     // TODO: Salary sorting - uncomment when JA adds salary support
     // SALARY_ASCENDING: "salaryAsc",
     // SALARY_DESCENDING: "salaryDesc",
-    IS_FRESHER: "isFresher",
 } as const;
 
 export const APPLICANT_SORT_LABELS: Record<string, string> = {
@@ -129,7 +128,6 @@ export const APPLICANT_SORT_LABELS: Record<string, string> = {
     // TODO: Salary sorting - uncomment when JA adds salary support
     // salaryAsc: "Salary ascending",
     // salaryDesc: "Salary descending",
-    isFresher: "Is fresher",
 };
 
 export const SKILLS_ENDPOINT = "/api/v1/skills";
