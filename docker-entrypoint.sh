@@ -11,7 +11,7 @@ echo "📋 Environment: ${VITE_ENV:-production}"
 
 # Configure backend URL for nginx proxy
 # Default to local Docker host if not specified
-BACKEND_URL="${BACKEND_URL:-http://172.17.0.1:8080/api/}"
+BACKEND_URL="${BACKEND_URL:-http://172.17.0.1:8080}"
 echo "🔧 Backend URL: $BACKEND_URL"
 
 # Process nginx config template if it exists
