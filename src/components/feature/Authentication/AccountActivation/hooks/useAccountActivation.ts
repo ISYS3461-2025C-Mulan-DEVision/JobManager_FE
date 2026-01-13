@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { ActivationState } from "../types.ts";
+import { API_BASE_URL } from "@/utils/constants";
 
 export const useAccountActivation = () => {
     const [searchParams] = useSearchParams();
@@ -34,7 +35,7 @@ export const useAccountActivation = () => {
 
             try {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api/auth/activate`,
+                    `${API_BASE_URL}/auth/activate`,
                     {
                         token: token,
                     }

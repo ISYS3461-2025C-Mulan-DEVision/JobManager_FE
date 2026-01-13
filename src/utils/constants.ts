@@ -2,7 +2,9 @@
 
 // API Configuration
 // All requests should go through the gateway (port 8080), not individual services
-export const API_BASE_URL = `${import.meta.env.VITE_GATEWAY_API_URL || "http://localhost:8080"}/api`;
+// In production with HTTPS, VITE_GATEWAY_API_URL should be empty so requests go through nginx proxy
+const gatewayUrl = import.meta.env.VITE_GATEWAY_API_URL;
+export const API_BASE_URL = gatewayUrl ? `${gatewayUrl}/api` : "/api";
 
 export const JA_USER_SERVICE_URL = import.meta.env.VITE_JA_USER_SERVICE_URL;
 export const JA_AUTH_TOKEN = import.meta.env.VITE_JA_AUTH_TOKEN;
