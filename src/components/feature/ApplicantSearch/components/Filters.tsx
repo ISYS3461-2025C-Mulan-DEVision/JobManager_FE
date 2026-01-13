@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
-  Select,
-  Checkbox,
-  RangeSlider,
-  TagInput,
-  RadioGroup,
-  Toggle,
-  Input,
+    Select,
+    Checkbox,
+    RangeSlider,
+    TagInput,
+    RadioGroup,
+    Toggle,
+    Input,
 } from "@/components/ui";
 import type { RadioOption } from "@/components/ui";
 import type { Tag } from "@/components/ui/TagInput";
@@ -43,11 +43,11 @@ export const Filters: React.FC<FiltersProps> = ({
     onProfileStatusChange,
     isUpdatingStatus = false,
 }) => {
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [isLoadingCountries, setIsLoadingCountries] = useState(true);
-  const [skills, setSkills] = useState<Tag[]>([]);
-  const [isLoadingSkills, setIsLoadingSkills] = useState(true);
-  const [cityInput, setCityInput] = useState(searchState.city || "");
+    const [countries, setCountries] = useState<Country[]>([]);
+    const [isLoadingCountries, setIsLoadingCountries] = useState(true);
+    const [skills, setSkills] = useState<Tag[]>([]);
+    const [isLoadingSkills, setIsLoadingSkills] = useState(true);
+    const [cityInput, setCityInput] = useState(searchState.city || "");
 
     // Load countries on mount
     useEffect(() => {
@@ -93,26 +93,32 @@ export const Filters: React.FC<FiltersProps> = ({
         onFilterChange({ countryCode: value || undefined });
     };
 
-    const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        onFilterChange({ city: value || undefined });
+    const handleCityChange = (value: string) => {
+        setCityInput(value);
     };
 
-  const handleCityChange = (value: string) => {
-    setCityInput(value);
-  };
+    const handleCityKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            onFilterChange({ city: cityInput || undefined });
+        }
+    };
 
-  const handleCityKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      onFilterChange({ city: cityInput || undefined });
-    }
-  };
+    const handleWorkExperienceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        onFilterChange({ workExperience: value || undefined });
+    };
 
     const handleEmploymentTypeChange = (type: EmploymentType, checked: boolean) => {
         const newTypes = checked
             ? [...searchState.employmentTypes, type]
             : searchState.employmentTypes.filter((t) => t !== type);
         onFilterChange({ employmentTypes: newTypes });
+    };
+
+    const handleProfileStatusToggle = () => {
+        if (onProfileStatusChange) {
+            onProfileStatusChange(!isProfileActive);
+        }
     };
 
     const handleDegreeChange = (value: string | undefined) => {
@@ -135,26 +141,18 @@ export const Filters: React.FC<FiltersProps> = ({
     };
 
     const handleSkillAdd = (skillId: string) => {
-        // Find the skill name from the ID to pass to the API
-        const skill = skills.find((s) => s.id === skillId);
-        if (skill) {
-            onFilterChange({ skillIds: [...searchState.skillIds, skill.name] });
+        // Add skill ID directly
+        if (!searchState.skillIds.includes(skillId)) {
+            onFilterChange({ skillIds: [...searchState.skillIds, skillId] });
         }
     };
 
-  const handleSkillAdd = (skillId: string) => {
-    // Add skill ID directly
-    if (!searchState.skillIds.includes(skillId)) {
-      onFilterChange({ skillIds: [...searchState.skillIds, skillId] });
-    }
-  };
-
-  const handleSkillRemove = (skillId: string) => {
-    // Remove by ID
-    onFilterChange({
-      skillIds: searchState.skillIds.filter((id) => id !== skillId),
-    });
-  };
+    const handleSkillRemove = (skillId: string) => {
+        // Remove by ID
+        onFilterChange({
+            skillIds: searchState.skillIds.filter((id) => id !== skillId),
+        });
+    };
 
     const countryOptions = [
         { value: "", label: "All countries" },
@@ -194,7 +192,7 @@ export const Filters: React.FC<FiltersProps> = ({
 
             {/* Location */}
             <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-2 sm:mb-3">Location</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Location</h3>
                 <Select
                     options={countryOptions}
                     value={searchState.countryCode || ""}
@@ -202,47 +200,18 @@ export const Filters: React.FC<FiltersProps> = ({
                     disabled={disabled || isLoadingCountries}
                     fullWidth
                 />
-                <input
-                    type="text"
-                    placeholder="Enter city name..."
-                    value={searchState.city || ""}
-                    onChange={handleCityChange}
-                    disabled={disabled}
-                    className="mt-2 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                />
+                <div className="mt-2">
+                    <Input
+                        type="text"
+                        placeholder="Enter city name and press Enter..."
+                        value={cityInput}
+                        onChange={handleCityChange}
+                        onKeyDown={handleCityKeyDown}
+                        disabled={disabled}
+                        fullWidth
+                    />
+                </div>
             </div>
-            <Toggle
-              checked={isProfileActive}
-              onChange={handleProfileStatusToggle}
-              disabled={disabled || isUpdatingStatus}
-              size="md"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Location */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Location</h3>
-        <Select
-          options={countryOptions}
-          value={searchState.countryCode || ""}
-          onChange={handleCountryChange}
-          disabled={disabled || isLoadingCountries}
-          fullWidth
-        />
-        <div className="mt-2">
-          <Input
-            type="text"
-            placeholder="Enter city name and press Enter..."
-            value={cityInput}
-            onChange={handleCityChange}
-            onKeyDown={handleCityKeyDown}
-            disabled={disabled}
-            fullWidth
-          />
-        </div>
-      </div>
 
             {/* Work Experience / Job Title */}
             <div>
@@ -260,27 +229,23 @@ export const Filters: React.FC<FiltersProps> = ({
                 />
             </div>
 
-      {/* Employment Type */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">
-          Employment Type
-        </h3>
-        <div className="space-y-2">
-          {Object.entries(EMPLOYMENT_TYPES).map(([key, value]) => (
-            <Checkbox
-              key={key}
-              label={EMPLOYMENT_TYPE_LABELS[value]}
-              checked={searchState.employmentTypes.includes(
-                value as EmploymentType,
-              )}
-              onChange={(checked) =>
-                handleEmploymentTypeChange(value as EmploymentType, checked)
-              }
-              disabled={disabled}
-            />
-          ))}
-        </div>
-      </div>
+            {/* Employment Type */}
+            <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Employment Type</h3>
+                <div className="space-y-2">
+                    {Object.entries(EMPLOYMENT_TYPES).map(([key, value]) => (
+                        <Checkbox
+                            key={key}
+                            label={EMPLOYMENT_TYPE_LABELS[value]}
+                            checked={searchState.employmentTypes.includes(value as EmploymentType)}
+                            onChange={(checked) =>
+                                handleEmploymentTypeChange(value as EmploymentType, checked)
+                            }
+                            disabled={disabled}
+                        />
+                    ))}
+                </div>
+            </div>
 
             {/* Education Degree */}
             <div>
