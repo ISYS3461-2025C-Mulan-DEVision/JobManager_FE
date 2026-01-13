@@ -24,8 +24,6 @@ import type {
 } from "../types";
 import ApplicantSearchService from "../api/ApplicantSearchService";
 
-import { skillService } from "@/services/skillService";
-
 interface FiltersProps {
   searchState: SearchState;
   onFilterChange: (updates: Partial<SearchState>) => void;
@@ -77,13 +75,15 @@ export const Filters: React.FC<FiltersProps> = ({
   useEffect(() => {
     const loadSkills = async () => {
       try {
-        const fetchedSkills = await skillService.getAllSkills();
-        // Map API response to Tag format expected by TagInput
-        const mappedSkills: Tag[] = fetchedSkills.map((skill) => ({
-          id: skill.id,
-          name: skill.name,
-        }));
-        setSkills(mappedSkills);
+        const response = await ApplicantSearchService.getSkills();
+        if (response.success && response.data) {
+          // Map API response to Tag format expected by TagInput
+          const mappedSkills: Tag[] = response.data.map((skill) => ({
+            id: skill.id,
+            name: skill.name,
+          }));
+          setSkills(mappedSkills);
+        }
       } catch (err) {
         console.error("Failed to load skills:", err);
       } finally {

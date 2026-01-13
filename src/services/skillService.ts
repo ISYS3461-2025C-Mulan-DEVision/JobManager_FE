@@ -34,6 +34,7 @@ class SkillService {
         return {
             "Authorization": `Bearer ${JA_AUTH_TOKEN}`,
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true", // Required for ngrok URLs
         };
     }
 
