@@ -13,4 +13,5 @@ export interface Skill {
 export interface SkillSelection {
 	id: string;
 	name: string;
+	usageCount?: number; 
 }

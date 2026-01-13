@@ -6,6 +6,7 @@ import { NotificationsPage } from "@/pages/notifications";
 import { ROUTES } from "@/utils";
 import { PublicRoute } from "@/components/common/PublicRoute";
 import { ProtectedRoute } from "@/components/common/ProtectedRoute";
+import { PremiumRoute } from "@/components/common/PremiumRoute";
 
 export const mainRoutes = [
     <Route
@@ -39,9 +40,9 @@ export const mainRoutes = [
         key="notifications"
         path="/notifications"
         element={
-            <ProtectedRoute>
+            <PremiumRoute featureName="Notifications">
                 <NotificationsPage />
-            </ProtectedRoute>
+            </PremiumRoute>
         }
     />,
 ];

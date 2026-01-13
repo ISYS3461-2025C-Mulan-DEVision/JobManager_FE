@@ -1,2 +1,4 @@
 export { default as ApplicationsPage } from "./ApplicationsPage";
-export { default as ApplicationDetailsPage } from "./ApplicationDetailsPage";
+
+// Placeholder for ApplicationDetailsPage (if needed in the future)
+// export { default as ApplicationDetailsPage } from "./ApplicationDetailsPage";

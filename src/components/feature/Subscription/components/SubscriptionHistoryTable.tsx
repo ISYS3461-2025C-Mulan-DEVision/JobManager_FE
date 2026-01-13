@@ -107,9 +107,12 @@ export const SubscriptionHistoryTable: React.FC<SubscriptionHistoryTableProps> =
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                     {record.planName}
+                                    {record.amount === 0 && (
+                                        <span className="ml-2 text-xs text-gray-500">(Status Update)</span>
+                                    )}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {formatCurrency(record.amount, record.currency)}
+                                    {record.amount > 0 ? formatCurrency(record.amount, record.currency) : "—"}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                     {record.paymentMethod}

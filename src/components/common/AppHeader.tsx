@@ -36,6 +36,25 @@ export default function AppHeader({ className }: AppHeaderProps) {
         };
     }, []);
 
+    // Listen for subscription status changes
+    useEffect(() => {
+        const handleSubscriptionChange = async () => {
+            if (user?.companyId) {
+                try {
+                    const premiumStatus = await checkIsPremium();
+                    setIsPremium(premiumStatus.data ?? false);
+                } catch (error) {
+                    console.error("Failed to refresh premium status:", error);
+                }
+            }
+        };
+
+        window.addEventListener("subscription-change", handleSubscriptionChange);
+        return () => {
+            window.removeEventListener("subscription-change", handleSubscriptionChange);
+        };
+    }, [user]);
+
     // Reset dropdown state when user changes
     useEffect(() => {
         setIsDropdownOpen(false);
@@ -189,12 +208,31 @@ export default function AppHeader({ className }: AppHeaderProps) {
                                                 >
                                                     Profile Settings
                                                 </Link>
-                                                <Link
-                                                    to="/notifications"
-                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                >
-                                                    Notifications
-                                                </Link>
+                                                {isPremium ? (
+                                                    <Link
+                                                        to="/notifications"
+                                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                    >
+                                                        Notifications
+                                                    </Link>
+                                                ) : (
+                                                    <Link
+                                                        to="/subscription"
+                                                        className="flex items-center justify-between px-4 py-2 text-sm text-gray-400 hover:bg-amber-50 group"
+                                                    >
+                                                        <span>Notifications</span>
+                                                        <span className="flex items-center gap-1 text-xs text-amber-500">
+                                                            <svg
+                                                                className="w-3 h-3"
+                                                                viewBox="0 0 24 24"
+                                                                fill="currentColor"
+                                                            >
+                                                                <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z" />
+                                                            </svg>
+                                                            Premium
+                                                        </span>
+                                                    </Link>
+                                                )}
                                                 <div className="border-t border-gray-100 my-1"></div>
                                                 <button
                                                     onClick={handleLogout}
