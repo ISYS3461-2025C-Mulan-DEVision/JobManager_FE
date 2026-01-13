@@ -1,8 +1,8 @@
-import React, {useState, useEffect, useCallback} from "react";
-import {useNavigate, useParams} from "react-router-dom";
-import {Button, Spinner} from "@/components/ui";
-import {useToastContext} from "@/components/headless/Toast";
-import {JobPostFormData, JobPostFormErrors, FormStep, FORM_STEPS, SaveStatus} from "./types";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button, Spinner } from "@/components/ui";
+import { useToastContext } from "@/components/headless/Toast";
+import { JobPostFormData, JobPostFormErrors, FormStep, FORM_STEPS, SaveStatus } from "./types";
 import {
   validateBasics,
   validateCompensation,
@@ -10,12 +10,12 @@ import {
   validateVisibility,
   validateAllSteps,
 } from "./validation";
-import {Step1Basics} from "./steps/Step1Basics";
-import {Step2Compensation} from "./steps/Step2Compensation";
-import {Step3Description} from "./steps/Step3Description";
-import {Step4Visibility} from "./steps/Step4Visibility";
-import {JobPostPreviewModal} from "./components/JobPostPreviewModal";
-import {ROUTES} from "@/utils/constants";
+import { Step1Basics } from "./steps/Step1Basics";
+import { Step2Compensation } from "./steps/Step2Compensation";
+import { Step3Description } from "./steps/Step3Description";
+import { Step4Visibility } from "./steps/Step4Visibility";
+import { JobPostPreviewModal } from "./components/JobPostPreviewModal";
+import { ROUTES } from "@/utils/constants";
 import clsx from "clsx";
 import {
   createJobPost,
@@ -23,13 +23,15 @@ import {
   fetchJobPostById,
   updateJobPost,
 } from "@/services/jobPostService";
-import {getCompanyId} from "@/services/authStorage";
-import {CreateJobPostRequest, UpdateJobPostRequest, JobPost} from "@/types";
+import { getCompanyId } from "@/services/authStorage";
+import { CreateJobPostRequest, UpdateJobPostRequest, JobPost } from "@/types";
+import { Skill } from "@/types/skill";
+import { skillService } from "@/services/skillService";
 
 const CreateJobPostPage: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToastContext();
-  const {id} = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id);
 
   // Form state
@@ -45,8 +47,8 @@ const CreateJobPostPage: React.FC = () => {
     locationCity: "",
     countryCode: "",
     description: "",
-    technicalSkills: [],
-    selectedSkills: [],
+    technicalSkills: [], // Deprecated - keeping for backward compatibility
+    selectedSkills: [], // Primary skills field
     isPrivate: false,
     expiryAt: "",
     isPublished: false,
@@ -78,10 +80,25 @@ const CreateJobPostPage: React.FC = () => {
 
   /**
    * Convert JobPost API response to form data format
+   * ✅ UPDATED: Now async to load skill objects
    */
-  const convertJobPostToFormData = (jobPost: JobPost): JobPostFormData => {
+  const convertJobPostToFormData = async (jobPost: JobPost): Promise<JobPostFormData> => {
     // Extract date part from ISO datetime string (e.g., "2026-01-09T23:59:59" -> "2026-01-09")
     const expiryDate = jobPost.expiryAt ? jobPost.expiryAt.split("T")[0] : "";
+
+    // ✅ Load actual skill objects from skill IDs
+    let selectedSkills: Skill[] = [];
+    if (jobPost.skillIds && jobPost.skillIds.length > 0) {
+      try {
+        console.log("🔍 Loading skills for job post:", jobPost.skillIds);
+        selectedSkills = await skillService.getSkillsByIds(jobPost.skillIds);
+        console.log("✓ Loaded", selectedSkills.length, "skills for editing");
+      } catch (error) {
+        console.error("❌ Failed to load skills:", error);
+        toast.warning("Some skills could not be loaded");
+        // Continue with empty skills array
+      }
+    }
 
     return {
       title: jobPost.title,
@@ -94,23 +111,31 @@ const CreateJobPostPage: React.FC = () => {
       locationCity: jobPost.locationCity,
       description: jobPost.description,
       countryCode: jobPost.countryCode || "",
-      // TODO: Fetch actual skill names from skill service using jobPost.skillIds
-      // For now, skills will be lost on edit until skill service integration is complete
-      technicalSkills: [],
+      technicalSkills: [], // Deprecated - keeping for backward compatibility
+      selectedSkills: selectedSkills, // ✅ Now properly loaded with skill objects
       isPrivate: jobPost.isPrivate,
       expiryAt: expiryDate,
       isPublished: jobPost.isPublished,
     };
   };
 
+  /**
+   * ✅ UPDATED: Now handles async conversion
+   */
   const loadJobPost = async (jobId: string) => {
     setIsLoading(true);
     try {
+      console.log("📥 Loading job post:", jobId);
       const jobPost = await fetchJobPostById(jobId);
-      const formData = convertJobPostToFormData(jobPost);
+      console.log("✓ Job post fetched, converting to form data...");
+      
+      // ✅ Now awaits the async conversion
+      const formData = await convertJobPostToFormData(jobPost);
+      console.log("✓ Form data ready with", formData.selectedSkills.length, "skills");
+      
       setFormData(formData);
     } catch (error: any) {
-      console.error("Failed to load job post:", error);
+      console.error("❌ Failed to load job post:", error);
       const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
@@ -125,6 +150,7 @@ const CreateJobPostPage: React.FC = () => {
 
   /**
    * Convert form data to API request format
+   * ✅ UPDATED: Now properly extracts skillIds from selectedSkills
    */
   const convertFormDataToRequest = (data: JobPostFormData): CreateJobPostRequest => {
     const companyId = getCompanyId();
@@ -136,12 +162,10 @@ const CreateJobPostPage: React.FC = () => {
     // Input: "2026-01-09" -> Output: "2026-01-09T23:59:59"
     const expiryAtDateTime = data.expiryAt ? `${data.expiryAt}T23:59:59` : data.expiryAt;
 
-    // TODO: Convert technicalSkills (names) to skillIds (UUIDs) using skill service
-    // Currently, skills are not being sent to the backend
-    // Need to integrate with skill service to map skill names to IDs
-
-    // Extract skill IDs from selected skills
+    // ✅ Extract skill IDs from selected skills (primary source)
     const skillIds = data.selectedSkills?.map((skill) => skill.id) || [];
+    
+    console.log("📤 Preparing request with", skillIds.length, "skills");
 
     return {
       companyId,
@@ -157,13 +181,13 @@ const CreateJobPostPage: React.FC = () => {
       isPrivate: data.isPrivate,
       expiryAt: expiryAtDateTime,
       employmentType: data.employmentTypes.length > 0 ? data.employmentTypes[0] : undefined,
-      skillIds: skillIds, // TODO: Map technicalSkills to skillIds
+      skillIds: skillIds, // ✅ Now properly extracted from selectedSkills
     };
   };
 
   const handleAutoSave = useCallback(async () => {
     // Only auto-save if form has content
-    if (!formData.title && formData.technicalSkills.length === 0) {
+    if (!formData.title && formData.selectedSkills.length === 0) {
       return;
     }
 
@@ -226,25 +250,25 @@ const CreateJobPostPage: React.FC = () => {
   const handleNext = () => {
     if (validateCurrentStep()) {
       setCurrentStep((prev) => Math.min(prev + 1, FORM_STEPS.length - 1));
-      window.scrollTo({top: 0, behavior: "smooth"});
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const handlePrevious = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
-    window.scrollTo({top: 0, behavior: "smooth"});
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleStepClick = (step: FormStep) => {
     // Allow navigating to previous steps or current step freely
     if (step <= currentStep) {
       setCurrentStep(step);
-      window.scrollTo({top: 0, behavior: "smooth"});
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       // Validate current step before moving forward
       if (validateCurrentStep()) {
         setCurrentStep(step);
-        window.scrollTo({top: 0, behavior: "smooth"});
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     }
   };
@@ -255,7 +279,7 @@ const CreateJobPostPage: React.FC = () => {
 
     try {
       if (isEditMode && id) {
-        // Extract skill IDs from selected skills
+        // ✅ Extract skill IDs from selected skills
         const skillIds = formData.selectedSkills?.map((skill) => skill.id) || [];
 
         const updateData: UpdateJobPostRequest = {
@@ -270,8 +294,10 @@ const CreateJobPostPage: React.FC = () => {
           isFresher: formData.isFresher,
           isPrivate: formData.isPrivate,
           expiryAt: formData.expiryAt ? `${formData.expiryAt}T23:59:59` : undefined,
-          skillIds: skillIds,
+          skillIds: skillIds, // ✅ Properly included
         };
+        
+        console.log("💾 Updating job post with", skillIds.length, "skills");
         await updateJobPost(id, updateData);
         toast.success("Job post updated successfully!");
       } else {
@@ -289,7 +315,7 @@ const CreateJobPostPage: React.FC = () => {
         navigate(ROUTES.JOB_POSTS);
       }, 500);
     } catch (error: any) {
-      console.error("Failed to save draft:", error);
+      console.error("❌ Failed to save draft:", error);
       setSaveStatus("error");
       const errorMessage =
         error?.response?.data?.message ||
@@ -316,7 +342,7 @@ const CreateJobPostPage: React.FC = () => {
 
     try {
       if (isEditMode && id) {
-        // Extract skill IDs from selected skills
+        // ✅ Extract skill IDs from selected skills
         const skillIds = formData.selectedSkills?.map((skill) => skill.id) || [];
 
         const updateData: UpdateJobPostRequest = {
@@ -331,8 +357,10 @@ const CreateJobPostPage: React.FC = () => {
           isFresher: formData.isFresher,
           isPrivate: formData.isPrivate,
           expiryAt: formData.expiryAt ? `${formData.expiryAt}T23:59:59` : undefined,
-          skillIds: skillIds, // ADD THIS LINE
+          skillIds: skillIds, // ✅ Properly included
         };
+        
+        console.log("🚀 Publishing job post with", skillIds.length, "skills");
         await updateJobPost(id, updateData);
 
         // Publish the updated job post
@@ -353,7 +381,7 @@ const CreateJobPostPage: React.FC = () => {
       // Navigate back to job posts
       navigate(ROUTES.JOB_POSTS);
     } catch (error: any) {
-      console.error("Failed to publish:", error);
+      console.error("❌ Failed to publish:", error);
       setSaveStatus("error");
       const errorMessage =
         error?.response?.data?.message ||
@@ -369,7 +397,7 @@ const CreateJobPostPage: React.FC = () => {
     switch (currentStep) {
       case FormStep.BASICS:
         return (
-          <Step1Basics formData={formData} errors={errors} onChange={handleFieldChange}/>
+          <Step1Basics formData={formData} errors={errors} onChange={handleFieldChange} />
         );
       case FormStep.COMPENSATION:
         return (
@@ -409,32 +437,32 @@ const CreateJobPostPage: React.FC = () => {
       case "saving":
         return (
           <span className="text-sm text-gray-500 flex items-center gap-2">
-                        <Spinner className="w-4 h-4"/>
-                        Saving...
-                    </span>
+            <Spinner className="w-4 h-4" />
+            Saving...
+          </span>
         );
       case "saved":
         return (
           <span className="text-sm text-green-600 flex items-center gap-2">
-                        ✓ Saved
+            ✓ Saved
             {lastSavedAt && (
               <span className="text-gray-500">
-                                at {lastSavedAt.toLocaleTimeString()}
-                            </span>
+                at {lastSavedAt.toLocaleTimeString()}
+              </span>
             )}
-                    </span>
+          </span>
         );
       case "error":
         return (
           <span className="text-sm text-red-600 flex items-center gap-2">
-                        ⚠ Failed to save
-                    </span>
+            ⚠ Failed to save
+          </span>
         );
       default:
         return lastSavedAt ? (
           <span className="text-sm text-gray-500">
-                        Last saved at {lastSavedAt.toLocaleTimeString()}
-                    </span>
+            Last saved at {lastSavedAt.toLocaleTimeString()}
+          </span>
         ) : null;
     }
   };
@@ -444,7 +472,7 @@ const CreateJobPostPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Spinner className="w-12 h-12 mx-auto mb-4"/>
+          <Spinner className="w-12 h-12 mx-auto mb-4" />
           <p className="text-gray-600">Loading job post...</p>
         </div>
       </div>
