@@ -110,7 +110,10 @@ export const getSubscriptionHistory = async (): Promise<ApiResponse<Subscription
 
     try {
         // Fetch BOTH payment history AND current subscription status
-        console.log("[Subscription History] Fetching combined payment + subscription data for company:", companyId);
+        console.log(
+            "[Subscription History] Fetching combined payment + subscription data for company:",
+            companyId
+        );
 
         // 1. Fetch payment history: GET /api/payment/payer/{payerId}/type/COMPANY
         const paymentEndpoint = API_ENDPOINTS.PAYMENT.HISTORY_BY_PAYER(companyId, "COMPANY");
@@ -123,7 +126,7 @@ export const getSubscriptionHistory = async (): Promise<ApiResponse<Subscription
         // Execute both requests in parallel
         const [paymentResponse, subscriptionResponse] = await Promise.allSettled([
             httpClient.get<ApiResponse<any[]>>(paymentEndpoint),
-            httpClient.get<ApiResponse<SubscriptionStatusResponse>>(subscriptionEndpoint)
+            httpClient.get<ApiResponse<SubscriptionStatusResponse>>(subscriptionEndpoint),
         ]);
 
         console.log("[Subscription History] Payment response:", paymentResponse);
@@ -152,27 +155,37 @@ export const getSubscriptionHistory = async (): Promise<ApiResponse<Subscription
             });
         }
 
-        // Add subscription status as a history entry if it exists
-        if (subscriptionResponse.status === "fulfilled" && subscriptionResponse.value.data.success) {
+        // Add subscription status as a history entry ONLY if it's an actual premium subscription
+        // Don't show "Free Plan" status entries - they clutter the history
+        if (
+            subscriptionResponse.status === "fulfilled" &&
+            subscriptionResponse.value.data.success
+        ) {
             const subscription = subscriptionResponse.value.data.data;
             console.log("[Subscription History] Current subscription:", subscription);
 
-            if (subscription && subscription.status) {
-                // Add subscription status as a timeline entry
-                const statusEntry: SubscriptionHistory = {
-                    id: `sub-status-${Date.now()}`,
-                    companyId: companyId,
-                    planName: subscription.isPremium ? "Premium Company Subscription" : "Free Plan",
-                    amount: 0,
-                    currency: "USD",
-                    status: subscription.status === "CANCELLED" ? "FAILED" :
-                           subscription.status === "ACTIVE" ? "SUCCESS" : "PENDING",
-                    paymentMethod: "STRIPE",
-                    startDate: subscription.endAt || new Date().toISOString(),
-                    endDate: subscription.endAt || new Date().toISOString(),
-                    createdAt: subscription.endAt || new Date().toISOString(),
-                };
-                history.push(statusEntry);
+            // Only add subscription entry if user is/was premium (not for free plan users)
+            if (subscription && subscription.isPremium && subscription.status === "ACTIVE") {
+                // Only add if there's no payment history entry for this subscription period
+                const hasMatchingPayment = history.some(
+                    (h) => h.status === "SUCCESS" && h.amount > 0
+                );
+
+                if (!hasMatchingPayment) {
+                    const statusEntry: SubscriptionHistory = {
+                        id: `sub-status-${Date.now()}`,
+                        companyId: companyId,
+                        planName: "Premium Company Subscription",
+                        amount: 0,
+                        currency: "USD",
+                        status: "SUCCESS",
+                        paymentMethod: "STRIPE",
+                        startDate: subscription.endAt || new Date().toISOString(),
+                        endDate: subscription.endAt || new Date().toISOString(),
+                        createdAt: subscription.endAt || new Date().toISOString(),
+                    };
+                    history.push(statusEntry);
+                }
             }
         }
 

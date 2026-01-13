@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getCompanyId } from "@/services/authStorage";
+import { getCompanyId, notifySubscriptionChange } from "@/services/authStorage";
 import type {
     SubscriptionStatusResponse,
     SubscriptionPlan,
@@ -23,8 +23,9 @@ import {
  * Hook for managing subscription status
  */
 export const useSubscriptionStatus = () => {
-    const [subscriptionStatus, setSubscriptionStatus] =
-        useState<SubscriptionStatusResponse | null>(null);
+    const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatusResponse | null>(
+        null
+    );
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -255,7 +256,11 @@ export const useCancelSubscription = () => {
         try {
             const response = await cancelSubscription();
             if (response.success) {
-                setSuccess("Subscription cancelled successfully. It will remain active until the end date.");
+                setSuccess(
+                    "Subscription cancelled successfully. It will remain active until the end date."
+                );
+                // Notify other components (e.g., AppHeader) about the subscription change
+                notifySubscriptionChange();
                 return response.data;
             } else {
                 setError(response.message);

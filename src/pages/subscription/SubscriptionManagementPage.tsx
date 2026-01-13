@@ -33,12 +33,16 @@ export const SubscriptionManagementPage: React.FC = () => {
         selectedPlanId,
         selectedPaymentMethod,
         handleUpgrade,
-        handleRenew,
         handlePlanSelect,
         handlePaymentMethodSelect,
         handleBackToOverview,
         goBack,
     } = useSubscriptionManagement();
+
+    // Navigate to upgrade page for renew/upgrade
+    const handleRenewClick = () => {
+        navigate("/subscription/upgrade");
+    };
 
     // Data hooks
     const {
@@ -158,8 +162,8 @@ export const SubscriptionManagementPage: React.FC = () => {
             {subscriptionStatus && (
                 <SubscriptionStatusCard
                     status={subscriptionStatus}
-                    onUpgrade={handleUpgrade}
-                    onRenew={handleRenew}
+                    onUpgrade={handleRenewClick}
+                    onRenew={handleRenewClick}
                     onCancel={handleCancelSubscription}
                     isLoading={cancelLoading}
                 />

@@ -241,7 +241,11 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                             </Button>
                         </div>
                     ) : (
-                        <Elements stripe={stripePromise} options={elementsOptions}>
+                        <Elements
+                            stripe={stripePromise}
+                            options={elementsOptions}
+                            key={clientSecret} // Force remount when clientSecret changes
+                        >
                             <StripeCheckoutForm
                                 onPaymentComplete={onPaymentComplete}
                                 amount={confirmation.price}
