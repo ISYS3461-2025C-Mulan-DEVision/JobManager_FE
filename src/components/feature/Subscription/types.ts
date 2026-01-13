@@ -95,6 +95,25 @@ export interface SubscriptionHistory {
     createdAt: string;
 }
 
+// Unified timeline entry combining payments and subscription events
+export type TimelineEntryType = "PAYMENT" | "SUBSCRIPTION_START" | "SUBSCRIPTION_CANCELLED" | "SUBSCRIPTION_RENEWED";
+
+export interface TimelineEntry {
+    id: string;
+    type: TimelineEntryType;
+    date: string;
+    title: string;
+    description: string;
+    amount?: number;
+    currency?: string;
+    status?: "SUCCESS" | "FAILED" | "PENDING" | "ACTIVE" | "CANCELLED";
+    metadata?: {
+        paymentMethod?: PaymentMethodType;
+        subscriptionEndDate?: string;
+        subscriptionStatus?: SubscriptionStatus;
+    };
+}
+
 export interface SubscriptionNotification {
     id: string;
     companyId: string;

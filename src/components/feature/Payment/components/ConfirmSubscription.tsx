@@ -193,8 +193,8 @@ export const ConfirmSubscription: React.FC<ConfirmSubscriptionProps> = ({
                     onClick={onBack}
                     className="sm:w-auto"
                     disabled={isLoading}
+                    leftIcon={<ArrowLeft className="w-4 h-4" />}
                 >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
                     Go Back
                 </Button>
                 <Button
@@ -203,8 +203,8 @@ export const ConfirmSubscription: React.FC<ConfirmSubscriptionProps> = ({
                     disabled={!agreedToTerms || isLoading}
                     isLoading={isLoading}
                     className="flex-1 sm:flex-none sm:min-w-[200px] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                    leftIcon={<Check className="w-4 h-4" />}
                 >
-                    <Check className="w-4 h-4 mr-2" />
                     Proceed to Payment
                 </Button>
             </div>

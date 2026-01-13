@@ -40,7 +40,7 @@ export const API_ENDPOINTS = {
       `/applications/${applicationId}/files/${docType}`,
   },
 
-  // Companies
+// Companies
   COMPANIES: {
     BASE: "/companies",
     LIST: "/companies",
@@ -99,5 +99,11 @@ export const API_ENDPOINTS = {
     CANCEL: (subscriptionId: string) => `/internal/subscriptions/${subscriptionId}/cancel`,
     GET_BY_COMPANY: (companyId: string) => `/internal/subscriptions/company/${companyId}`,
     RENEW: (companyId: string) => `/subscriptions/company/${companyId}/renew`,
+  },
+
+  // Payment
+  PAYMENT: {
+    HISTORY_BY_PAYER: (payerId: string, payerType: string) =>
+      `/payment/payer/${payerId}/type/${payerType}`,
   },
 } as const;
