@@ -10,8 +10,8 @@ export const JA_USER_SERVICE_URL = import.meta.env.VITE_JA_USER_SERVICE_URL;
 export const JA_AUTH_TOKEN = import.meta.env.VITE_JA_AUTH_TOKEN;
 
 export const NGROK_HEADERS = {
-  "ngrok-skip-browser-warning": "true",
-  "User-Agent": "DEVisionJobManager/1.0"
+    "ngrok-skip-browser-warning": "true",
+    "User-Agent": "DEVisionJobManager/1.0",
 };
 
 export const API_TIMEOUT = 30000; // 30 seconds

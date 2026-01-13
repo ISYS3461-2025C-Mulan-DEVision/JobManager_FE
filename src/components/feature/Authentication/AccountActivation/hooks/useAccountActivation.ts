@@ -34,12 +34,9 @@ export const useAccountActivation = () => {
             }
 
             try {
-                const response = await axios.post(
-                    `${API_BASE_URL}/auth/activate`,
-                    {
-                        token: token,
-                    }
-                );
+                const response = await axios.post(`${API_BASE_URL}/auth/activate`, {
+                    token: token,
+                });
 
                 if (response.data.success) {
                     setState({
