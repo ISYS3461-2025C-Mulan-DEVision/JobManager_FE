@@ -174,16 +174,16 @@ export const Filters: React.FC<FiltersProps> = ({
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Search Profile Status Toggle - only show when a profile is selected */}
       {selectedProfileId && (
-        <div className="pb-4 border-b border-gray-200">
+        <div className="pb-3 sm:pb-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-gray-900">
                 Profile Status
               </h3>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 mt-0.5 sm:mt-1">
                 {isProfileActive ? "Active" : "Inactive"}
               </p>
             </div>
@@ -199,7 +199,7 @@ export const Filters: React.FC<FiltersProps> = ({
 
       {/* Location */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Location</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-2 sm:mb-3">Location</h3>
         <Select
           options={countryOptions}
           value={searchState.countryCode || ""}
@@ -237,10 +237,10 @@ export const Filters: React.FC<FiltersProps> = ({
 
       {/* Employment Type */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">
+        <h3 className="text-sm font-semibold text-gray-900 mb-2 sm:mb-3">
           Employment Type
         </h3>
-        <div className="space-y-2">
+        <div className="grid grid-cols-2 sm:grid-cols-1 gap-2">
           {Object.entries(EMPLOYMENT_TYPES).map(([key, value]) => (
             <Checkbox
               key={key}
@@ -262,7 +262,7 @@ export const Filters: React.FC<FiltersProps> = ({
 
       {/* Education Degree */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">
+        <h3 className="text-sm font-semibold text-gray-900 mb-2 sm:mb-3">
           Education Degree
         </h3>
         <RadioGroup
@@ -285,7 +285,7 @@ export const Filters: React.FC<FiltersProps> = ({
         <h3 className="text-sm font-semibold text-gray-900 mb-1">
           Salary Range
         </h3>
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-gray-500 mb-2 sm:mb-3">
           Used for profile notifications only
         </p>
         <RangeSlider
@@ -303,7 +303,7 @@ export const Filters: React.FC<FiltersProps> = ({
 
       {/* Skill Tags */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Skill Tags</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-2 sm:mb-3">Skill Tags</h3>
         <TagInput
           tags={skills}
           selectedTags={searchState.skillIds}
@@ -319,7 +319,7 @@ export const Filters: React.FC<FiltersProps> = ({
         <button
           onClick={onClearFilters}
           disabled={disabled}
-          className="w-full py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
         >
           Clear All Filters
         </button>

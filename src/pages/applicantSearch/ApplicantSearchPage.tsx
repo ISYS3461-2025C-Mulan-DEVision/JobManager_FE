@@ -27,7 +27,7 @@ import type {
   StatusFilterType,
 } from "@/components/feature/ApplicantSearch/types";
 import ApplicantSearchService from "@/components/feature/ApplicantSearch/api/ApplicantSearchService";
-import { Star, AlertCircle, Users } from "lucide-react";
+import { Star, AlertCircle, Users, SlidersHorizontal, X } from "lucide-react";
 
 // Filter fields to compare for dirty state (excludes username, sortBy, page, pageSize)
 const FILTER_KEYS: (keyof SearchState)[] = [
@@ -104,6 +104,7 @@ export const ApplicantSearchPage: React.FC = () => {
     string | null | undefined
   >(undefined);
   const [showSaveAsNewModal, setShowSaveAsNewModal] = useState(false);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   // Ref to track if we should trigger save-as-new modal after unsaved changes modal closes
   const triggerSaveAsNewRef = useRef(false);
@@ -320,17 +321,17 @@ export const ApplicantSearchPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Page Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Applicant Search</h1>
-          <p className="text-gray-600 mt-1">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Applicant Search</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
             Search and filter applicants to find the perfect candidates
           </p>
         </div>
 
         {/* Search Bar */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
           <SearchBar
             searchTerm={searchState.username}
             ftsQuery={searchState.ftsQuery}
@@ -343,11 +344,46 @@ export const ApplicantSearchPage: React.FC = () => {
           />
         </div>
 
+        {/* Mobile Filter Toggle Button */}
+        <button
+          onClick={() => setIsMobileFiltersOpen(true)}
+          className="lg:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-white rounded-lg shadow-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+        >
+          <SlidersHorizontal className="w-5 h-5" />
+          Filters & Saved Profiles
+        </button>
+
         {/* Main Content */}
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+          {/* Mobile Filter Overlay */}
+          {isMobileFiltersOpen && (
+            <div
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+              onClick={() => setIsMobileFiltersOpen(false)}
+            />
+          )}
+
           {/* Left Sidebar - Saved Profiles & Filters */}
-          <aside className="lg:w-80 flex-shrink-0">
-            <div className="bg-white rounded-lg shadow-sm p-4 sticky top-4 space-y-6">
+          <aside
+            className={`
+              fixed inset-y-0 left-0 z-50 w-full max-w-sm bg-white transform transition-transform duration-300 ease-in-out lg:relative lg:inset-auto lg:z-auto lg:w-80 lg:max-w-none lg:transform-none lg:transition-none flex-shrink-0
+              ${isMobileFiltersOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            `}
+          >
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between p-4 border-b lg:hidden">
+              <h2 className="text-lg font-semibold">Filters & Profiles</h2>
+              <button
+                onClick={() => setIsMobileFiltersOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="Close filters"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="h-full overflow-y-auto lg:h-auto lg:overflow-visible">
+              <div className="bg-white lg:rounded-lg lg:shadow-sm p-4 lg:sticky lg:top-4 space-y-6">
               {/* Unsaved changes indicator */}
               {hasUnsavedChanges && isPremium && (
                 <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
@@ -375,22 +411,39 @@ export const ApplicantSearchPage: React.FC = () => {
                 searchState={searchState}
                 onFilterChange={handleFilterChange}
                 onClearFilters={resetSearchState}
-                onSearch={handleSearch}
+                onSearch={() => {
+                  handleSearch();
+                  setIsMobileFiltersOpen(false);
+                }}
                 disabled={isSearching}
                 selectedProfileId={selectedProfile?.id}
                 isProfileActive={selectedProfile?.isActive ?? false}
                 onProfileStatusChange={handleProfileStatusChange}
                 isUpdatingStatus={isSaving}
               />
+
+              {/* Mobile Apply Button */}
+              <div className="lg:hidden pt-4 border-t">
+                <button
+                  onClick={() => {
+                    handleSearch();
+                    setIsMobileFiltersOpen(false);
+                  }}
+                  className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Apply Filters
+                </button>
+              </div>
+              </div>
             </div>
           </aside>
 
           {/* Right Content - Applicant List */}
-          <main className="flex-1">
+          <main className="flex-1 min-w-0">
             <div className="bg-white rounded-lg shadow-sm">
               {/* Status Tabs */}
-              <div className="border-b border-gray-200 px-4">
-                <nav className="-mb-px flex space-x-8">
+              <div className="border-b border-gray-200 px-2 sm:px-4 overflow-x-auto">
+                <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max">
                   {[
                     {
                       id: "ALL" as StatusFilterType,
@@ -417,7 +470,7 @@ export const ApplicantSearchPage: React.FC = () => {
                         onClick={() => {
                           updateSearchState({ statusFilter: tab.id, page: 0 });
                         }}
-                        className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
+                        className={`flex items-center gap-1.5 sm:gap-2 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors cursor-pointer whitespace-nowrap ${
                           isActive
                             ? "border-blue-500 text-blue-600"
                             : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -434,7 +487,7 @@ export const ApplicantSearchPage: React.FC = () => {
               </div>
 
               {/* Applicant List */}
-              <div className="p-4">
+              <div className="p-3 sm:p-4">
                 <ApplicantList
                   applicants={applicants}
                   isLoading={isSearching}

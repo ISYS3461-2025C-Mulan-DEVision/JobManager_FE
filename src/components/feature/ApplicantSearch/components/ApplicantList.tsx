@@ -34,7 +34,7 @@ export const ApplicantList: React.FC<ApplicantListProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-8 sm:py-12">
         <Spinner size="lg" />
       </div>
     );
@@ -42,24 +42,24 @@ export const ApplicantList: React.FC<ApplicantListProps> = ({
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <AlertTriangle className="w-12 h-12 text-red-400 mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+      <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center px-4">
+        <AlertTriangle className="w-10 h-10 sm:w-12 sm:h-12 text-red-400 mb-3 sm:mb-4" />
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
           Error loading applicants
         </h3>
-        <p className="text-gray-500">{error}</p>
+        <p className="text-sm sm:text-base text-gray-500">{error}</p>
       </div>
     );
   }
 
   if (applicants.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <Users className="w-16 h-16 text-gray-300 mb-4" strokeWidth={1.5} />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+      <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center px-4">
+        <Users className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mb-3 sm:mb-4" strokeWidth={1.5} />
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
           No applicants found
         </h3>
-        <p className="text-gray-500 max-w-md">
+        <p className="text-sm sm:text-base text-gray-500 max-w-md">
           Try adjusting your search filters or search terms to find more
           applicants.
         </p>
@@ -68,14 +68,14 @@ export const ApplicantList: React.FC<ApplicantListProps> = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Results count */}
-      <p className="text-sm text-gray-600">
+      <p className="text-xs sm:text-sm text-gray-600">
         Showing {startItem}-{endItem} of {totalElements} results
       </p>
 
       {/* Applicant cards */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {applicants.map((applicant) => (
           <ApplicantCard
             key={applicant.id}
@@ -87,7 +87,7 @@ export const ApplicantList: React.FC<ApplicantListProps> = ({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="pt-4">
+        <div className="pt-3 sm:pt-4">
           <Pagination
             currentPage={currentPage + 1} // Convert 0-indexed to 1-indexed
             totalPages={totalPages}

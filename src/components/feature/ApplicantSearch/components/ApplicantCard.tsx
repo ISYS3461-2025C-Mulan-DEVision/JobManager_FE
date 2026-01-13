@@ -35,39 +35,57 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
   // };
 
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow">
-      <div className="flex flex-col sm:flex-row items-start gap-4">
+    <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow touch-manipulation">
+      <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
         {/* Avatar */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 flex items-center gap-3 w-full sm:w-auto">
           {applicant.avatarUrl ? (
             <img
               src={applicant.avatarUrl}
               alt={applicant.fullName}
-              className="w-12 h-12 rounded-full object-cover"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-              <User className="w-6 h-6 text-gray-400" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 flex items-center justify-center">
+              <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" />
             </div>
           )}
+          {/* Mobile: Name next to avatar */}
+          <div className="sm:hidden flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-base font-semibold text-gray-900 truncate">
+                {applicant.fullName}
+              </h3>
+              {isFavorite && (
+                <Star
+                  className="w-4 h-4 text-yellow-500 flex-shrink-0"
+                  fill="currentColor"
+                />
+              )}
+              {isWarning && (
+                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+              )}
+            </div>
+            <p className="text-xs text-gray-500 truncate">{applicant.email}</p>
+          </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
           {/* Skills */}
           <div className="flex flex-wrap gap-1 mb-2">
             {applicant.skills.slice(0, 3).map((skill) => (
-              <Badge key={skill.id} variant="info">
+              <Badge key={skill.id} variant="info" className="text-xs">
                 {skill.name}
               </Badge>
             ))}
             {applicant.skills.length > 3 && (
-              <Badge variant="neutral">+{applicant.skills.length - 3}</Badge>
+              <Badge variant="neutral" className="text-xs">+{applicant.skills.length - 3}</Badge>
             )}
           </div>
 
-          {/* Name & Status Icons */}
-          <div className="flex items-center gap-2">
+          {/* Name & Status Icons - Desktop only */}
+          <div className="hidden sm:flex items-center gap-2">
             <h3 className="text-lg font-semibold text-gray-900 truncate">
               {applicant.fullName}
             </h3>
@@ -81,25 +99,29 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
             )}
           </div>
-          <p className="text-sm text-gray-500 truncate">{applicant.email}</p>
+          <p className="hidden sm:block text-sm text-gray-500 truncate">{applicant.email}</p>
 
           {/* Details */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-2 text-sm text-gray-600">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 text-xs sm:text-sm text-gray-600">
             {applicant.education && applicant.education.length > 0 && (
               <span className="flex items-center gap-1">
-                <GraduationCap className="w-4 h-4" />
-                {applicant.education[0].degree &&
-                  EDUCATION_DEGREE_LABELS[
-                    applicant.education[0].degree as EducationDegree
-                  ]}
+                <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="truncate max-w-[100px] sm:max-w-none">
+                  {applicant.education[0].degree &&
+                    EDUCATION_DEGREE_LABELS[
+                      applicant.education[0].degree as EducationDegree
+                    ]}
+                </span>
               </span>
             )}
             {applicant.employmentTypes.length > 0 && (
               <span className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                {applicant.employmentTypes
-                  .map((t) => EMPLOYMENT_TYPE_LABELS[t])
-                  .join(", ")}
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="truncate max-w-[80px] sm:max-w-none">
+                  {applicant.employmentTypes
+                    .map((t) => EMPLOYMENT_TYPE_LABELS[t])
+                    .join(", ")}
+                </span>
               </span>
             )}
             {/* TODO: Salary display - uncomment when JA adds salary support */}
@@ -109,7 +131,7 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
             </span> */}
             {applicant.countryCode && (
               <span className="flex items-center gap-1">
-                <MapPin className="w-4 h-4" />
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 {applicant.countryCode}
               </span>
             )}
@@ -117,13 +139,13 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({
         </div>
 
         {/* Action Button */}
-        <div className="flex-shrink-0 w-full sm:w-auto">
+        <div className="flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
           <Button
             variant="primary"
             size="sm"
             onClick={onClick}
             fullWidth
-            className="sm:w-auto"
+            className="sm:w-auto touch-manipulation"
           >
             View Details
           </Button>
