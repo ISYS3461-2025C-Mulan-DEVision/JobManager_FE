@@ -7,6 +7,7 @@ import {
     cancelSubscription,
     getPaymentStatus,
 } from "../api/PaymentApiService";
+import { notifySubscriptionChange } from "@/services/authStorage";
 import type {
     SubscriptionDetails,
     PaymentStep,
@@ -260,6 +261,9 @@ export const usePaymentFlow = () => {
                     // Refresh subscription status one final time
                     await refetchSubscription();
 
+                    // Notify other components (e.g., AppHeader) that subscription status changed
+                    notifySubscriptionChange();
+
                     if (!isActivated) {
                         console.warn(
                             "Subscription activation timed out, but will show success screen"
@@ -338,6 +342,8 @@ export const usePaymentFlow = () => {
         try {
             await cancelSubscription(subscription.id);
             await refetchSubscription();
+            // Notify other components (e.g., AppHeader) that subscription status changed
+            notifySubscriptionChange();
             return true;
         } catch (err: any) {
             const errorMessage =
