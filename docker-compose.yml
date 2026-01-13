@@ -24,6 +24,7 @@ services:
             - "443:443"
         environment:
             VITE_ENV: ${VITE_ENV:-production}
+            BACKEND_URL: ${BACKEND_URL:-http://172.17.0.1:8080/api/}
         healthcheck:
             test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
             interval: 30s

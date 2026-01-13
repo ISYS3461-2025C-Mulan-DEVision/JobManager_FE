@@ -1,6 +1,6 @@
 # ========================================
-# Nginx Configuration for JobManager Frontend
-# Serves React SPA with proper routing
+# Nginx Configuration Template for JobManager Frontend
+# Uses environment variables for flexible deployment
 # ========================================
 
 server {
@@ -44,11 +44,9 @@ server {
     }
 
     # Proxy API requests to backend gateway
-    # In local Docker: proxies to host network (172.17.0.1:8080)
-    # In production: update this to your backend server URL
-    # For EC2: use the backend server's internal/public IP
+    # BACKEND_URL will be substituted at container startup
     location /api/ {
-        proxy_pass http://172.17.0.1:8080/api/;
+        proxy_pass ${BACKEND_URL};
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
